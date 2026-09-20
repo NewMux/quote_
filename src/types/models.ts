@@ -52,6 +52,7 @@ export interface Client {
   address: string | null;
   tax_registration_number: string | null;
   notes: string | null;
+  photo_uri: string | null;
   is_archived: 0 | 1;
   created_at: string;
   updated_at: string;
@@ -178,6 +179,11 @@ export interface LineItemEditable {
   taxBracketId: string | null;
   taxBracketNameSnapshot: string | null;
   taxRateBp: number;
+}
+
+export interface ChartPoint {
+  label: string;
+  value: number;
 }
 
 export interface DocumentListItem {

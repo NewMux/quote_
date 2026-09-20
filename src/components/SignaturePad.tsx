@@ -27,7 +27,7 @@ export function SignaturePad({ onSave }: SignaturePadProps) {
           <Text className="text-gray-700 font-medium">Clear</Text>
         </Pressable>
         <Pressable
-          className="px-6 py-3 rounded-lg bg-blue-600"
+          className="px-6 py-3 rounded-lg bg-brand"
           onPress={() => ref.current?.readSignature()}
         >
           <Text className="text-white font-semibold">Save Signature</Text>

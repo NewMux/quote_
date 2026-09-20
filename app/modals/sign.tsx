@@ -23,7 +23,7 @@ export default function SignModal() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50 p-4">
+    <View className="flex-1 bg-surface p-4">
       <SignaturePad onSave={handleSave} />
     </View>
   );

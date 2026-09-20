@@ -28,7 +28,7 @@ export default function TaxBracketsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-surface">
       <FlatList
         data={taxBrackets}
         keyExtractor={(item) => item.id}
@@ -51,7 +51,7 @@ export default function TaxBracketsScreen() {
                 onChangeText={setRate}
               />
             </View>
-            <Pressable onPress={handleAdd} className="bg-blue-600 rounded-lg py-2 items-center">
+            <Pressable onPress={handleAdd} className="bg-brand rounded-lg py-2 items-center">
               <Text className="text-white font-semibold">Add</Text>
             </Pressable>
           </View>
@@ -64,7 +64,7 @@ export default function TaxBracketsScreen() {
             </View>
             <View className="flex-row items-center gap-3">
               {item.is_default ? (
-                <Text className="text-xs text-blue-600 font-semibold">Default</Text>
+                <Text className="text-xs text-brand font-semibold">Default</Text>
               ) : (
                 <Pressable onPress={() => setDefault(item.id)}>
                   <Text className="text-xs text-gray-500">Set default</Text>

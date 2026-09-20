@@ -35,7 +35,7 @@ export default function ClientPickerModal() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-surface">
       <View className="p-4 bg-white border-b border-gray-100">
         <TextInput
           className="border border-gray-300 rounded-lg px-3 py-2 text-base"
@@ -63,9 +63,9 @@ export default function ClientPickerModal() {
             <Pressable
               onPress={quickAddClient}
               disabled={isCreating}
-              className="bg-blue-50 rounded-xl p-4 border border-blue-200"
+              className="bg-brand/10 rounded-xl p-4 border border-brand/30"
             >
-              <Text className="text-blue-700 font-medium">+ Add "{query.trim()}" as new client</Text>
+              <Text className="text-brand font-medium">+ Add "{query.trim()}" as new client</Text>
             </Pressable>
           ) : null
         }

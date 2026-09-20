@@ -31,6 +31,7 @@ export interface ClientInput {
   address?: string | null;
   tax_registration_number?: string | null;
   notes?: string | null;
+  photo_uri?: string | null;
 }
 
 export async function createClient(input: ClientInput): Promise<Client> {
@@ -38,8 +39,8 @@ export async function createClient(input: ClientInput): Promise<Client> {
   const now = nowIso();
   await db.runAsync(
     `INSERT INTO clients
-      (id, display_name, contact_name, email, phone, address, tax_registration_number, notes, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, display_name, contact_name, email, phone, address, tax_registration_number, notes, photo_uri, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
       input.display_name,
@@ -49,6 +50,7 @@ export async function createClient(input: ClientInput): Promise<Client> {
       input.address ?? null,
       input.tax_registration_number ?? null,
       input.notes ?? null,
+      input.photo_uri ?? null,
       now,
       now,
     ]
@@ -61,7 +63,7 @@ export async function createClient(input: ClientInput): Promise<Client> {
 export async function updateClient(id: string, input: ClientInput): Promise<void> {
   await db.runAsync(
     `UPDATE clients SET display_name = ?, contact_name = ?, email = ?, phone = ?, address = ?,
-       tax_registration_number = ?, notes = ?, updated_at = ? WHERE id = ?`,
+       tax_registration_number = ?, notes = ?, photo_uri = ?, updated_at = ? WHERE id = ?`,
     [
       input.display_name,
       input.contact_name ?? null,
@@ -70,6 +72,7 @@ export async function updateClient(id: string, input: ClientInput): Promise<void
       input.address ?? null,
       input.tax_registration_number ?? null,
       input.notes ?? null,
+      input.photo_uri ?? null,
       nowIso(),
       id,
     ]

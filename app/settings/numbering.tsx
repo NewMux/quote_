@@ -37,7 +37,7 @@ export default function NumberingScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Field label="Estimate Prefix" value={estimatePrefix} onChangeText={setEstimatePrefix} />
       <Field label="Invoice Prefix" value={invoicePrefix} onChangeText={setInvoicePrefix} />
       <Field label="Number Padding (digits)" value={padding} onChangeText={setPadding} keyboardType="number-pad" />
@@ -53,7 +53,7 @@ export default function NumberingScreen() {
         <Switch value={resetYearly} onValueChange={setResetYearly} />
       </View>
 
-      <Pressable onPress={handleSave} disabled={isSaving} className="bg-blue-600 rounded-lg py-3 items-center">
+      <Pressable onPress={handleSave} disabled={isSaving} className="bg-brand rounded-lg py-3 items-center">
         <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save'}</Text>
       </Pressable>
     </ScrollView>

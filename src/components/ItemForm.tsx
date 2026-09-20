@@ -25,7 +25,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
   }, [load]);
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View>
         <Text className="text-xs text-gray-500 mb-1">Name</Text>
         <TextInput
@@ -74,7 +74,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
                 <Pressable
                   key={bracket.id}
                   onPress={() => setTaxBracketId(bracket.id)}
-                  className={`px-3 py-2 rounded-full border ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}
+                  className={`px-3 py-2 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
                 >
                   <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{bracket.name}</Text>
                 </Pressable>
@@ -96,7 +96,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
             default_tax_bracket_id: isTaxable ? taxBracketId : null,
           })
         }
-        className={`rounded-lg py-3 items-center ${name.trim() ? 'bg-blue-600' : 'bg-gray-300'}`}
+        className={`rounded-lg py-3 items-center ${name.trim() ? 'bg-brand' : 'bg-gray-300'}`}
       >
         <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save Item'}</Text>
       </Pressable>

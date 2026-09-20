@@ -63,7 +63,7 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
               <Pressable
                 key={m.value}
                 onPress={() => setMethod(m.value)}
-                className={`px-3 py-2 rounded-full border ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}
+                className={`px-3 py-2 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
               >
                 <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{m.label}</Text>
               </Pressable>
@@ -118,7 +118,7 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
             notes: notes || null,
           })
         }
-        className={`rounded-lg py-3 items-center ${amountMinor > 0 ? 'bg-blue-600' : 'bg-gray-300'}`}
+        className={`rounded-lg py-3 items-center ${amountMinor > 0 ? 'bg-brand' : 'bg-gray-300'}`}
       >
         <Text className="text-white font-semibold">{isSubmitting ? 'Saving…' : 'Log Payment'}</Text>
       </Pressable>

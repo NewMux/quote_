@@ -66,7 +66,7 @@ export default function BusinessProfileScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View>
         <Text className="text-xs text-gray-500 mb-2">Logo</Text>
         {logoUri ? (
@@ -105,7 +105,7 @@ export default function BusinessProfileScreen() {
       />
       <Field label="Footer / Terms & Conditions" value={footerTerms} onChangeText={setFooterTerms} multiline />
 
-      <Pressable onPress={handleSave} disabled={isSaving} className="bg-blue-600 rounded-lg py-3 items-center mt-2">
+      <Pressable onPress={handleSave} disabled={isSaving} className="bg-brand rounded-lg py-3 items-center mt-2">
         <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save'}</Text>
       </Pressable>
     </ScrollView>

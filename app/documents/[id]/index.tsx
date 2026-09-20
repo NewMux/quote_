@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
+import { Avatar } from '../../../src/components/Avatar';
+import { Card } from '../../../src/components/Card';
 import { LineItemRow } from '../../../src/components/LineItemRow';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { listActivity } from '../../../src/db/repositories/activityLog.repo';
@@ -28,7 +30,9 @@ import {
   canLogSettlement,
   canMarkViewed,
   canVoid,
+  isOverdue,
 } from '../../../src/lib/statusMachine';
+import { BRAND } from '../../../src/lib/theme';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import type {
   ActivityLogEntry,
@@ -132,71 +136,118 @@ export default function DocumentDetailScreen() {
     if (!document) return;
     const docType = document.doc_type;
     const docNumber = document.doc_number;
+    const overdue = isOverdue(document);
     await withBusy(async () => {
       const pdfUri = await generateDocumentPdf(id);
       if (action === 'view') {
         await sharePdf(id, pdfUri);
       } else {
+        const label = docType === 'estimate' ? 'Estimate' : 'Invoice';
         await emailPdf({
           documentId: id,
           pdfUri,
           recipientEmail: client?.email ?? null,
-          subject: `${docType === 'estimate' ? 'Estimate' : 'Invoice'} ${docNumber}`,
-          body: `Please find attached ${docType} ${docNumber}.`,
+          subject: overdue ? `Payment Reminder: ${label} ${docNumber}` : `${label} ${docNumber}`,
+          body: overdue
+            ? `This is a friendly reminder that ${label.toLowerCase()} ${docNumber} for ${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)} is overdue. Please arrange payment at your earliest convenience.\n\nThank you!`
+            : `Please find attached ${docType} ${docNumber}.`,
         });
       }
     });
   }
 
+  const primaryAction = getPrimaryAction(document, {
+    onIssue: handleIssue,
+    onConvert: handleConvert,
+    onLogPayment: () => router.push(`/documents/${id}/settlement-new`),
+    onEmail: () => handleGeneratePdfAnd('email'),
+  });
+
   return (
-    <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View className="bg-white rounded-xl p-4 border border-gray-100">
-        <View className="flex-row justify-between items-start mb-2">
-          <View>
-            <Text className="text-lg font-semibold text-gray-900">{document.doc_number}</Text>
-            <Text className="text-sm text-gray-500">{client?.display_name ?? document.client_name_snapshot ?? 'No client'}</Text>
-          </View>
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}>
+      <Card>
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="text-lg font-bold text-gray-900">{document.doc_number}</Text>
           <StatusBadge document={document} />
         </View>
-        <Text className="text-2xl font-bold text-gray-900 mt-2">
-          {formatMinor(document.total_minor, document.currency_code)}
-        </Text>
-        {document.amount_paid_minor > 0 ? (
-          <Text className="text-sm text-green-700 mt-1">
-            {formatMinor(document.amount_paid_minor, document.currency_code)} paid
-          </Text>
-        ) : null}
-      </View>
+        <View className="flex-row items-center gap-3 mb-3">
+          <Avatar
+            name={client?.display_name ?? document.client_name_snapshot ?? 'No client'}
+            photoUri={client?.photo_uri}
+            seed={client?.id ?? document.id}
+            size={40}
+          />
+          <View className="flex-1">
+            <Text className="text-base text-gray-900">
+              {client?.display_name ?? document.client_name_snapshot ?? 'No client'}
+            </Text>
+            {client?.email ? <Text className="text-sm text-gray-500">{client.email}</Text> : null}
+          </View>
+        </View>
+        <View className="flex-row justify-between pt-3 border-t border-gray-100">
+          <View>
+            <Text className="text-xs text-gray-400">Issued</Text>
+            <Text className="text-sm text-gray-900">{document.issue_date ?? '—'}</Text>
+          </View>
+          <View>
+            <Text className="text-xs text-gray-400">{document.doc_type === 'invoice' ? 'Due' : 'Valid Until'}</Text>
+            <Text className="text-sm text-gray-900">
+              {document.doc_type === 'invoice' ? document.due_date ?? '—' : document.expiry_date ?? '—'}
+            </Text>
+          </View>
+        </View>
+      </Card>
 
-      <View className="bg-white rounded-xl p-4 border border-gray-100">
+      <Card>
         <Text className="text-sm font-semibold text-gray-900 mb-2">Line Items</Text>
         {lines.map((line) => (
           <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />
         ))}
-      </View>
+      </Card>
+
+      <Card className="p-0 overflow-hidden">
+        <View className="p-5 gap-1">
+          <TotalsRow label="Subtotal" valueMinor={document.subtotal_minor} currencyCode={document.currency_code} />
+          {document.discount_amount_minor > 0 ? (
+            <TotalsRow
+              label="Discount"
+              valueMinor={-document.discount_amount_minor}
+              currencyCode={document.currency_code}
+            />
+          ) : null}
+          <TotalsRow label="Tax" valueMinor={document.tax_total_minor} currencyCode={document.currency_code} />
+          {document.amount_paid_minor > 0 ? (
+            <TotalsRow label="Paid" valueMinor={document.amount_paid_minor} currencyCode={document.currency_code} />
+          ) : null}
+        </View>
+        <View style={{ backgroundColor: BRAND.dark }} className="flex-row justify-between items-center px-5 py-4">
+          <Text className="text-white/70 text-sm">Amount</Text>
+          <Text className="text-white text-lg font-bold">
+            {formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}
+          </Text>
+        </View>
+      </Card>
 
       <View className="flex-row flex-wrap gap-2">
         {canEdit(document) ? (
           <ActionButton label="Edit" onPress={() => router.push(`/documents/${id}/edit`)} />
         ) : null}
-        {canIssue(document) ? <ActionButton label="Issue" onPress={handleIssue} primary /> : null}
-        <ActionButton label="Sign (Merchant)" onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'merchant' } })} />
-        <ActionButton label="Sign (Client)" onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'client' } })} />
+        <ActionButton
+          label="Sign (Merchant)"
+          onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'merchant' } })}
+        />
+        <ActionButton
+          label="Sign (Client)"
+          onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'client' } })}
+        />
         <ActionButton label="Share PDF" onPress={() => handleGeneratePdfAnd('view')} />
-        <ActionButton label="Email PDF" onPress={() => handleGeneratePdfAnd('email')} />
-        {canConvertToInvoice(document) ? (
-          <ActionButton label="Convert to Invoice" onPress={handleConvert} primary />
-        ) : null}
-        {canLogSettlement(document) ? (
-          <ActionButton label="Log Payment" onPress={() => router.push(`/documents/${id}/settlement-new`)} primary />
-        ) : null}
         {canMarkViewed(document) ? <ActionButton label="Mark as Viewed" onPress={handleMarkViewed} /> : null}
         {canVoid(document) ? <ActionButton label="Void" onPress={handleVoid} destructive /> : null}
         {canDelete(document) ? <ActionButton label="Delete Draft" onPress={handleDelete} destructive /> : null}
       </View>
 
       {settlements.length > 0 ? (
-        <View className="bg-white rounded-xl p-4 border border-gray-100">
+        <Card>
           <Text className="text-sm font-semibold text-gray-900 mb-2">Settlements</Text>
           {settlements.map((s) => (
             <View key={s.id} className="flex-row justify-between py-1">
@@ -206,13 +257,19 @@ export default function DocumentDetailScreen() {
               <Text className="text-sm text-gray-900">{formatMinor(s.amount_minor, document.currency_code)}</Text>
             </View>
           ))}
-        </View>
+        </Card>
       ) : null}
 
-      <View className="bg-white rounded-xl p-4 border border-gray-100">
+      <Card>
         <Text className="text-sm font-semibold text-gray-900 mb-2">Activity</Text>
         <ActivityLogList entries={activity} />
-      </View>
+      </Card>
+
+      {primaryAction ? (
+        <Pressable onPress={primaryAction.onPress} className="bg-brand rounded-2xl py-4 items-center">
+          <Text className="text-white font-semibold text-base">{primaryAction.label}</Text>
+        </Pressable>
+      ) : null}
 
       {busy ? (
         <View className="absolute inset-0 items-center justify-center bg-white/60">
@@ -223,19 +280,52 @@ export default function DocumentDetailScreen() {
   );
 }
 
+interface PrimaryActionHandlers {
+  onIssue: () => void;
+  onConvert: () => void;
+  onLogPayment: () => void;
+  onEmail: () => void;
+}
+
+function getPrimaryAction(
+  document: DocumentRecord,
+  handlers: PrimaryActionHandlers
+): { label: string; onPress: () => void } | null {
+  if (canIssue(document)) return { label: 'Issue', onPress: handlers.onIssue };
+  if (canConvertToInvoice(document)) return { label: 'Convert to Invoice', onPress: handlers.onConvert };
+  if (canLogSettlement(document)) return { label: 'Log Payment', onPress: handlers.onLogPayment };
+  if (document.status === 'void') return null;
+  return { label: isOverdue(document) ? 'Send Reminder' : 'Email Invoice', onPress: handlers.onEmail };
+}
+
+function TotalsRow({
+  label,
+  valueMinor,
+  currencyCode,
+}: {
+  label: string;
+  valueMinor: number;
+  currencyCode: string;
+}) {
+  return (
+    <View className="flex-row justify-between py-1">
+      <Text className="text-sm text-gray-600">{label}</Text>
+      <Text className="text-sm text-gray-900">{formatMinor(valueMinor, currencyCode)}</Text>
+    </View>
+  );
+}
+
 function ActionButton({
   label,
   onPress,
-  primary,
   destructive,
 }: {
   label: string;
   onPress: () => void;
-  primary?: boolean;
   destructive?: boolean;
 }) {
-  const bg = destructive ? 'bg-red-50 border-red-200' : primary ? 'bg-blue-600 border-blue-600' : 'border-gray-300';
-  const textColor = destructive ? 'text-red-600' : primary ? 'text-white' : 'text-gray-700';
+  const bg = destructive ? 'bg-red-50 border-red-200' : 'border-gray-300';
+  const textColor = destructive ? 'text-red-600' : 'text-gray-700';
   return (
     <Pressable onPress={onPress} className={`px-4 py-2 rounded-full border ${bg}`}>
       <Text className={`text-sm font-medium ${textColor}`}>{label}</Text>

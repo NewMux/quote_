@@ -49,7 +49,7 @@ export default function EditDocumentScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-surface">
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}>
         <View className="bg-white rounded-xl p-4 border border-gray-100">
           <Text className="text-xs text-gray-500 mb-1">Client</Text>
@@ -81,7 +81,7 @@ export default function EditDocumentScreen() {
             <Text className="text-sm font-semibold text-gray-900">Line Items</Text>
             <Pressable
               onPress={() => router.push('/modals/item-picker')}
-              className="bg-blue-600 rounded-full px-4 py-1.5"
+              className="bg-brand rounded-full px-4 py-1.5"
             >
               <Text className="text-white text-sm font-medium">+ Add Item</Text>
             </Pressable>
@@ -144,7 +144,7 @@ export default function EditDocumentScreen() {
       </ScrollView>
 
       <View className="p-4 bg-white border-t border-gray-100">
-        <Pressable onPress={handleDone} className="bg-blue-600 rounded-lg py-3 items-center">
+        <Pressable onPress={handleDone} className="bg-brand rounded-lg py-3 items-center">
           <Text className="text-white font-semibold">Done</Text>
         </Pressable>
       </View>
@@ -196,13 +196,13 @@ function DocumentDiscountEditor({
         <View className="flex-row gap-2 items-center">
           <Pressable
             onPress={() => onChange('percent', discountValue ?? 0)}
-            className={`px-3 py-2 rounded-full border ${discountType === 'percent' ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}
+            className={`px-3 py-2 rounded-full border ${discountType === 'percent' ? 'bg-brand border-brand' : 'border-gray-300'}`}
           >
             <Text className={discountType === 'percent' ? 'text-white text-sm' : 'text-gray-700 text-sm'}>%</Text>
           </Pressable>
           <Pressable
             onPress={() => onChange('fixed', discountValue ?? 0)}
-            className={`px-3 py-2 rounded-full border ${discountType === 'fixed' ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}
+            className={`px-3 py-2 rounded-full border ${discountType === 'fixed' ? 'bg-brand border-brand' : 'border-gray-300'}`}
           >
             <Text className={discountType === 'fixed' ? 'text-white text-sm' : 'text-gray-700 text-sm'}>$</Text>
           </Pressable>

@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Avatar } from '../../../src/components/Avatar';
+import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { getClient } from '../../../src/db/repositories/clients.repo';
@@ -29,35 +31,37 @@ export default function ClientDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="bg-white p-4 border-b border-gray-100">
-        <Text className="text-xl font-semibold text-gray-900">{client.display_name}</Text>
-        {client.contact_name ? <Text className="text-sm text-gray-500">{client.contact_name}</Text> : null}
-        {client.email ? <Text className="text-sm text-gray-500">{client.email}</Text> : null}
-        {client.phone ? <Text className="text-sm text-gray-500">{client.phone}</Text> : null}
-        {client.address ? <Text className="text-sm text-gray-500">{client.address}</Text> : null}
-        <Pressable onPress={() => router.push(`/clients/${id}/edit`)} className="mt-3 self-start">
-          <Text className="text-blue-600 text-sm font-medium">Edit</Text>
-        </Pressable>
+    <View className="flex-1 bg-surface">
+      <View className="bg-white p-4 border-b border-gray-100 flex-row items-center gap-3">
+        <Avatar name={client.display_name} photoUri={client.photo_uri} seed={client.id} size={56} />
+        <View className="flex-1">
+          <Text className="text-xl font-semibold text-gray-900">{client.display_name}</Text>
+          {client.contact_name ? <Text className="text-sm text-gray-500">{client.contact_name}</Text> : null}
+          {client.email ? <Text className="text-sm text-gray-500">{client.email}</Text> : null}
+          {client.phone ? <Text className="text-sm text-gray-500">{client.phone}</Text> : null}
+          {client.address ? <Text className="text-sm text-gray-500">{client.address}</Text> : null}
+          <Pressable onPress={() => router.push(`/clients/${id}/edit`)} className="mt-2 self-start">
+            <Text className="text-brand text-sm font-medium">Edit</Text>
+          </Pressable>
+        </View>
       </View>
 
       <FlatList
         data={documents}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, gap: 12 }}
         ListEmptyComponent={<EmptyState title="No documents for this client yet" />}
         renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push(`/documents/${item.id}`)}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-100 flex-row justify-between items-center"
-          >
-            <View>
-              <Text className="text-base font-semibold text-gray-900">{item.doc_number}</Text>
-              <StatusBadge document={item} />
-            </View>
-            <Text className="text-base font-medium text-gray-900">
-              {formatMinor(item.total_minor, item.currency_code)}
-            </Text>
+          <Pressable onPress={() => router.push(`/documents/${item.id}`)}>
+            <Card className="p-4 flex-row justify-between items-center">
+              <View>
+                <Text className="text-base font-semibold text-gray-900">{item.doc_number}</Text>
+                <StatusBadge document={item} />
+              </View>
+              <Text className="text-base font-medium text-gray-900">
+                {formatMinor(item.total_minor, item.currency_code)}
+              </Text>
+            </Card>
           </Pressable>
         )}
       />

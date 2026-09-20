@@ -1,7 +1,8 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { up as migration001 } from './migrations/001_init';
+import { up as migration002 } from './migrations/002_client_photo';
 
-const MIGRATIONS: Array<(db: SQLiteDatabase) => Promise<void>> = [migration001];
+const MIGRATIONS: Array<(db: SQLiteDatabase) => Promise<void>> = [migration001, migration002];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {
   await db.execAsync('PRAGMA foreign_keys = ON');

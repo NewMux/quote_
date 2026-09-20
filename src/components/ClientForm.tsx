@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Avatar } from './Avatar';
+import { persistPickedFile } from '../lib/fileStorage';
+import { newId } from '../lib/id';
 import type { ClientInput } from '../db/repositories/clients.repo';
 import type { Client } from '../types/models';
 
@@ -17,9 +21,29 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
   const [address, setAddress] = useState(initial?.address ?? '');
   const [taxRegNumber, setTaxRegNumber] = useState(initial?.tax_registration_number ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [photoUri, setPhotoUri] = useState<string | null>(initial?.photo_uri ?? null);
+
+  async function pickPhoto() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Photo library access is required to set a client photo.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+    if (result.canceled || !result.assets[0]) return;
+    const persistedUri = await persistPickedFile(result.assets[0].uri, 'client-photos', `${newId()}.jpg`);
+    setPhotoUri(persistedUri);
+  }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <View className="items-center gap-2">
+        <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={72} />
+        <Pressable onPress={pickPhoto}>
+          <Text className="text-brand text-sm font-medium">{photoUri ? 'Change photo' : 'Add photo'}</Text>
+        </Pressable>
+      </View>
+
       <Field label="Name" value={displayName} onChangeText={setDisplayName} />
       <Field label="Contact Name (optional)" value={contactName} onChangeText={setContactName} />
       <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
@@ -39,9 +63,10 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
             address: address || null,
             tax_registration_number: taxRegNumber || null,
             notes: notes || null,
+            photo_uri: photoUri,
           })
         }
-        className={`rounded-lg py-3 items-center ${displayName.trim() ? 'bg-blue-600' : 'bg-gray-300'}`}
+        className={`rounded-2xl py-3 items-center ${displayName.trim() ? 'bg-brand' : 'bg-gray-300'}`}
       >
         <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save Client'}</Text>
       </Pressable>
@@ -66,7 +91,7 @@ function Field({
     <View>
       <Text className="text-xs text-gray-500 mb-1">{label}</Text>
       <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+        className="border border-gray-300 rounded-2xl px-3 py-2 bg-white text-base text-gray-900"
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}

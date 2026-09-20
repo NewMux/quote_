@@ -40,7 +40,7 @@ export default function NewSettlementScreen() {
   const balanceDue = document.total_minor - document.amount_paid_minor;
 
   return (
-    <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16 }}>
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16 }}>
       <SettlementForm defaultAmountMinor={balanceDue} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </ScrollView>
   );

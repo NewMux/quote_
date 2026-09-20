@@ -1,6 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system';
 
-export type StorageCategory = 'branding' | 'signatures' | 'receipts' | 'pdfs';
+export type StorageCategory = 'branding' | 'signatures' | 'receipts' | 'pdfs' | 'client-photos';
 
 function categoryDir(category: StorageCategory): Directory {
   const dir = new Directory(Paths.document, category);

@@ -26,7 +26,7 @@ export default function NewDocumentScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50 p-6 justify-center gap-4">
+    <View className="flex-1 bg-surface p-6 justify-center gap-4">
       <Text className="text-lg font-semibold text-gray-900 text-center mb-4">
         What would you like to create?
       </Text>

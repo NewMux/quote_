@@ -89,7 +89,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
                     taxRateBp: bracket.rate_bp,
                   })
                 }
-                className={`px-3 py-1 rounded-full border ${selected ? 'bg-blue-600 border-blue-600' : 'border-gray-300'}`}
+                className={`px-3 py-1 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
               >
                 <Text className={selected ? 'text-white text-xs' : 'text-gray-700 text-xs'}>
                   {bracket.name}
