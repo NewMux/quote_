@@ -1,7 +1,7 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Card } from '../../src/components/Card';
+import { Card } from '../../../src/components/Card';
 
 const ROWS: Array<{ label: string; href: string; icon: keyof typeof Ionicons.glyphMap }> = [
   { label: 'Business Profile', href: '/settings/business-profile', icon: 'business-outline' },
@@ -12,7 +12,11 @@ const ROWS: Array<{ label: string; href: string; icon: keyof typeof Ionicons.gly
 
 export default function SettingsScreen() {
   return (
-    <View className="flex-1 bg-surface p-4">
+    <ScrollView
+      className="flex-1 bg-surface"
+      contentContainerStyle={{ padding: 16 }}
+      contentInsetAdjustmentBehavior="automatic"
+    >
       {ROWS.map((row) => (
         <Pressable key={row.href} onPress={() => router.push(row.href as never)}>
           <Card className="flex-row items-center justify-between p-4 mb-3">
@@ -24,6 +28,6 @@ export default function SettingsScreen() {
           </Card>
         </Pressable>
       ))}
-    </View>
+    </ScrollView>
   );
 }

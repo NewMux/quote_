@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Avatar } from './Avatar';
+import { Button } from './Button';
 import { persistPickedFile } from '../lib/fileStorage';
 import { newId } from '../lib/id';
 import type { ClientInput } from '../db/repositories/clients.repo';
@@ -39,9 +40,7 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
     <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View className="items-center gap-2">
         <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={72} />
-        <Pressable onPress={pickPhoto}>
-          <Text className="text-brand text-sm font-medium">{photoUri ? 'Change photo' : 'Add photo'}</Text>
-        </Pressable>
+        <Button label={photoUri ? 'Change photo' : 'Add photo'} variant="plain" onPress={pickPhoto} />
       </View>
 
       <Field label="Name" value={displayName} onChangeText={setDisplayName} />
@@ -52,7 +51,10 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
       <Field label="Tax / VAT Registration Number" value={taxRegNumber} onChangeText={setTaxRegNumber} />
       <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
 
-      <Pressable
+      <Button
+        label={isSaving ? 'Saving…' : 'Save Client'}
+        variant="filled"
+        size="large"
         disabled={isSaving || !displayName.trim()}
         onPress={() =>
           onSubmit({
@@ -66,10 +68,7 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
             photo_uri: photoUri,
           })
         }
-        className={`rounded-2xl py-3 items-center ${displayName.trim() ? 'bg-brand' : 'bg-gray-300'}`}
-      >
-        <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save Client'}</Text>
-      </Pressable>
+      />
     </ScrollView>
   );
 }

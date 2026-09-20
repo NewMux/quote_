@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
+import { Button } from './Button';
 import { MoneyInput } from './MoneyInput';
 import { useTaxBracketsStore } from '../stores/useTaxBracketsStore';
 import type { ItemInput } from '../db/repositories/itemCatalog.repo';
@@ -84,7 +85,10 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
         </View>
       ) : null}
 
-      <Pressable
+      <Button
+        label={isSaving ? 'Saving…' : 'Save Item'}
+        variant="filled"
+        size="large"
         disabled={isSaving || !name.trim()}
         onPress={() =>
           onSubmit({
@@ -96,10 +100,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
             default_tax_bracket_id: isTaxable ? taxBracketId : null,
           })
         }
-        className={`rounded-lg py-3 items-center ${name.trim() ? 'bg-brand' : 'bg-gray-300'}`}
-      >
-        <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save Item'}</Text>
-      </Pressable>
+      />
     </ScrollView>
   );
 }

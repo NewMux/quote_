@@ -36,7 +36,13 @@ export default function RootLayout() {
         <Stack.Screen name="documents/[id]/edit" options={{ title: 'Edit Document' }} />
         <Stack.Screen
           name="documents/[id]/settlement-new"
-          options={{ title: 'Log Payment', presentation: 'modal' }}
+          options={{
+            title: 'Log Payment',
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
         />
         <Stack.Screen name="clients/new" options={{ title: 'New Client' }} />
         <Stack.Screen name="clients/[id]/index" options={{ title: 'Client' }} />
@@ -47,14 +53,35 @@ export default function RootLayout() {
         <Stack.Screen name="settings/items" options={{ title: 'Item Catalog' }} />
         <Stack.Screen name="settings/tax-brackets" options={{ title: 'Tax Brackets' }} />
         <Stack.Screen name="settings/numbering" options={{ title: 'Document Numbering' }} />
-        <Stack.Screen name="modals/sign" options={{ title: 'Signature', presentation: 'modal' }} />
+        <Stack.Screen
+          name="modals/sign"
+          options={{
+            title: 'Signature',
+            presentation: 'formSheet',
+            sheetAllowedDetents: [1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
         <Stack.Screen
           name="modals/client-picker"
-          options={{ title: 'Select Client', presentation: 'modal' }}
+          options={{
+            title: 'Select Client',
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
         />
         <Stack.Screen
           name="modals/item-picker"
-          options={{ title: 'Select Item', presentation: 'modal' }}
+          options={{
+            title: 'Select Item',
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
         />
       </Stack>
     </GestureHandlerRootView>

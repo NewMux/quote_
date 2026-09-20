@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
+import { Button } from '../../src/components/Button';
 import { EmptyState } from '../../src/components/EmptyState';
 import { formatMinor } from '../../src/lib/money';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
@@ -57,15 +58,15 @@ export default function ItemPickerModal() {
           </Pressable>
         )}
         ListFooterComponent={
-          <Pressable
+          <Button
+            label="+ Add custom line item"
+            variant="tinted"
+            size="large"
             onPress={() => {
               addBlankLineItem();
               router.back();
             }}
-            className="bg-brand/10 rounded-xl p-4 border border-brand/30"
-          >
-            <Text className="text-brand font-medium">+ Add custom line item</Text>
-          </Pressable>
+          />
         }
       />
     </View>

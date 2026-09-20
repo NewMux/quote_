@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
+import { Button } from '../../src/components/Button';
 import { EmptyState } from '../../src/components/EmptyState';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
@@ -60,13 +61,13 @@ export default function ClientPickerModal() {
         )}
         ListFooterComponent={
           query.trim() && !filtered.some((c) => c.display_name.toLowerCase() === query.trim().toLowerCase()) ? (
-            <Pressable
-              onPress={quickAddClient}
+            <Button
+              label={`+ Add "${query.trim()}" as new client`}
+              variant="tinted"
+              size="large"
               disabled={isCreating}
-              className="bg-brand/10 rounded-xl p-4 border border-brand/30"
-            >
-              <Text className="text-brand font-medium">+ Add "{query.trim()}" as new client</Text>
-            </Pressable>
+              onPress={quickAddClient}
+            />
           ) : null
         }
       />

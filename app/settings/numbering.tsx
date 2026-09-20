@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
+import { ScrollView, Switch, Text, TextInput, View } from 'react-native';
+import { Button } from '../../src/components/Button';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 
 export default function NumberingScreen() {
@@ -53,9 +54,7 @@ export default function NumberingScreen() {
         <Switch value={resetYearly} onValueChange={setResetYearly} />
       </View>
 
-      <Pressable onPress={handleSave} disabled={isSaving} className="bg-brand rounded-lg py-3 items-center">
-        <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save'}</Text>
-      </Pressable>
+      <Button label={isSaving ? 'Saving…' : 'Save'} variant="filled" size="large" disabled={isSaving} onPress={handleSave} />
     </ScrollView>
   );
 }

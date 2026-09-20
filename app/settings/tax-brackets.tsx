@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Text, TextInput, View } from 'react-native';
+import { Button } from '../../src/components/Button';
 import { formatRateBp, parseRateBp } from '../../src/lib/money';
 import { useTaxBracketsStore } from '../../src/stores/useTaxBracketsStore';
 import type { TaxBracket } from '../../src/types/models';
@@ -51,9 +52,7 @@ export default function TaxBracketsScreen() {
                 onChangeText={setRate}
               />
             </View>
-            <Pressable onPress={handleAdd} className="bg-brand rounded-lg py-2 items-center">
-              <Text className="text-white font-semibold">Add</Text>
-            </Pressable>
+            <Button label="Add" variant="filled" onPress={handleAdd} />
           </View>
         }
         renderItem={({ item }) => (
@@ -66,13 +65,9 @@ export default function TaxBracketsScreen() {
               {item.is_default ? (
                 <Text className="text-xs text-brand font-semibold">Default</Text>
               ) : (
-                <Pressable onPress={() => setDefault(item.id)}>
-                  <Text className="text-xs text-gray-500">Set default</Text>
-                </Pressable>
+                <Button label="Set default" variant="plain" size="small" onPress={() => setDefault(item.id)} />
               )}
-              <Pressable onPress={() => confirmArchive(item)}>
-                <Text className="text-xs text-red-500">Archive</Text>
-              </Pressable>
+              <Button label="Archive" variant="destructive" size="small" onPress={() => confirmArchive(item)} />
             </View>
           </View>
         )}

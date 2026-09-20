@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { Alert, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { Button } from './Button';
 import { DateField } from './DateField';
 import { MoneyInput } from './MoneyInput';
 import { persistPickedFile } from '../lib/fileStorage';
 import { newId } from '../lib/id';
+import { BRAND } from '../lib/theme';
 import type { SettlementMethod } from '../types/models';
 
 const METHODS: Array<{ value: SettlementMethod; label: string }> = [
   { value: 'cash', label: 'Cash' },
-  { value: 'bank_transfer', label: 'Bank Transfer' },
+  { value: 'bank_transfer', label: 'Bank' },
   { value: 'check', label: 'Check' },
   { value: 'other', label: 'Other' },
 ];
@@ -56,20 +59,12 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
     <View className="gap-4">
       <View>
         <Text className="text-xs text-gray-500 mb-2">Method</Text>
-        <View className="flex-row flex-wrap gap-2">
-          {METHODS.map((m) => {
-            const selected = m.value === method;
-            return (
-              <Pressable
-                key={m.value}
-                onPress={() => setMethod(m.value)}
-                className={`px-3 py-2 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
-              >
-                <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{m.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <SegmentedControl
+          values={METHODS.map((m) => m.label)}
+          selectedIndex={METHODS.findIndex((m) => m.value === method)}
+          tintColor={BRAND.default}
+          onChange={(e) => setMethod(METHODS[e.nativeEvent.selectedSegmentIndex].value)}
+        />
       </View>
 
       <MoneyInput label="Amount" valueMinor={amountMinor} onChangeMinor={setAmountMinor} />
@@ -101,12 +96,13 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
         {receiptUri ? (
           <Image source={{ uri: receiptUri }} className="w-full h-40 rounded-lg mb-2" resizeMode="cover" />
         ) : null}
-        <Pressable onPress={pickReceiptPhoto} className="border border-gray-300 rounded-lg px-3 py-2 self-start">
-          <Text className="text-gray-700 text-sm">{receiptUri ? 'Change photo' : 'Attach photo'}</Text>
-        </Pressable>
+        <Button label={receiptUri ? 'Change photo' : 'Attach photo'} variant="tinted" onPress={pickReceiptPhoto} />
       </View>
 
-      <Pressable
+      <Button
+        label={isSubmitting ? 'Saving…' : 'Log Payment'}
+        variant="filled"
+        size="large"
         disabled={isSubmitting || amountMinor <= 0}
         onPress={() =>
           onSubmit({
@@ -118,10 +114,7 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
             notes: notes || null,
           })
         }
-        className={`rounded-lg py-3 items-center ${amountMinor > 0 ? 'bg-brand' : 'bg-gray-300'}`}
-      >
-        <Text className="text-white font-semibold">{isSubmitting ? 'Saving…' : 'Log Payment'}</Text>
-      </Pressable>
+      />
     </View>
   );
 }

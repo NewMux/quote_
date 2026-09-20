@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
 import { Avatar } from '../../../src/components/Avatar';
+import { Button } from '../../../src/components/Button';
 import { Card } from '../../../src/components/Card';
 import { LineItemRow } from '../../../src/components/LineItemRow';
 import { StatusBadge } from '../../../src/components/StatusBadge';
@@ -230,20 +231,24 @@ export default function DocumentDetailScreen() {
 
       <View className="flex-row flex-wrap gap-2">
         {canEdit(document) ? (
-          <ActionButton label="Edit" onPress={() => router.push(`/documents/${id}/edit`)} />
+          <Button label="Edit" variant="tinted" onPress={() => router.push(`/documents/${id}/edit`)} />
         ) : null}
-        <ActionButton
+        <Button
           label="Sign (Merchant)"
+          variant="tinted"
           onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'merchant' } })}
         />
-        <ActionButton
+        <Button
           label="Sign (Client)"
+          variant="tinted"
           onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'client' } })}
         />
-        <ActionButton label="Share PDF" onPress={() => handleGeneratePdfAnd('view')} />
-        {canMarkViewed(document) ? <ActionButton label="Mark as Viewed" onPress={handleMarkViewed} /> : null}
-        {canVoid(document) ? <ActionButton label="Void" onPress={handleVoid} destructive /> : null}
-        {canDelete(document) ? <ActionButton label="Delete Draft" onPress={handleDelete} destructive /> : null}
+        <Button label="Share PDF" variant="tinted" onPress={() => handleGeneratePdfAnd('view')} />
+        {canMarkViewed(document) ? (
+          <Button label="Mark as Viewed" variant="tinted" onPress={handleMarkViewed} />
+        ) : null}
+        {canVoid(document) ? <Button label="Void" variant="destructive" onPress={handleVoid} /> : null}
+        {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
       </View>
 
       {settlements.length > 0 ? (
@@ -265,11 +270,7 @@ export default function DocumentDetailScreen() {
         <ActivityLogList entries={activity} />
       </Card>
 
-      {primaryAction ? (
-        <Pressable onPress={primaryAction.onPress} className="bg-brand rounded-2xl py-4 items-center">
-          <Text className="text-white font-semibold text-base">{primaryAction.label}</Text>
-        </Pressable>
-      ) : null}
+      {primaryAction ? <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} /> : null}
 
       {busy ? (
         <View className="absolute inset-0 items-center justify-center bg-white/60">
@@ -312,23 +313,5 @@ function TotalsRow({
       <Text className="text-sm text-gray-600">{label}</Text>
       <Text className="text-sm text-gray-900">{formatMinor(valueMinor, currencyCode)}</Text>
     </View>
-  );
-}
-
-function ActionButton({
-  label,
-  onPress,
-  destructive,
-}: {
-  label: string;
-  onPress: () => void;
-  destructive?: boolean;
-}) {
-  const bg = destructive ? 'bg-red-50 border-red-200' : 'border-gray-300';
-  const textColor = destructive ? 'text-red-600' : 'text-gray-700';
-  return (
-    <Pressable onPress={onPress} className={`px-4 py-2 rounded-full border ${bg}`}>
-      <Text className={`text-sm font-medium ${textColor}`}>{label}</Text>
-    </Pressable>
   );
 }

@@ -1,17 +1,17 @@
 import { useCallback } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import { ScrollView, Text, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { BarChart } from '../../src/components/charts/BarChart';
-import { LineChart } from '../../src/components/charts/LineChart';
-import { Card } from '../../src/components/Card';
-import { StatStrip } from '../../src/components/StatStrip';
-import { formatMinor } from '../../src/lib/money';
-import { BRAND } from '../../src/lib/theme';
-import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
-import { useReportsStore } from '../../src/stores/useReportsStore';
-import type { ReportGranularity } from '../../src/db/repositories/reports.repo';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { BarChart } from '../../../src/components/charts/BarChart';
+import { LineChart } from '../../../src/components/charts/LineChart';
+import { Card } from '../../../src/components/Card';
+import { StatStrip } from '../../../src/components/StatStrip';
+import { formatMinor } from '../../../src/lib/money';
+import { BRAND } from '../../../src/lib/theme';
+import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+import { useReportsStore } from '../../../src/stores/useReportsStore';
+import type { ReportGranularity } from '../../../src/db/repositories/reports.repo';
 
 const GRANULARITIES: Array<{ label: string; value: ReportGranularity }> = [
   { label: 'D', value: 'day' },
@@ -34,18 +34,11 @@ export default function HomeScreen() {
   const receivedThisMonth = revenueByMonth[revenueByMonth.length - 1]?.value ?? 0;
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <View style={{ backgroundColor: BRAND.mint }} className="w-1.5 h-5 rounded-full" />
-          <View style={{ backgroundColor: BRAND.default }} className="w-1.5 h-5 rounded-full -ml-1" />
-          <Text className="text-lg font-bold text-gray-900 ml-1">Quote</Text>
-        </View>
-        <Pressable onPress={() => router.push('/(tabs)/settings')}>
-          <Ionicons name="settings-outline" size={22} color="#374151" />
-        </Pressable>
-      </View>
-
+    <ScrollView
+      className="flex-1 bg-surface"
+      contentContainerStyle={{ padding: 16, gap: 16 }}
+      contentInsetAdjustmentBehavior="automatic"
+    >
       <LinearGradient
         colors={[BRAND.default, BRAND.darker]}
         start={{ x: 0, y: 0 }}
@@ -81,21 +74,13 @@ export default function HomeScreen() {
       <Card>
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-sm font-semibold text-gray-900">Paid</Text>
-          <View className="flex-row gap-1">
-            {GRANULARITIES.map((g) => {
-              const selected = g.value === granularity;
-              return (
-                <Pressable
-                  key={g.value}
-                  onPress={() => setGranularity(g.value)}
-                  className={`w-7 h-7 rounded-full items-center justify-center ${selected ? 'bg-brand' : 'bg-gray-100'}`}
-                >
-                  <Text className={`text-xs font-semibold ${selected ? 'text-white' : 'text-gray-600'}`}>
-                    {g.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <View style={{ width: 140 }}>
+            <SegmentedControl
+              values={GRANULARITIES.map((g) => g.label)}
+              selectedIndex={GRANULARITIES.findIndex((g) => g.value === granularity)}
+              tintColor={BRAND.default}
+              onChange={(e) => setGranularity(GRANULARITIES[e.nativeEvent.selectedSegmentIndex].value)}
+            />
           </View>
         </View>
         <BarChart data={paidByPeriod} />

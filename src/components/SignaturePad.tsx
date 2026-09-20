@@ -1,6 +1,7 @@
 import { useRef } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 import SignatureView, { type SignatureViewRef } from 'react-native-signature-canvas';
+import { Button } from './Button';
 
 interface SignaturePadProps {
   onSave: (dataUrl: string) => void;
@@ -20,18 +21,8 @@ export function SignaturePad({ onSave }: SignaturePadProps) {
         />
       </View>
       <View className="flex-row justify-between mt-4">
-        <Pressable
-          className="px-4 py-3 rounded-lg border border-gray-300"
-          onPress={() => ref.current?.clearSignature()}
-        >
-          <Text className="text-gray-700 font-medium">Clear</Text>
-        </Pressable>
-        <Pressable
-          className="px-6 py-3 rounded-lg bg-brand"
-          onPress={() => ref.current?.readSignature()}
-        >
-          <Text className="text-white font-semibold">Save Signature</Text>
-        </Pressable>
+        <Button label="Clear" variant="tinted" onPress={() => ref.current?.clearSignature()} />
+        <Button label="Save Signature" variant="filled" onPress={() => ref.current?.readSignature()} />
       </View>
     </View>
   );

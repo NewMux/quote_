@@ -2,15 +2,17 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Avatar } from '../../src/components/Avatar';
-import { Card } from '../../src/components/Card';
-import { EmptyState } from '../../src/components/EmptyState';
-import { StatStrip } from '../../src/components/StatStrip';
-import { StatusBadge } from '../../src/components/StatusBadge';
-import { formatMinor } from '../../src/lib/money';
-import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
-import { useReportsStore } from '../../src/stores/useReportsStore';
-import type { DocType } from '../../src/types/models';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { Avatar } from '../../../src/components/Avatar';
+import { Card } from '../../../src/components/Card';
+import { EmptyState } from '../../../src/components/EmptyState';
+import { StatStrip } from '../../../src/components/StatStrip';
+import { StatusBadge } from '../../../src/components/StatusBadge';
+import { formatMinor } from '../../../src/lib/money';
+import { BRAND } from '../../../src/lib/theme';
+import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
+import { useReportsStore } from '../../../src/stores/useReportsStore';
+import type { DocType } from '../../../src/types/models';
 
 const TYPE_FILTERS: Array<{ label: string; value: DocType | undefined }> = [
   { label: 'All', value: undefined },
@@ -21,7 +23,7 @@ const TYPE_FILTERS: Array<{ label: string; value: DocType | undefined }> = [
 export default function DocumentsScreen() {
   const { documents, filter, setFilter, load } = useDocumentsStore();
   const { breakdown, load: loadReports } = useReportsStore();
-  const [activeType, setActiveType] = useState<DocType | undefined>(undefined);
+  const [activeTypeIndex, setActiveTypeIndex] = useState(0);
   const [search, setSearch] = useState('');
 
   useFocusEffect(
@@ -37,6 +39,7 @@ export default function DocumentsScreen() {
         data={documents}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 12 }}
+        contentInsetAdjustmentBehavior="automatic"
         ListHeaderComponent={
           <View className="gap-4 mb-2">
             {breakdown ? (
@@ -63,23 +66,16 @@ export default function DocumentsScreen() {
               />
             </View>
 
-            <View className="flex-row gap-2">
-              {TYPE_FILTERS.map((f) => {
-                const selected = f.value === activeType;
-                return (
-                  <Pressable
-                    key={f.label}
-                    onPress={() => {
-                      setActiveType(f.value);
-                      setFilter({ ...filter, docType: f.value });
-                    }}
-                    className={`px-3 py-1.5 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
-                  >
-                    <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{f.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <SegmentedControl
+              values={TYPE_FILTERS.map((f) => f.label)}
+              selectedIndex={activeTypeIndex}
+              tintColor={BRAND.default}
+              onChange={(e) => {
+                const index = e.nativeEvent.selectedSegmentIndex;
+                setActiveTypeIndex(index);
+                setFilter({ ...filter, docType: TYPE_FILTERS[index].value });
+              }}
+            />
           </View>
         }
         ListEmptyComponent={

@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import { Button } from '../../../src/components/Button';
 import { DateField } from '../../../src/components/DateField';
 import { LineItemEditor } from '../../../src/components/LineItemEditor';
 import { computeDocumentTotals } from '../../../src/lib/documentCalculations';
 import { formatMinor, parseToMinor } from '../../../src/lib/money';
+import { BRAND } from '../../../src/lib/theme';
 import { useDocumentEditorStore } from '../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
 
@@ -79,12 +82,7 @@ export default function EditDocumentScreen() {
         <View>
           <View className="flex-row justify-between items-center mb-2">
             <Text className="text-sm font-semibold text-gray-900">Line Items</Text>
-            <Pressable
-              onPress={() => router.push('/modals/item-picker')}
-              className="bg-brand rounded-full px-4 py-1.5"
-            >
-              <Text className="text-white text-sm font-medium">+ Add Item</Text>
-            </Pressable>
+            <Button label="+ Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
           </View>
           {editor.lines.length === 0 ? (
             <Text className="text-sm text-gray-400 py-4 text-center">No line items yet.</Text>
@@ -144,9 +142,7 @@ export default function EditDocumentScreen() {
       </ScrollView>
 
       <View className="p-4 bg-white border-t border-gray-100">
-        <Pressable onPress={handleDone} className="bg-brand rounded-lg py-3 items-center">
-          <Text className="text-white font-semibold">Done</Text>
-        </Pressable>
+        <Button label="Done" variant="filled" size="large" onPress={handleDone} />
       </View>
     </View>
   );
@@ -194,18 +190,16 @@ function DocumentDiscountEditor({
       </View>
       {enabled ? (
         <View className="flex-row gap-2 items-center">
-          <Pressable
-            onPress={() => onChange('percent', discountValue ?? 0)}
-            className={`px-3 py-2 rounded-full border ${discountType === 'percent' ? 'bg-brand border-brand' : 'border-gray-300'}`}
-          >
-            <Text className={discountType === 'percent' ? 'text-white text-sm' : 'text-gray-700 text-sm'}>%</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => onChange('fixed', discountValue ?? 0)}
-            className={`px-3 py-2 rounded-full border ${discountType === 'fixed' ? 'bg-brand border-brand' : 'border-gray-300'}`}
-          >
-            <Text className={discountType === 'fixed' ? 'text-white text-sm' : 'text-gray-700 text-sm'}>$</Text>
-          </Pressable>
+          <View style={{ width: 90 }}>
+            <SegmentedControl
+              values={['%', '$']}
+              selectedIndex={discountType === 'percent' ? 0 : 1}
+              tintColor={BRAND.default}
+              onChange={(e) =>
+                onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', discountValue ?? 0)
+              }
+            />
+          </View>
           <TextInput
             className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base"
             keyboardType="decimal-pad"

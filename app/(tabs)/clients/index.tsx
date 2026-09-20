@@ -2,10 +2,10 @@ import { useCallback } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Avatar } from '../../src/components/Avatar';
-import { Card } from '../../src/components/Card';
-import { EmptyState } from '../../src/components/EmptyState';
-import { useClientsStore } from '../../src/stores/useClientsStore';
+import { Avatar } from '../../../src/components/Avatar';
+import { Card } from '../../../src/components/Card';
+import { EmptyState } from '../../../src/components/EmptyState';
+import { useClientsStore } from '../../../src/stores/useClientsStore';
 
 export default function ClientsScreen() {
   const { clients, load } = useClientsStore();
@@ -22,6 +22,7 @@ export default function ClientsScreen() {
         data={clients}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, gap: 12 }}
+        contentInsetAdjustmentBehavior="automatic"
         ListEmptyComponent={
           <EmptyState title="No clients yet" subtitle="Add a client to start building documents for them." />
         }

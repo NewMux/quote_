@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Button } from '../../src/components/Button';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { persistPickedFile } from '../../src/lib/fileStorage';
 
@@ -72,9 +73,9 @@ export default function BusinessProfileScreen() {
         {logoUri ? (
           <Image source={{ uri: logoUri }} className="w-24 h-24 rounded-lg mb-2" resizeMode="contain" />
         ) : null}
-        <Pressable onPress={pickLogo} className="border border-gray-300 rounded-lg px-3 py-2 self-start">
-          <Text className="text-gray-700 text-sm">{logoUri ? 'Change logo' : 'Add logo'}</Text>
-        </Pressable>
+        <View className="self-start">
+          <Button label={logoUri ? 'Change logo' : 'Add logo'} variant="tinted" onPress={pickLogo} />
+        </View>
       </View>
 
       <Field label="Business Name" value={businessName} onChangeText={setBusinessName} />
@@ -105,9 +106,9 @@ export default function BusinessProfileScreen() {
       />
       <Field label="Footer / Terms & Conditions" value={footerTerms} onChangeText={setFooterTerms} multiline />
 
-      <Pressable onPress={handleSave} disabled={isSaving} className="bg-brand rounded-lg py-3 items-center mt-2">
-        <Text className="text-white font-semibold">{isSaving ? 'Saving…' : 'Save'}</Text>
-      </Pressable>
+      <View className="mt-2">
+        <Button label={isSaving ? 'Saving…' : 'Save'} variant="filled" size="large" disabled={isSaving} onPress={handleSave} />
+      </View>
     </ScrollView>
   );
 }
