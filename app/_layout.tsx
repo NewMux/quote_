@@ -1,0 +1,61 @@
+import '../global.css';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Stack } from 'expo-router';
+import { db } from '../src/db/client';
+import { migrate } from '../src/db/migrate';
+import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
+
+export default function RootLayout() {
+  const [ready, setReady] = useState(false);
+  const loadProfile = useBusinessProfileStore((s) => s.load);
+
+  useEffect(() => {
+    (async () => {
+      await migrate(db);
+      await loadProfile();
+      setReady(true);
+    })();
+  }, [loadProfile]);
+
+  if (!ready) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />
+        <Stack.Screen name="documents/[id]/index" options={{ title: 'Document' }} />
+        <Stack.Screen name="documents/[id]/edit" options={{ title: 'Edit Document' }} />
+        <Stack.Screen
+          name="documents/[id]/settlement-new"
+          options={{ title: 'Log Payment', presentation: 'modal' }}
+        />
+        <Stack.Screen name="clients/new" options={{ title: 'New Client' }} />
+        <Stack.Screen name="clients/[id]/index" options={{ title: 'Client' }} />
+        <Stack.Screen name="clients/[id]/edit" options={{ title: 'Edit Client' }} />
+        <Stack.Screen name="items/new" options={{ title: 'New Item' }} />
+        <Stack.Screen name="items/[id]/edit" options={{ title: 'Edit Item' }} />
+        <Stack.Screen name="settings/business-profile" options={{ title: 'Business Profile' }} />
+        <Stack.Screen name="settings/tax-brackets" options={{ title: 'Tax Brackets' }} />
+        <Stack.Screen name="settings/numbering" options={{ title: 'Document Numbering' }} />
+        <Stack.Screen name="modals/sign" options={{ title: 'Signature', presentation: 'modal' }} />
+        <Stack.Screen
+          name="modals/client-picker"
+          options={{ title: 'Select Client', presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="modals/item-picker"
+          options={{ title: 'Select Item', presentation: 'modal' }}
+        />
+      </Stack>
+    </GestureHandlerRootView>
+  );
+}

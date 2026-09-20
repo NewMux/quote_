@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Quote",
+    "slug": "quote-app",
+    "version": "1.0.0",
+    "scheme": "quoteapp",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.quoteapp.mobile"
+    },
+    "android": {
+      "package": "com.quoteapp.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-file-system",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Quote to access your photos to attach a receipt or set your business logo.",
+          "cameraPermission": "Allow Quote to use your camera to take a photo of a receipt."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
