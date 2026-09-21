@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, Text, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 
@@ -24,19 +24,37 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
           {value ? format(parseISO(value), 'MMM d, yyyy') : placeholder}
         </Text>
       </Pressable>
-      {show ? (
-        <View className="border border-gray-200 rounded-xl mt-2 p-2 bg-white">
-          <DateTimePicker
-            value={value ? parseISO(value) : new Date()}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
-            onChange={(_event, date) => {
-              setShow(false);
-              if (date) onChange(date.toISOString().slice(0, 10));
-            }}
-            onDismiss={() => setShow(false)}
-          />
-        </View>
+      {show && Platform.OS === 'ios' ? (
+        <Modal visible transparent animationType="fade" onRequestClose={() => setShow(false)}>
+          <Pressable
+            className="flex-1 items-center justify-center bg-black/40 px-6"
+            onPress={() => setShow(false)}
+          >
+            <View className="bg-white rounded-2xl p-2">
+              <DateTimePicker
+                value={value ? parseISO(value) : new Date()}
+                mode="date"
+                display="inline"
+                onChange={(_event, date) => {
+                  setShow(false);
+                  if (date) onChange(date.toISOString().slice(0, 10));
+                }}
+              />
+            </View>
+          </Pressable>
+        </Modal>
+      ) : null}
+      {show && Platform.OS !== 'ios' ? (
+        <DateTimePicker
+          value={value ? parseISO(value) : new Date()}
+          mode="date"
+          display="calendar"
+          onChange={(_event, date) => {
+            setShow(false);
+            if (date) onChange(date.toISOString().slice(0, 10));
+          }}
+          onDismiss={() => setShow(false)}
+        />
       ) : null}
     </View>
   );
