@@ -193,6 +193,7 @@ export default function CurrencyPickerModal() {
         />
       </View>
       <FlatList
+        style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.code}
         contentContainerStyle={{ padding: 16 }}

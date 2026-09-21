@@ -65,7 +65,7 @@ export default function TabsLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Tabs screenOptions={{ tabBarActiveTintColor: BRAND.default }}>
+      <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: BRAND.default }}>
         <Tabs.Screen
           name="home"
           options={{

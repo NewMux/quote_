@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
 import { Avatar } from '../../../src/components/Avatar';
 import { Button } from '../../../src/components/Button';
@@ -46,6 +47,7 @@ import type {
 
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
   const profile = useBusinessProfileStore((s) => s.profile);
   const [document, setDocument] = useState<DocumentRecord | null>(null);
   const [client, setClient] = useState<Client | null>(null);
@@ -172,7 +174,10 @@ export default function DocumentDetailScreen() {
   });
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}>
+    <ScrollView
+      className="flex-1 bg-surface"
+      contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 16 }}
+    >
       <Card>
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-lg font-bold text-gray-900">{document.doc_number}</Text>
@@ -214,9 +219,11 @@ export default function DocumentDetailScreen() {
 
       <Card>
         <Text className="text-sm font-semibold text-gray-900 mb-2">Line Items</Text>
-        {lines.map((line) => (
-          <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />
-        ))}
+        {lines.length > 0 ? (
+          lines.map((line) => <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />)
+        ) : (
+          <Text className="text-sm text-gray-400 py-2">No line items yet — tap Edit to add some.</Text>
+        )}
       </Card>
 
       <Card className="p-0 overflow-hidden">
@@ -260,9 +267,14 @@ export default function DocumentDetailScreen() {
         {canMarkViewed(document) ? (
           <Button label="Mark as Viewed" variant="tinted" onPress={handleMarkViewed} />
         ) : null}
-        {canVoid(document) ? <Button label="Void" variant="destructive" onPress={handleVoid} /> : null}
-        {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
       </View>
+
+      {canVoid(document) || canDelete(document) ? (
+        <View className="flex-row flex-wrap gap-2">
+          {canVoid(document) ? <Button label="Void" variant="destructive" onPress={handleVoid} /> : null}
+          {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
+        </View>
+      ) : null}
 
       {settlements.length > 0 ? (
         <Card>

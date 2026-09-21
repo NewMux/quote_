@@ -42,6 +42,7 @@ export default function ItemPickerModal() {
         />
       </View>
       <FlatList
+        style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}

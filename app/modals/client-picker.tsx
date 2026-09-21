@@ -49,6 +49,7 @@ export default function ClientPickerModal() {
         />
       </View>
       <FlatList
+        style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
