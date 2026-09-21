@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Avatar } from '../../../src/components/Avatar';
-import { Button } from '../../../src/components/Button';
 import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { StatusBadge } from '../../../src/components/StatusBadge';
@@ -27,7 +26,16 @@ export default function ClientDetailScreen() {
   );
 
   useEffect(() => {
-    if (client) navigation.setOptions({ title: client.display_name });
+    if (!client) return;
+    navigation.setOptions({
+      title: client.display_name,
+      headerRight: () => (
+        <Pressable onPress={confirmArchive}>
+          <Text className="text-red-500">Archive</Text>
+        </Pressable>
+      ),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, client]);
 
   if (!client) {
@@ -66,7 +74,6 @@ export default function ClientDetailScreen() {
             <Pressable onPress={() => router.push(`/clients/${id}/edit`)}>
               <Text className="text-brand text-sm font-medium">Edit</Text>
             </Pressable>
-            <Button label="Archive" variant="destructive" size="small" onPress={confirmArchive} />
           </View>
         </View>
       </View>

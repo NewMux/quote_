@@ -70,7 +70,18 @@ export default function RootLayout() {
         <Stack.Screen name="items/[id]/edit" options={{ title: 'Edit Item' }} />
         <Stack.Screen name="settings/business-profile" options={{ title: 'Business Profile' }} />
         <Stack.Screen name="settings/items" options={{ title: 'Item Catalog' }} />
-        <Stack.Screen name="settings/tax-brackets" options={{ title: 'Tax Rates' }} />
+        <Stack.Screen name="settings/tax-brackets/index" options={{ title: 'Tax Rates' }} />
+        <Stack.Screen
+          name="settings/tax-brackets/new"
+          options={{
+            headerShown: false,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
+        <Stack.Screen name="settings/tax-brackets/[id]/edit" options={{ title: 'Edit Tax Rate' }} />
         <Stack.Screen name="settings/numbering" options={{ title: 'Invoice & Estimate Numbers' }} />
         <Stack.Screen
           name="modals/sign"
