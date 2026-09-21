@@ -58,7 +58,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
           />
         </View>
         <View className="w-24">
-          <Text className="text-xs text-gray-500 mb-1">Unit</Text>
+          <Text className="text-xs text-gray-500 mb-1">Per (hr, item)</Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
             value={unitLabel}
@@ -74,7 +74,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
 
       {isTaxable ? (
         <View>
-          <Text className="text-xs text-gray-500 mb-2">Default Tax Bracket</Text>
+          <Text className="text-xs text-gray-500 mb-2">Default Tax Rate</Text>
           <View className="flex-row flex-wrap gap-2">
             {taxBrackets.map((bracket) => {
               const selected = bracket.id === taxBracketId;

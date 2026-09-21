@@ -5,6 +5,7 @@ import { BRAND } from '../lib/theme';
 
 export interface FabAction {
   label: string;
+  subtitle?: string;
   icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
 }
@@ -45,7 +46,10 @@ export function FabSpeedDial({ actions, onClose }: FabSpeedDialProps) {
               <View style={styles.iconCircle}>
                 <Ionicons name={action.icon} size={16} color="white" />
               </View>
-              <Text style={styles.label}>{action.label}</Text>
+              <View>
+                <Text style={styles.label}>{action.label}</Text>
+                {action.subtitle ? <Text style={styles.subtitle}>{action.subtitle}</Text> : null}
+              </View>
             </Pressable>
           </Animated.View>
         ))}
@@ -67,7 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderRadius: 999,
+    borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 18,
     gap: 10,
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 5,
     minWidth: 170,
+    maxWidth: 260,
   },
   iconCircle: {
     width: 32,
@@ -90,5 +95,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#111827',
+  },
+  subtitle: {
+    fontSize: 11,
+    color: '#6B7280',
+    marginTop: 1,
   },
 });

@@ -9,12 +9,12 @@ const LABELS: Record<ActivityLogEntry['event_type'], string> = {
   viewed_marked: 'Marked as viewed',
   shared: 'Shared',
   emailed: 'Emailed',
-  signed_merchant: 'Signed (merchant)',
-  signed_client: 'Signed (client)',
+  signed_merchant: 'You signed',
+  signed_client: 'Client signed',
   settlement_logged: 'Payment logged',
   status_changed: 'Status changed',
   converted_to_invoice: 'Converted to invoice',
-  voided: 'Voided',
+  voided: 'Canceled',
 };
 
 interface ActivityLogListProps {

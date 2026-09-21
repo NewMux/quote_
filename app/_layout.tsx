@@ -51,8 +51,8 @@ export default function RootLayout() {
         <Stack.Screen name="items/[id]/edit" options={{ title: 'Edit Item' }} />
         <Stack.Screen name="settings/business-profile" options={{ title: 'Business Profile' }} />
         <Stack.Screen name="settings/items" options={{ title: 'Item Catalog' }} />
-        <Stack.Screen name="settings/tax-brackets" options={{ title: 'Tax Brackets' }} />
-        <Stack.Screen name="settings/numbering" options={{ title: 'Document Numbering' }} />
+        <Stack.Screen name="settings/tax-brackets" options={{ title: 'Tax Rates' }} />
+        <Stack.Screen name="settings/numbering" options={{ title: 'Invoice & Estimate Numbers' }} />
         <Stack.Screen
           name="modals/sign"
           options={{

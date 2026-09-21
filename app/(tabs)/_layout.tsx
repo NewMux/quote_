@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, View, type GestureResponderEvent } from 'react-native';
+import { Animated, Pressable, Text, View, type GestureResponderEvent } from 'react-native';
 import { Tabs, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,6 +41,7 @@ function RaisedCenterButton({ onPress, isOpen }: RaisedCenterButtonProps) {
           <Ionicons name="add" size={28} color="white" />
         </Animated.View>
       </LinearGradient>
+      <Text style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>New</Text>
     </Pressable>
   );
 }
@@ -51,11 +52,13 @@ export default function TabsLayout() {
   const fabActions: FabAction[] = [
     {
       label: 'New Invoice',
+      subtitle: 'A bill your client can pay',
       icon: 'document-text-outline',
       onPress: () => router.push({ pathname: '/documents/new', params: { type: 'invoice' } }),
     },
     {
       label: 'New Estimate',
+      subtitle: 'A quote you can convert to an invoice later',
       icon: 'receipt-outline',
       onPress: () => router.push({ pathname: '/documents/new', params: { type: 'estimate' } }),
     },

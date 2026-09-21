@@ -4,11 +4,31 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../../src/components/Card';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 
-const ROWS: Array<{ label: string; href: string; icon: keyof typeof Ionicons.glyphMap }> = [
-  { label: 'Business Profile', href: '/settings/business-profile', icon: 'business-outline' },
-  { label: 'Item Catalog', href: '/settings/items', icon: 'pricetags-outline' },
-  { label: 'Tax Brackets', href: '/settings/tax-brackets', icon: 'calculator-outline' },
-  { label: 'Document Numbering', href: '/settings/numbering', icon: 'list-outline' },
+const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }> = [
+  {
+    label: 'Business Profile',
+    subtitle: 'Your business name, logo, and contact info',
+    href: '/settings/business-profile',
+    icon: 'business-outline',
+  },
+  {
+    label: 'Item Catalog',
+    subtitle: 'Save items or services you bill often',
+    href: '/settings/items',
+    icon: 'pricetags-outline',
+  },
+  {
+    label: 'Tax Rates',
+    subtitle: 'Sales tax or VAT rates you can add to items',
+    href: '/settings/tax-brackets',
+    icon: 'calculator-outline',
+  },
+  {
+    label: 'Invoice & Estimate Numbers',
+    subtitle: 'How your invoice and estimate numbers are formatted',
+    href: '/settings/numbering',
+    icon: 'list-outline',
+  },
 ];
 
 export default function SettingsScreen() {
@@ -19,9 +39,14 @@ export default function SettingsScreen() {
         {ROWS.map((row) => (
           <Pressable key={row.href} onPress={() => router.push(row.href as never)}>
             <Card className="flex-row items-center justify-between p-4 mb-3">
-              <View className="flex-row items-center gap-3">
+              <View className="flex-row items-center gap-3 flex-1">
                 <Ionicons name={row.icon} size={20} color="#374151" />
-                <Text className="text-base text-gray-900">{row.label}</Text>
+                <View className="flex-1">
+                  <Text className="text-base text-gray-900">{row.label}</Text>
+                  <Text className="text-xs text-gray-500" numberOfLines={1}>
+                    {row.subtitle}
+                  </Text>
+                </View>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
             </Card>

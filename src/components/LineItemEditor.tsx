@@ -43,13 +43,13 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
             }}
           />
         </View>
-        <View className="w-16">
-          <Text className="text-xs text-gray-500 mb-1">Unit</Text>
+        <View className="w-20">
+          <Text className="text-xs text-gray-500 mb-1">Per</Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900"
             value={line.unitLabel ?? ''}
             onChangeText={(unitLabel) => onChange({ unitLabel: unitLabel || null })}
-            placeholder="unit"
+            placeholder="hr, item"
           />
         </View>
         <View className="flex-1">

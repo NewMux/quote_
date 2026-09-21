@@ -38,7 +38,7 @@ export default function TaxBracketsScreen() {
   }
 
   function confirmArchive(bracket: TaxBracket) {
-    Alert.alert('Archive tax bracket?', `"${bracket.name}" will no longer appear when adding new line items.`, [
+    Alert.alert('Archive tax rate?', `"${bracket.name}" will no longer appear when adding new line items.`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Archive', style: 'destructive', onPress: () => archive(bracket.id, true) },
     ]);
@@ -52,11 +52,11 @@ export default function TaxBracketsScreen() {
         contentContainerStyle={{ padding: 16 }}
         ListHeaderComponent={
           <View className="bg-white rounded-xl p-4 mb-4 border border-gray-100">
-            <Text className="text-xs text-gray-500 mb-2">{editingId ? 'Edit Tax Bracket' : 'Add Tax Bracket'}</Text>
+            <Text className="text-xs text-gray-500 mb-2">{editingId ? 'Edit Tax Rate' : 'Add Tax Rate'}</Text>
             <View className="flex-row gap-2 mb-2">
               <TextInput
                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base"
-                placeholder="Name (e.g. Standard)"
+                placeholder="Name (e.g. Sales Tax)"
                 value={name}
                 onChangeText={setName}
               />

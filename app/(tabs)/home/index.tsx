@@ -16,17 +16,17 @@ import { useReportsStore } from '../../../src/stores/useReportsStore';
 import type { ReportGranularity } from '../../../src/db/repositories/reports.repo';
 
 const GRANULARITIES: Array<{ label: string; value: ReportGranularity }> = [
-  { label: 'D', value: 'day' },
-  { label: 'W', value: 'week' },
-  { label: 'M', value: 'month' },
-  { label: 'Y', value: 'year' },
+  { label: 'Day', value: 'day' },
+  { label: 'Week', value: 'week' },
+  { label: 'Month', value: 'month' },
+  { label: 'Year', value: 'year' },
 ];
 
 const PERIODS: Array<{ label: string; kind: ReportPeriod['kind'] }> = [
-  { label: 'Month', kind: 'month' },
-  { label: '90 Days', kind: 'last90' },
-  { label: 'Year', kind: 'year' },
-  { label: 'Custom', kind: 'custom' },
+  { label: 'This Month', kind: 'month' },
+  { label: 'Last 90 Days', kind: 'last90' },
+  { label: 'This Year', kind: 'year' },
+  { label: 'Pick Dates…', kind: 'custom' },
 ];
 
 export default function HomeScreen() {
@@ -84,12 +84,12 @@ export default function HomeScreen() {
         <Card>
           <View className="flex-row justify-between items-start mb-2">
             <View>
-              <Text className="text-xs text-gray-500">Received</Text>
+              <Text className="text-xs text-gray-500">Paid</Text>
               <Text className="text-2xl font-bold text-gray-900">
                 {formatMinor(receivedThisMonth, currencyCode)}
               </Text>
             </View>
-            <Text className="text-xs text-gray-400 mt-1">Monthly</Text>
+            <Text className="text-xs text-gray-400 mt-1">This month</Text>
           </View>
           <LineChart data={revenueByMonth} />
         </Card>
@@ -97,7 +97,7 @@ export default function HomeScreen() {
         <Card>
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-sm font-semibold text-gray-900">Paid</Text>
-            <View style={{ width: 140 }}>
+            <View style={{ width: 220 }}>
               <SegmentedControl
                 values={GRANULARITIES.map((g) => g.label)}
                 selectedIndex={GRANULARITIES.findIndex((g) => g.value === granularity)}

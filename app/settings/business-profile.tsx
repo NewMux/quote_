@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button } from '../../src/components/Button';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { persistPickedFile } from '../../src/lib/fileStorage';
+import { getCurrencyName } from '../../src/lib/currencies';
 
 const ACCENT_COLORS = ['#2563EB', '#059669', '#DC2626', '#D97706', '#7C3AED', '#0891B2', '#111827'];
 
@@ -101,7 +102,9 @@ export default function BusinessProfileScreen() {
           onPress={() => router.push('/modals/currency-picker')}
           className="border border-gray-300 rounded-lg px-3 py-2 bg-white flex-row justify-between items-center"
         >
-          <Text className="text-base text-gray-900">{profile?.default_currency_code ?? 'USD'}</Text>
+          <Text className="text-base text-gray-900">
+            {getCurrencyName(profile?.default_currency_code ?? 'USD')} ({profile?.default_currency_code ?? 'USD'})
+          </Text>
           <Text className="text-gray-400">›</Text>
         </Pressable>
       </View>

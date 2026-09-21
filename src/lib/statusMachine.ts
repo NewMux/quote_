@@ -66,6 +66,6 @@ export function statusLabel(status: DisplayStatus): string {
     case 'overdue':
       return 'Overdue';
     case 'void':
-      return 'Void';
+      return 'Canceled';
   }
 }

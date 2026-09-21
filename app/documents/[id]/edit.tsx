@@ -6,7 +6,7 @@ import { Button } from '../../../src/components/Button';
 import { DateField } from '../../../src/components/DateField';
 import { LineItemEditor } from '../../../src/components/LineItemEditor';
 import { computeDocumentTotals } from '../../../src/lib/documentCalculations';
-import { formatMinor, minorToDecimalString, parseToMinor } from '../../../src/lib/money';
+import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../src/lib/money';
 import { BRAND } from '../../../src/lib/theme';
 import { useDocumentEditorStore } from '../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
@@ -132,12 +132,13 @@ export default function EditDocumentScreen() {
         </View>
 
         <View>
-          <Text className="text-xs text-gray-500 mb-1">Terms Override (optional)</Text>
+          <Text className="text-xs text-gray-500 mb-1">Custom Terms for This Document (optional)</Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
             value={editor.termsOverride}
             onChangeText={editor.setTermsOverride}
             multiline
+            placeholder="Leave blank to use your default terms from Business Profile"
           />
         </View>
       </ScrollView>
@@ -192,32 +193,33 @@ function DocumentDiscountEditor({
         />
       </View>
       {enabled ? (
-        <View className="flex-row gap-2 items-center">
-          <View style={{ width: 90 }}>
-            <SegmentedControl
-              values={['%', '$']}
-              selectedIndex={discountType === 'percent' ? 0 : 1}
-              tintColor={BRAND.default}
-              onChange={(e) =>
-                onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', discountValue ?? 0)
+        <View className="gap-2">
+          <Text className="text-xs text-gray-500">Discount Type</Text>
+          <View className="flex-row gap-2 items-center">
+            <View style={{ width: 90 }}>
+              <SegmentedControl
+                values={['%', getCurrencySymbol(currencyCode)]}
+                selectedIndex={discountType === 'percent' ? 0 : 1}
+                tintColor={BRAND.default}
+                onChange={(e) => onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', 0)}
+              />
+            </View>
+            <TextInput
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base"
+              keyboardType="decimal-pad"
+              value={
+                discountType === 'percent'
+                  ? String((discountValue ?? 0) / 100)
+                  : minorToDecimalString(discountValue ?? 0, currencyCode)
               }
+              onChangeText={(text) => {
+                const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
+                const minorOrBp =
+                  discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
+                onChange(discountType, minorOrBp);
+              }}
             />
           </View>
-          <TextInput
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base"
-            keyboardType="decimal-pad"
-            value={
-              discountType === 'percent'
-                ? String((discountValue ?? 0) / 100)
-                : minorToDecimalString(discountValue ?? 0, currencyCode)
-            }
-            onChangeText={(text) => {
-              const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-              const minorOrBp =
-                discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
-              onChange(discountType, minorOrBp);
-            }}
-          />
         </View>
       ) : null}
     </View>

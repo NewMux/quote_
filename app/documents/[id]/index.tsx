@@ -92,7 +92,18 @@ export default function DocumentDetailScreen() {
     }
   }
 
+  function checkReadyToSend(): string | null {
+    if (lines.length === 0) return 'Add at least one item before sending this document.';
+    if (!client && !document?.client_name_snapshot) return 'Add a client before sending this document.';
+    return null;
+  }
+
   async function handleIssue() {
+    const problem = checkReadyToSend();
+    if (problem) {
+      Alert.alert('Almost there', problem);
+      return;
+    }
     await withBusy(() => issueDocument(id));
   }
 
@@ -101,23 +112,29 @@ export default function DocumentDetailScreen() {
   }
 
   function handleClearSignature(role: 'merchant' | 'client') {
-    Alert.alert('Clear signature?', `The ${role} signature will be removed.`, [
+    const whose = role === 'merchant' ? 'Your' : "The client's";
+    Alert.alert('Clear signature?', `${whose} signature will be removed.`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Clear', style: 'destructive', onPress: () => withBusy(() => deleteSignature(id, role)) },
     ]);
   }
 
   function handleVoid() {
+    const docLabel = document?.doc_type === 'estimate' ? 'estimate' : 'invoice';
     if (Platform.OS === 'ios') {
-      Alert.prompt('Void document', 'Reason for voiding (optional)', (reason) => {
+      Alert.prompt('Cancel this ' + docLabel + '?', 'Reason (optional)', (reason) => {
         withBusy(() => voidDocument(id, reason || 'No reason given'));
       });
       return;
     }
-    Alert.alert('Void document?', 'This document will be marked void and can no longer be edited.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Void', style: 'destructive', onPress: () => withBusy(() => voidDocument(id, 'No reason given')) },
-    ]);
+    Alert.alert(
+      `Cancel this ${docLabel}?`,
+      `This ${docLabel} will be canceled. It stays on record but can't be edited, sent, or paid anymore.`,
+      [
+        { text: 'Back', style: 'cancel' },
+        { text: 'Cancel It', style: 'destructive', onPress: () => withBusy(() => voidDocument(id, 'No reason given')) },
+      ]
+    );
   }
 
   function handleDelete() {
@@ -144,6 +161,11 @@ export default function DocumentDetailScreen() {
 
   async function handleGeneratePdfAnd(action: 'view' | 'email') {
     if (!document) return;
+    const problem = checkReadyToSend();
+    if (problem) {
+      Alert.alert('Almost there', problem);
+      return;
+    }
     const docType = document.doc_type;
     const docNumber = document.doc_number;
     const overdue = isOverdue(document);
@@ -203,7 +225,7 @@ export default function DocumentDetailScreen() {
             <Text className="text-sm text-gray-900">{document.issue_date ?? '—'}</Text>
           </View>
           <View>
-            <Text className="text-xs text-gray-400">{document.doc_type === 'invoice' ? 'Due' : 'Valid Until'}</Text>
+            <Text className="text-xs text-gray-400">{document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}</Text>
             <Text className="text-sm text-gray-900">
               {document.doc_type === 'invoice' ? document.due_date ?? '—' : document.expiry_date ?? '—'}
             </Text>
@@ -211,7 +233,7 @@ export default function DocumentDetailScreen() {
         </View>
         {document.status === 'void' ? (
           <View className="mt-3 pt-3 border-t border-gray-100">
-            <Text className="text-xs text-gray-400">Voided{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
+            <Text className="text-xs text-gray-400">Canceled{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
             <Text className="text-sm text-gray-700 mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
           </View>
         ) : null}
@@ -254,12 +276,12 @@ export default function DocumentDetailScreen() {
           <Button label="Edit" variant="tinted" onPress={() => router.push(`/documents/${id}/edit`)} />
         ) : null}
         <Button
-          label="Sign (Merchant)"
+          label="Sign as Me"
           variant="tinted"
           onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'merchant' } })}
         />
         <Button
-          label="Sign (Client)"
+          label="Get Client's Signature"
           variant="tinted"
           onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'client' } })}
         />
@@ -271,14 +293,20 @@ export default function DocumentDetailScreen() {
 
       {canVoid(document) || canDelete(document) ? (
         <View className="flex-row flex-wrap gap-2">
-          {canVoid(document) ? <Button label="Void" variant="destructive" onPress={handleVoid} /> : null}
+          {canVoid(document) ? (
+            <Button
+              label={document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice'}
+              variant="destructive"
+              onPress={handleVoid}
+            />
+          ) : null}
           {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
         </View>
       ) : null}
 
       {settlements.length > 0 ? (
         <Card>
-          <Text className="text-sm font-semibold text-gray-900 mb-2">Settlements</Text>
+          <Text className="text-sm font-semibold text-gray-900 mb-2">Payments</Text>
           {settlements.map((s) => (
             <Pressable
               key={s.id}
@@ -305,8 +333,8 @@ export default function DocumentDetailScreen() {
             if (!sig) return null;
             return (
               <View key={role} className="flex-row justify-between items-center py-1">
-                <Text className="text-sm text-gray-700 capitalize">
-                  {role} — signed {sig.signed_at.slice(0, 10)}
+                <Text className="text-sm text-gray-700">
+                  {role === 'merchant' ? 'You' : 'Client'} signed {sig.signed_at.slice(0, 10)}
                 </Text>
                 <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
               </View>
@@ -320,7 +348,12 @@ export default function DocumentDetailScreen() {
         <ActivityLogList entries={activity} />
       </Card>
 
-      {primaryAction ? <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} /> : null}
+      {primaryAction ? (
+        <View className="gap-1.5">
+          <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
+          <Text className="text-xs text-gray-400 text-center">{primaryAction.caption}</Text>
+        </View>
+      ) : null}
 
       {busy ? (
         <View className="absolute inset-0 items-center justify-center bg-white/60">
@@ -341,12 +374,28 @@ interface PrimaryActionHandlers {
 function getPrimaryAction(
   document: DocumentRecord,
   handlers: PrimaryActionHandlers
-): { label: string; onPress: () => void } | null {
-  if (canIssue(document)) return { label: 'Issue', onPress: handlers.onIssue };
-  if (canConvertToInvoice(document)) return { label: 'Convert to Invoice', onPress: handlers.onConvert };
-  if (canLogSettlement(document)) return { label: 'Log Payment', onPress: handlers.onLogPayment };
+): { label: string; caption: string; onPress: () => void } | null {
+  if (canIssue(document)) {
+    return {
+      label: document.doc_type === 'estimate' ? 'Issue Estimate' : 'Issue Invoice',
+      caption: 'Finalizes the number and locks editing.',
+      onPress: handlers.onIssue,
+    };
+  }
+  if (canConvertToInvoice(document)) {
+    return {
+      label: 'Convert to Invoice',
+      caption: 'Turn this accepted estimate into a billable invoice.',
+      onPress: handlers.onConvert,
+    };
+  }
+  if (canLogSettlement(document)) {
+    return { label: 'Log Payment', caption: 'Record a payment you received for this invoice.', onPress: handlers.onLogPayment };
+  }
   if (document.status === 'void') return null;
-  return { label: isOverdue(document) ? 'Send Reminder' : 'Email Invoice', onPress: handlers.onEmail };
+  return isOverdue(document)
+    ? { label: 'Send Reminder', caption: 'Emails the client a payment reminder.', onPress: handlers.onEmail }
+    : { label: 'Email Invoice', caption: 'Sends this invoice to the client by email.', onPress: handlers.onEmail };
 }
 
 function TotalsRow({

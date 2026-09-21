@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { Button } from '../../src/components/Button';
+import { formatDocNumber } from '../../src/lib/docNumber';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 
 export default function NumberingScreen() {
@@ -37,11 +38,21 @@ export default function NumberingScreen() {
     setIsSaving(false);
   }
 
+  const previewPadding = Math.max(1, Number.parseInt(padding, 10) || 3);
+  const previewYear = resetYearly ? new Date().getFullYear() : 0;
+  const invoicePreview = formatDocNumber(invoicePrefix, 1, previewPadding, previewYear);
+  const estimatePreview = formatDocNumber(estimatePrefix, 1, previewPadding, previewYear);
+
   return (
     <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Field label="Estimate Prefix" value={estimatePrefix} onChangeText={setEstimatePrefix} />
       <Field label="Invoice Prefix" value={invoicePrefix} onChangeText={setInvoicePrefix} />
-      <Field label="Number Padding (digits)" value={padding} onChangeText={setPadding} keyboardType="number-pad" />
+      <Field
+        label="Minimum Digits (e.g. 001)"
+        value={padding}
+        onChangeText={setPadding}
+        keyboardType="number-pad"
+      />
       <Field
         label="Default Payment Terms (days)"
         value={paymentTermsDays}
@@ -49,9 +60,20 @@ export default function NumberingScreen() {
         keyboardType="number-pad"
       />
 
-      <View className="flex-row items-center justify-between bg-white rounded-lg border border-gray-300 px-3 py-3">
-        <Text className="text-base text-gray-900">Reset numbering yearly</Text>
-        <Switch value={resetYearly} onValueChange={setResetYearly} />
+      <View className="bg-white rounded-lg border border-gray-100 px-3 py-3 gap-1">
+        <Text className="text-xs text-gray-500">Next numbers will look like:</Text>
+        <Text className="text-base font-semibold text-gray-900">{estimatePreview}</Text>
+        <Text className="text-base font-semibold text-gray-900">{invoicePreview}</Text>
+      </View>
+
+      <View className="bg-white rounded-lg border border-gray-300 px-3 py-3">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-base text-gray-900">Start Over Each Year</Text>
+          <Switch value={resetYearly} onValueChange={setResetYearly} />
+        </View>
+        <Text className="text-xs text-gray-500 mt-1">
+          e.g. INV-001 becomes the first number again each January
+        </Text>
       </View>
 
       <Button label={isSaving ? 'Saving…' : 'Save'} variant="filled" size="large" disabled={isSaving} onPress={handleSave} />
