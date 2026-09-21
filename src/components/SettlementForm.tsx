@@ -8,7 +8,7 @@ import { MoneyInput } from './MoneyInput';
 import { persistPickedFile } from '../lib/fileStorage';
 import { newId } from '../lib/id';
 import { BRAND } from '../lib/theme';
-import type { SettlementMethod } from '../types/models';
+import type { Settlement, SettlementMethod } from '../types/models';
 
 const METHODS: Array<{ value: SettlementMethod; label: string }> = [
   { value: 'cash', label: 'Cash' },
@@ -28,17 +28,25 @@ export interface SettlementFormValue {
 
 interface SettlementFormProps {
   defaultAmountMinor: number;
+  initial?: Settlement;
   onSubmit: (value: SettlementFormValue) => void;
+  onDelete?: () => void;
   isSubmitting: boolean;
 }
 
-export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: SettlementFormProps) {
-  const [method, setMethod] = useState<SettlementMethod>('cash');
-  const [amountMinor, setAmountMinor] = useState(defaultAmountMinor);
-  const [settledDate, setSettledDate] = useState(new Date().toISOString().slice(0, 10));
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [notes, setNotes] = useState('');
-  const [receiptUri, setReceiptUri] = useState<string | null>(null);
+export function SettlementForm({
+  defaultAmountMinor,
+  initial,
+  onSubmit,
+  onDelete,
+  isSubmitting,
+}: SettlementFormProps) {
+  const [method, setMethod] = useState<SettlementMethod>(initial?.method ?? 'cash');
+  const [amountMinor, setAmountMinor] = useState(initial?.amount_minor ?? defaultAmountMinor);
+  const [settledDate, setSettledDate] = useState(initial?.settled_date ?? new Date().toISOString().slice(0, 10));
+  const [referenceNumber, setReferenceNumber] = useState(initial?.reference_number ?? '');
+  const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [receiptUri, setReceiptUri] = useState<string | null>(initial?.receipt_photo_uri ?? null);
 
   async function pickReceiptPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -100,7 +108,7 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
       </View>
 
       <Button
-        label={isSubmitting ? 'Saving…' : 'Log Payment'}
+        label={isSubmitting ? 'Saving…' : initial ? 'Save Changes' : 'Log Payment'}
         variant="filled"
         size="large"
         disabled={isSubmitting || amountMinor <= 0}
@@ -115,6 +123,8 @@ export function SettlementForm({ defaultAmountMinor, onSubmit, isSubmitting }: S
           })
         }
       />
+
+      {onDelete ? <Button label="Delete Payment" variant="destructive" size="large" onPress={onDelete} /> : null}
     </View>
   );
 }

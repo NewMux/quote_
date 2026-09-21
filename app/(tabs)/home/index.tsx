@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { BarChart } from '../../../src/components/charts/BarChart';
@@ -8,6 +8,7 @@ import { LineChart } from '../../../src/components/charts/LineChart';
 import { Card } from '../../../src/components/Card';
 import { StatStrip } from '../../../src/components/StatStrip';
 import { formatMinor } from '../../../src/lib/money';
+import { formatPeriodLabel, type ReportPeriod } from '../../../src/lib/reportPeriods';
 import { BRAND } from '../../../src/lib/theme';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { useReportsStore } from '../../../src/stores/useReportsStore';
@@ -20,9 +21,17 @@ const GRANULARITIES: Array<{ label: string; value: ReportGranularity }> = [
   { label: 'Y', value: 'year' },
 ];
 
+const PERIODS: Array<{ label: string; kind: ReportPeriod['kind'] }> = [
+  { label: 'Month', kind: 'month' },
+  { label: '90 Days', kind: 'last90' },
+  { label: 'Year', kind: 'year' },
+  { label: 'Custom', kind: 'custom' },
+];
+
 export default function HomeScreen() {
   const currencyCode = useBusinessProfileStore((s) => s.profile?.default_currency_code ?? 'USD');
-  const { breakdown, revenueByMonth, paidByPeriod, granularity, load, setGranularity } = useReportsStore();
+  const { breakdown, revenueByMonth, paidByPeriod, granularity, period, load, setGranularity, setPeriod } =
+    useReportsStore();
 
   useFocusEffect(
     useCallback(() => {
@@ -30,8 +39,18 @@ export default function HomeScreen() {
     }, [load])
   );
 
-  const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   const receivedThisMonth = revenueByMonth[revenueByMonth.length - 1]?.value ?? 0;
+
+  function handlePeriodChange(index: number) {
+    const chosen = PERIODS[index];
+    if (chosen.kind === 'custom') {
+      router.push('/modals/custom-range');
+      return;
+    }
+    setPeriod({ kind: chosen.kind } as ReportPeriod);
+  }
+
+  const selectedPeriodIndex = PERIODS.findIndex((p) => p.kind === period.kind);
 
   return (
     <ScrollView
@@ -39,13 +58,20 @@ export default function HomeScreen() {
       contentContainerStyle={{ padding: 16, gap: 16 }}
       contentInsetAdjustmentBehavior="automatic"
     >
+      <SegmentedControl
+        values={PERIODS.map((p) => p.label)}
+        selectedIndex={selectedPeriodIndex}
+        tintColor={BRAND.default}
+        onChange={(e) => handlePeriodChange(e.nativeEvent.selectedSegmentIndex)}
+      />
+
       <LinearGradient
         colors={[BRAND.default, BRAND.darker]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ borderRadius: 24, padding: 20 }}
       >
-        <Text className="text-white text-lg font-bold mb-1">{monthLabel} Report</Text>
+        <Text className="text-white text-lg font-bold mb-1">{formatPeriodLabel(period)} Report</Text>
         <Text className="text-white/60 text-xs mb-4">Overview of your invoices</Text>
         {breakdown ? (
           <StatStrip

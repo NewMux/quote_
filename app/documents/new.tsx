@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { createDraftDocument } from '../../src/db/repositories/documents.repo';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import type { DocType } from '../../src/types/models';
 
 export default function NewDocumentScreen() {
+  const { type } = useLocalSearchParams<{ type?: DocType }>();
   const profile = useBusinessProfileStore((s) => s.profile);
   const [isCreating, setIsCreating] = useState(false);
+  const hasAutoTriggered = useRef(false);
 
   async function handleChoose(docType: DocType) {
     if (!profile || isCreating) return;
@@ -17,7 +19,15 @@ export default function NewDocumentScreen() {
     router.replace(`/documents/${doc.id}/edit`);
   }
 
-  if (isCreating || !profile) {
+  useEffect(() => {
+    if (type && profile && !hasAutoTriggered.current) {
+      hasAutoTriggered.current = true;
+      handleChoose(type);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, profile]);
+
+  if (isCreating || !profile || type) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" />

@@ -13,11 +13,26 @@ export interface StatusBreakdown {
   draftMinor: number;
 }
 
-/** Pulls all non-void documents (optionally of one type) and buckets them by display status
- * (draft/unpaid/overdue/paid), reusing statusMachine's overdue derivation rather than
- * re-implementing the date comparison in SQL. Dataset sizes for a local single-user app are
- * small enough that aggregating in JS is simpler and safer than duplicating that logic in SQL. */
-export async function getStatusBreakdown(docType?: DocType): Promise<StatusBreakdown> {
+/** Pulls all non-void documents (optionally of one type, optionally within a created_at range)
+ * and buckets them by display status (draft/unpaid/overdue/paid), reusing statusMachine's
+ * overdue derivation rather than re-implementing the date comparison in SQL. Dataset sizes for
+ * a local single-user app are small enough that aggregating in JS is simpler and safer than
+ * duplicating that logic in SQL. */
+export async function getStatusBreakdown(
+  docType?: DocType,
+  range?: { startIso: string; endIso: string }
+): Promise<StatusBreakdown> {
+  const conditions = ["status != 'void'"];
+  const params: string[] = [];
+  if (docType) {
+    conditions.push('doc_type = ?');
+    params.push(docType);
+  }
+  if (range) {
+    conditions.push('created_at >= ? AND created_at <= ?');
+    params.push(range.startIso, range.endIso);
+  }
+
   const rows = await db.getAllAsync<{
     status: DocStatus;
     due_date: string | null;
@@ -25,8 +40,8 @@ export async function getStatusBreakdown(docType?: DocType): Promise<StatusBreak
     amount_paid_minor: number;
   }>(
     `SELECT status, due_date, total_minor, amount_paid_minor FROM documents
-     WHERE status != 'void'${docType ? ' AND doc_type = ?' : ''}`,
-    docType ? [docType] : []
+     WHERE ${conditions.join(' AND ')}`,
+    params
   );
 
   const result: StatusBreakdown = {

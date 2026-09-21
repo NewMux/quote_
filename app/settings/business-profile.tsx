@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Button } from '../../src/components/Button';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
@@ -92,6 +93,17 @@ export default function BusinessProfileScreen() {
             />
           ))}
         </View>
+      </View>
+
+      <View>
+        <Text className="text-xs text-gray-500 mb-1">Currency</Text>
+        <Pressable
+          onPress={() => router.push('/modals/currency-picker')}
+          className="border border-gray-300 rounded-lg px-3 py-2 bg-white flex-row justify-between items-center"
+        >
+          <Text className="text-base text-gray-900">{profile?.default_currency_code ?? 'USD'}</Text>
+          <Text className="text-gray-400">›</Text>
+        </Pressable>
       </View>
 
       <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />

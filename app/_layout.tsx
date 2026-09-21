@@ -83,6 +83,26 @@ export default function RootLayout() {
             sheetCornerRadius: 20,
           }}
         />
+        <Stack.Screen
+          name="modals/custom-range"
+          options={{
+            title: 'Custom Range',
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.5, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
+        <Stack.Screen
+          name="modals/currency-picker"
+          options={{
+            title: 'Select Currency',
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
       </Stack>
     </GestureHandlerRootView>
   );

@@ -6,6 +6,7 @@ import {
   type ReportGranularity,
   type StatusBreakdown,
 } from '../db/repositories/reports.repo';
+import { getPeriodRange, type ReportPeriod } from '../lib/reportPeriods';
 import type { ChartPoint } from '../types/models';
 
 interface ReportsState {
@@ -13,9 +14,11 @@ interface ReportsState {
   revenueByMonth: ChartPoint[];
   paidByPeriod: ChartPoint[];
   granularity: ReportGranularity;
+  period: ReportPeriod;
   isLoading: boolean;
   load: () => Promise<void>;
   setGranularity: (granularity: ReportGranularity) => Promise<void>;
+  setPeriod: (period: ReportPeriod) => Promise<void>;
 }
 
 export const useReportsStore = create<ReportsState>((set, get) => ({
@@ -23,11 +26,12 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
   revenueByMonth: [],
   paidByPeriod: [],
   granularity: 'month',
+  period: { kind: 'month' },
   isLoading: false,
   load: async () => {
     set({ isLoading: true });
     const [breakdown, revenueByMonth, paidByPeriod] = await Promise.all([
-      getStatusBreakdown(),
+      getStatusBreakdown(undefined, getPeriodRange(get().period)),
       getRevenueByMonth(6),
       getPaidTotalsByPeriod(get().granularity),
     ]);
@@ -37,5 +41,10 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
     set({ granularity });
     const paidByPeriod = await getPaidTotalsByPeriod(granularity);
     set({ paidByPeriod });
+  },
+  setPeriod: async (period) => {
+    set({ period, isLoading: true });
+    const breakdown = await getStatusBreakdown(undefined, getPeriodRange(period));
+    set({ breakdown, isLoading: false });
   },
 }));

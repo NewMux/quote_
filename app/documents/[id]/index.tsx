@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Platform, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
 import { Avatar } from '../../../src/components/Avatar';
@@ -19,7 +19,7 @@ import {
 } from '../../../src/db/repositories/documents.repo';
 import { listLineItems } from '../../../src/db/repositories/lineItems.repo';
 import { listSettlements } from '../../../src/db/repositories/settlements.repo';
-import { listSignatures } from '../../../src/db/repositories/signatures.repo';
+import { deleteSignature, listSignatures } from '../../../src/db/repositories/signatures.repo';
 import { generateDocumentPdf } from '../../../src/lib/pdf/generatePdf';
 import { emailPdf, sharePdf } from '../../../src/lib/share';
 import { formatMinor } from '../../../src/lib/money';
@@ -96,6 +96,13 @@ export default function DocumentDetailScreen() {
 
   async function handleMarkViewed() {
     await withBusy(() => markViewed(id));
+  }
+
+  function handleClearSignature(role: 'merchant' | 'client') {
+    Alert.alert('Clear signature?', `The ${role} signature will be removed.`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Clear', style: 'destructive', onPress: () => withBusy(() => deleteSignature(id, role)) },
+    ]);
   }
 
   function handleVoid() {
@@ -197,6 +204,12 @@ export default function DocumentDetailScreen() {
             </Text>
           </View>
         </View>
+        {document.status === 'void' ? (
+          <View className="mt-3 pt-3 border-t border-gray-100">
+            <Text className="text-xs text-gray-400">Voided{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
+            <Text className="text-sm text-gray-700 mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
+          </View>
+        ) : null}
       </Card>
 
       <Card>
@@ -255,13 +268,38 @@ export default function DocumentDetailScreen() {
         <Card>
           <Text className="text-sm font-semibold text-gray-900 mb-2">Settlements</Text>
           {settlements.map((s) => (
-            <View key={s.id} className="flex-row justify-between py-1">
-              <Text className="text-sm text-gray-700">
-                {s.method} — {s.settled_date}
-              </Text>
-              <Text className="text-sm text-gray-900">{formatMinor(s.amount_minor, document.currency_code)}</Text>
-            </View>
+            <Pressable
+              key={s.id}
+              onPress={() =>
+                router.push({ pathname: `/documents/${id}/settlement-new`, params: { settlementId: s.id } })
+              }
+            >
+              <View className="flex-row justify-between py-2 border-b border-gray-50">
+                <Text className="text-sm text-gray-700">
+                  {s.method} — {s.settled_date}
+                </Text>
+                <Text className="text-sm text-gray-900">{formatMinor(s.amount_minor, document.currency_code)}</Text>
+              </View>
+            </Pressable>
           ))}
+        </Card>
+      ) : null}
+
+      {signatures.length > 0 ? (
+        <Card>
+          <Text className="text-sm font-semibold text-gray-900 mb-2">Signatures</Text>
+          {(['merchant', 'client'] as const).map((role) => {
+            const sig = signatures.find((s) => s.signer_role === role);
+            if (!sig) return null;
+            return (
+              <View key={role} className="flex-row justify-between items-center py-1">
+                <Text className="text-sm text-gray-700 capitalize">
+                  {role} — signed {sig.signed_at.slice(0, 10)}
+                </Text>
+                <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
+              </View>
+            );
+          })}
         </Card>
       ) : null}
 

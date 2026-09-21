@@ -25,3 +25,7 @@ export async function upsertSignature(
     [newId(), documentId, role, signerName ?? null, imageUri, now, now]
   );
 }
+
+export async function deleteSignature(documentId: string, role: SignerRole): Promise<void> {
+  await db.runAsync('DELETE FROM signatures WHERE document_id = ? AND signer_role = ?', [documentId, role]);
+}
