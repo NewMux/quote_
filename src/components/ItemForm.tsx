@@ -35,6 +35,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
           className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
           value={name}
           onChangeText={setName}
+          maxLength={100}
         />
       </View>
 
@@ -45,6 +46,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
           value={description}
           onChangeText={setDescription}
           multiline
+          maxLength={200}
         />
       </View>
 
@@ -63,6 +65,7 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
             className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
             value={unitLabel}
             onChangeText={setUnitLabel}
+            maxLength={20}
           />
         </View>
       </View>

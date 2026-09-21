@@ -43,13 +43,18 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
         <Button label={photoUri ? 'Change photo' : 'Add photo'} variant="plain" onPress={pickPhoto} />
       </View>
 
-      <Field label="Name" value={displayName} onChangeText={setDisplayName} />
-      <Field label="Contact Name (optional)" value={contactName} onChangeText={setContactName} />
-      <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
-      <Field label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-      <Field label="Address" value={address} onChangeText={setAddress} multiline />
-      <Field label="Tax / VAT Registration Number" value={taxRegNumber} onChangeText={setTaxRegNumber} />
-      <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
+      <Field label="Name" value={displayName} onChangeText={setDisplayName} maxLength={100} />
+      <Field label="Contact Name (optional)" value={contactName} onChangeText={setContactName} maxLength={100} />
+      <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" maxLength={150} />
+      <Field label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" maxLength={30} />
+      <Field label="Address" value={address} onChangeText={setAddress} multiline maxLength={500} />
+      <Field
+        label="Tax / VAT Registration Number"
+        value={taxRegNumber}
+        onChangeText={setTaxRegNumber}
+        maxLength={50}
+      />
+      <Field label="Notes" value={notes} onChangeText={setNotes} multiline maxLength={500} />
 
       <Button
         label={isSaving ? 'Saving…' : 'Save Client'}
@@ -79,12 +84,14 @@ function Field({
   onChangeText,
   multiline,
   keyboardType,
+  maxLength,
 }: {
   label: string;
   value: string;
   onChangeText: (v: string) => void;
   multiline?: boolean;
   keyboardType?: 'email-address' | 'phone-pad';
+  maxLength?: number;
 }) {
   return (
     <View>
@@ -95,6 +102,7 @@ function Field({
         onChangeText={onChangeText}
         multiline={multiline}
         keyboardType={keyboardType}
+        maxLength={maxLength}
         autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
       />
     </View>

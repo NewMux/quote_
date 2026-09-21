@@ -25,6 +25,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           value={line.description}
           onChangeText={(description) => onChange({ description })}
           multiline
+          maxLength={200}
         />
         <Pressable
           onPress={onRemove}
@@ -55,6 +56,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
             value={line.unitLabel ?? ''}
             onChangeText={(unitLabel) => onChange({ unitLabel: unitLabel || null })}
             placeholder="hr, item"
+            maxLength={20}
           />
         </View>
         <View className="flex-1">

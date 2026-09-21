@@ -32,8 +32,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Quote to access your photos to attach a receipt or set your business logo.",
-          "cameraPermission": "Allow Quote to use your camera to take a photo of a receipt."
+          "photosPermission": "Allow Quote to access your photos to attach a receipt or set your business logo."
         }
       ]
     ],
