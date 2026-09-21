@@ -31,6 +31,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />
         <Stack.Screen name="documents/[id]/index" options={{ title: 'Document' }} />
         <Stack.Screen name="documents/[id]/edit" options={{ title: 'Edit Document' }} />
