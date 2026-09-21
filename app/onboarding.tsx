@@ -54,7 +54,7 @@ export default function OnboardingScreen() {
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-surface">
       <View className="px-6 pt-4">
-        <Text className="text-xs text-gray-400 text-center">
+        <Text className="text-xs text-gray-500 text-center">
           Step {step + 1} of {TOTAL_STEPS}
         </Text>
       </View>
@@ -122,7 +122,7 @@ export default function OnboardingScreen() {
                 />
               </View>
             ) : (
-              <Text className="text-xs text-gray-400">No problem — you can add this anytime in Settings.</Text>
+              <Text className="text-xs text-gray-500">No problem — you can add this anytime in Settings.</Text>
             )}
           </View>
         ) : null}

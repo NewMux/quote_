@@ -20,7 +20,7 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
         onPress={() => setShow(true)}
         className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
       >
-        <Text className={value ? 'text-gray-900' : 'text-gray-400'}>
+        <Text className={value ? 'text-gray-900' : 'text-gray-500'}>
           {value ? format(parseISO(value), 'MMM d, yyyy') : placeholder}
         </Text>
       </Pressable>

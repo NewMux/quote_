@@ -100,7 +100,7 @@ export default function DocumentsScreen() {
                 <StatusBadge document={item} />
               </View>
               <View className="flex-row justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                <Text className="text-xs text-gray-400 uppercase">{item.doc_type}</Text>
+                <Text className="text-xs text-gray-500 uppercase">{item.doc_type}</Text>
                 <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
                   {formatMinor(item.total_minor, item.currency_code)}
                 </Text>

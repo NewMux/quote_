@@ -19,7 +19,7 @@ export function LineChart({ data, height = 140, color = BRAND.default }: LineCha
   if (data.length === 0) {
     return (
       <View style={{ height }} className="items-center justify-center">
-        <Text className="text-sm text-gray-400">No data yet</Text>
+        <Text className="text-sm text-gray-500">No data yet</Text>
       </View>
     );
   }
@@ -54,7 +54,7 @@ export function LineChart({ data, height = 140, color = BRAND.default }: LineCha
       </Svg>
       <View className="flex-row justify-between px-1">
         {data.map((d) => (
-          <Text key={d.label} className="text-xs text-gray-400">
+          <Text key={d.label} className="text-xs text-gray-500">
             {d.label}
           </Text>
         ))}

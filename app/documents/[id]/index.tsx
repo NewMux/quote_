@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
@@ -57,6 +57,8 @@ export default function DocumentDetailScreen() {
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [activity, setActivity] = useState<ActivityLogEntry[]>([]);
   const [busy, setBusy] = useState(false);
+  const [voidPromptVisible, setVoidPromptVisible] = useState(false);
+  const [voidReason, setVoidReason] = useState('');
 
   const reload = useCallback(async () => {
     const doc = await getDocument(id);
@@ -125,21 +127,13 @@ export default function DocumentDetailScreen() {
   }
 
   function handleVoid() {
-    const docLabel = document?.doc_type === 'estimate' ? 'estimate' : 'invoice';
-    if (Platform.OS === 'ios') {
-      Alert.prompt('Cancel this ' + docLabel + '?', 'Reason (optional)', (reason) => {
-        withBusy(() => voidDocument(id, reason || 'No reason given'));
-      });
-      return;
-    }
-    Alert.alert(
-      `Cancel this ${docLabel}?`,
-      `This ${docLabel} will be canceled. It stays on record but can't be edited, sent, or paid anymore.`,
-      [
-        { text: 'Back', style: 'cancel' },
-        { text: 'Cancel It', style: 'destructive', onPress: () => withBusy(() => voidDocument(id, 'No reason given')) },
-      ]
-    );
+    setVoidReason('');
+    setVoidPromptVisible(true);
+  }
+
+  async function confirmVoid() {
+    setVoidPromptVisible(false);
+    await withBusy(() => voidDocument(id, voidReason.trim() || 'No reason given'));
   }
 
   function handleDelete() {
@@ -226,11 +220,11 @@ export default function DocumentDetailScreen() {
         </View>
         <View className="flex-row justify-between pt-3 border-t border-gray-100">
           <View>
-            <Text className="text-xs text-gray-400">Issued</Text>
+            <Text className="text-xs text-gray-500">Issued</Text>
             <Text className="text-sm text-gray-900">{document.issue_date ?? '—'}</Text>
           </View>
           <View>
-            <Text className="text-xs text-gray-400">{document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}</Text>
+            <Text className="text-xs text-gray-500">{document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}</Text>
             <Text className="text-sm text-gray-900">
               {document.doc_type === 'invoice' ? document.due_date ?? '—' : document.expiry_date ?? '—'}
             </Text>
@@ -238,7 +232,7 @@ export default function DocumentDetailScreen() {
         </View>
         {document.status === 'void' ? (
           <View className="mt-3 pt-3 border-t border-gray-100">
-            <Text className="text-xs text-gray-400">Canceled{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
+            <Text className="text-xs text-gray-500">Canceled{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
             <Text className="text-sm text-gray-700 mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
           </View>
         ) : null}
@@ -249,7 +243,7 @@ export default function DocumentDetailScreen() {
         {lines.length > 0 ? (
           lines.map((line) => <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />)
         ) : (
-          <Text className="text-sm text-gray-400 py-2">No line items yet — tap Edit to add some.</Text>
+          <Text className="text-sm text-gray-500 py-2">No line items yet — tap Edit to add some.</Text>
         )}
       </Card>
 
@@ -277,7 +271,7 @@ export default function DocumentDetailScreen() {
       </Card>
 
       {!canEdit(document) && document.status !== 'void' ? (
-        <Text className="text-xs text-gray-400">
+        <Text className="text-xs text-gray-500">
           Editing is locked because this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} has been
           issued.
         </Text>
@@ -287,19 +281,24 @@ export default function DocumentDetailScreen() {
         {canEdit(document) ? (
           <Button label="Edit" variant="tinted" onPress={() => router.push(`/documents/${id}/edit`)} />
         ) : null}
+        <Button label="Share PDF" variant="tinted" onPress={() => handleGeneratePdfAnd('view')} />
+      </View>
+
+      <View className="flex-row flex-wrap gap-x-4 gap-y-1">
         <Button
           label="Sign as Me"
-          variant="tinted"
+          variant="plain"
+          size="small"
           onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'merchant' } })}
         />
         <Button
           label="Get Client's Signature"
-          variant="tinted"
+          variant="plain"
+          size="small"
           onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'client' } })}
         />
-        <Button label="Share PDF" variant="tinted" onPress={() => handleGeneratePdfAnd('view')} />
         {canMarkViewed(document) ? (
-          <Button label="Mark as Viewed" variant="tinted" onPress={handleMarkViewed} />
+          <Button label="Mark as Viewed" variant="plain" size="small" onPress={handleMarkViewed} />
         ) : null}
       </View>
 
@@ -363,7 +362,7 @@ export default function DocumentDetailScreen() {
       {primaryAction ? (
         <View className="gap-1.5">
           <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
-          <Text className="text-xs text-gray-400 text-center">{primaryAction.caption}</Text>
+          <Text className="text-xs text-gray-500 text-center">{primaryAction.caption}</Text>
         </View>
       ) : null}
 
@@ -372,6 +371,31 @@ export default function DocumentDetailScreen() {
           <ActivityIndicator size="large" />
         </View>
       ) : null}
+
+      <Modal visible={voidPromptVisible} transparent animationType="fade" onRequestClose={() => setVoidPromptVisible(false)}>
+        <View className="flex-1 items-center justify-center bg-black/40 px-6">
+          <View className="bg-white rounded-2xl p-5 w-full gap-3">
+            <Text className="text-base font-semibold text-gray-900">
+              Cancel this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'}?
+            </Text>
+            <Text className="text-sm text-gray-600">
+              This {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} will be canceled. It stays on
+              record but can't be edited, sent, or paid anymore.
+            </Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900"
+              placeholder="Reason (optional)"
+              value={voidReason}
+              onChangeText={setVoidReason}
+              autoFocus
+            />
+            <View className="flex-row gap-2 justify-end mt-1">
+              <Button label="Back" variant="plain" onPress={() => setVoidPromptVisible(false)} />
+              <Button label="Cancel It" variant="destructive" onPress={confirmVoid} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

@@ -65,7 +65,7 @@ export default function EditDocumentScreen() {
             onPress={() => router.push('/modals/client-picker')}
             className="border border-gray-300 rounded-lg px-3 py-2"
           >
-            <Text className={editor.clientNameSnapshot ? 'text-gray-900' : 'text-gray-400'}>
+            <Text className={editor.clientNameSnapshot ? 'text-gray-900' : 'text-gray-500'}>
               {editor.clientNameSnapshot ?? 'Select a client'}
             </Text>
           </Pressable>
@@ -90,7 +90,7 @@ export default function EditDocumentScreen() {
             <Button label="+ Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
           </View>
           {editor.lines.length === 0 ? (
-            <Text className="text-sm text-gray-400 py-4 text-center">No line items yet.</Text>
+            <Text className="text-sm text-gray-500 py-4 text-center">No line items yet.</Text>
           ) : null}
           {editor.lines.map((line) => (
             <LineItemEditor
@@ -149,7 +149,7 @@ export default function EditDocumentScreen() {
       </ScrollView>
 
       <View className="p-4 bg-white border-t border-gray-100 gap-2">
-        <Text className="text-xs text-gray-400 text-center">Changes save automatically as you go</Text>
+        <Text className="text-xs text-gray-500 text-center">Changes save automatically as you go</Text>
         <Button label="Done" variant="filled" size="large" onPress={handleDone} />
       </View>
     </View>

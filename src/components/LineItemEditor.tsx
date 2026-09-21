@@ -26,7 +26,11 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           onChangeText={(description) => onChange({ description })}
           multiline
         />
-        <Pressable onPress={onRemove} hitSlop={8}>
+        <Pressable
+          onPress={onRemove}
+          hitSlop={8}
+          className="w-11 h-11 items-center justify-center -mr-2 -mt-1"
+        >
           <Text className="text-red-500 text-lg">×</Text>
         </Pressable>
       </View>
@@ -91,7 +95,8 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
                     taxRateBp: bracket.rate_bp,
                   })
                 }
-                className={`px-3 py-1 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
+                hitSlop={4}
+                className={`px-3 py-2 min-h-[32px] justify-center rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
               >
                 <Text className={selected ? 'text-white text-xs' : 'text-gray-700 text-xs'}>
                   {bracket.name}

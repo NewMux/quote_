@@ -28,9 +28,9 @@ const TEXT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  large: 'py-4 px-6 rounded-2xl items-center',
-  medium: 'py-2.5 px-4 rounded-xl items-center',
-  small: 'py-1 px-2 rounded-lg items-center',
+  large: 'py-4 px-6 rounded-2xl items-center justify-center min-h-[44px]',
+  medium: 'py-2.5 px-4 rounded-xl items-center justify-center min-h-[44px]',
+  small: 'py-1 px-2 rounded-lg items-center justify-center min-h-[32px]',
 };
 
 const TEXT_SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -60,6 +60,7 @@ export function Button({ label, onPress, variant = 'filled', size = 'medium', di
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
+      hitSlop={8}
       style={{ opacity: disabled ? 0.4 : 1 }}
     >
       <Animated.View style={{ transform: [{ scale }] }}>

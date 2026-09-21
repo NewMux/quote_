@@ -12,7 +12,7 @@ export function BarChart({ data, height = 140, color = BRAND.default }: BarChart
   if (data.length === 0) {
     return (
       <View style={{ height }} className="items-center justify-center">
-        <Text className="text-sm text-gray-400">No data yet</Text>
+        <Text className="text-sm text-gray-500">No data yet</Text>
       </View>
     );
   }
@@ -29,7 +29,7 @@ export function BarChart({ data, height = 140, color = BRAND.default }: BarChart
               style={{ height: barHeight, backgroundColor: color }}
               className="w-full rounded-t-lg"
             />
-            <Text className="text-xs text-gray-400 mt-1" numberOfLines={1}>
+            <Text className="text-xs text-gray-500 mt-1" numberOfLines={1}>
               {d.label}
             </Text>
           </View>

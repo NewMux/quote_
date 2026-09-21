@@ -23,7 +23,7 @@ interface ActivityLogListProps {
 
 export function ActivityLogList({ entries }: ActivityLogListProps) {
   if (entries.length === 0) {
-    return <Text className="text-sm text-gray-400">No activity yet.</Text>;
+    return <Text className="text-sm text-gray-500">No activity yet.</Text>;
   }
   return (
     <View>
@@ -33,7 +33,7 @@ export function ActivityLogList({ entries }: ActivityLogListProps) {
             {LABELS[entry.event_type]}
             {entry.event_detail ? ` — ${entry.event_detail}` : ''}
           </Text>
-          <Text className="text-xs text-gray-400">
+          <Text className="text-xs text-gray-500">
             {format(parseISO(entry.created_at), 'MMM d, h:mm a')}
           </Text>
         </View>

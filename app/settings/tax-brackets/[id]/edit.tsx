@@ -84,7 +84,7 @@ export default function EditTaxBracketScreen() {
           value={rate}
           onChangeText={setRate}
         />
-        <Text className="text-xs text-gray-400 mt-1">Currently {formatRateBp(bracket.rate_bp)}</Text>
+        <Text className="text-xs text-gray-500 mt-1">Currently {formatRateBp(bracket.rate_bp)}</Text>
       </View>
       <Button
         label={isSaving ? 'Saving…' : 'Save'}

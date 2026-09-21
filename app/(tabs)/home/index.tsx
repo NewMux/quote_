@@ -89,7 +89,7 @@ export default function HomeScreen() {
                 {formatMinor(receivedThisMonth, currencyCode)}
               </Text>
             </View>
-            <Text className="text-xs text-gray-400 mt-1">This month</Text>
+            <Text className="text-xs text-gray-500 mt-1">This month</Text>
           </View>
           <LineChart data={revenueByMonth} />
         </Card>
