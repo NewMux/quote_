@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { ItemForm } from '../../src/components/ItemForm';
+import { SheetHeader } from '../../src/components/SheetHeader';
 import { useItemCatalogStore } from '../../src/stores/useItemCatalogStore';
 import type { ItemInput } from '../../src/db/repositories/itemCatalog.repo';
 
@@ -15,5 +17,10 @@ export default function NewItemScreen() {
     router.back();
   }
 
-  return <ItemForm onSubmit={handleSubmit} isSaving={isSaving} />;
+  return (
+    <View className="flex-1 bg-surface">
+      <SheetHeader title="New Item" />
+      <ItemForm onSubmit={handleSubmit} isSaving={isSaving} />
+    </View>
+  );
 }

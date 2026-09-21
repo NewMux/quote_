@@ -45,10 +45,28 @@ export default function RootLayout() {
             sheetCornerRadius: 20,
           }}
         />
-        <Stack.Screen name="clients/new" options={{ title: 'New Client' }} />
+        <Stack.Screen
+          name="clients/new"
+          options={{
+            headerShown: false,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.75, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
         <Stack.Screen name="clients/[id]/index" options={{ title: 'Client' }} />
         <Stack.Screen name="clients/[id]/edit" options={{ title: 'Edit Client' }} />
-        <Stack.Screen name="items/new" options={{ title: 'New Item' }} />
+        <Stack.Screen
+          name="items/new"
+          options={{
+            headerShown: false,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.6, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
         <Stack.Screen name="items/[id]/edit" options={{ title: 'Edit Item' }} />
         <Stack.Screen name="settings/business-profile" options={{ title: 'Business Profile' }} />
         <Stack.Screen name="settings/items" options={{ title: 'Item Catalog' }} />

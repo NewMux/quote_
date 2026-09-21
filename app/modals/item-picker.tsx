@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Button } from '../../src/components/Button';
 import { EmptyState } from '../../src/components/EmptyState';
 import { SheetHeader } from '../../src/components/SheetHeader';
@@ -18,10 +18,12 @@ export default function ItemPickerModal() {
   const addBlankLineItem = useDocumentEditorStore((s) => s.addBlankLineItem);
   const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    load();
-    loadTaxBrackets();
-  }, [load, loadTaxBrackets]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      loadTaxBrackets();
+    }, [load, loadTaxBrackets])
+  );
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
@@ -61,15 +63,23 @@ export default function ItemPickerModal() {
           </Pressable>
         )}
         ListFooterComponent={
-          <Button
-            label="+ Add custom line item"
-            variant="tinted"
-            size="large"
-            onPress={() => {
-              addBlankLineItem();
-              router.back();
-            }}
-          />
+          <View className="gap-2">
+            <Button
+              label="+ Add one-off item (not saved)"
+              variant="tinted"
+              size="large"
+              onPress={() => {
+                addBlankLineItem();
+                router.back();
+              }}
+            />
+            <Button
+              label="+ Add to My Item Catalog"
+              variant="plain"
+              size="large"
+              onPress={() => router.push('/items/new')}
+            />
+          </View>
         }
       />
     </View>

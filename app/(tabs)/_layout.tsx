@@ -75,6 +75,7 @@ export default function TabsLayout() {
             title: 'Home',
             tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
           }}
+          listeners={{ tabPress: () => setIsFabOpen(false) }}
         />
         <Tabs.Screen
           name="documents"
@@ -82,6 +83,7 @@ export default function TabsLayout() {
             title: 'Documents',
             tabBarIcon: ({ color, size }) => <Ionicons name="document-text-outline" size={size} color={color} />,
           }}
+          listeners={{ tabPress: () => setIsFabOpen(false) }}
         />
         <Tabs.Screen
           name="new-placeholder"
@@ -102,6 +104,7 @@ export default function TabsLayout() {
             title: 'Clients',
             tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />,
           }}
+          listeners={{ tabPress: () => setIsFabOpen(false) }}
         />
         <Tabs.Screen
           name="settings"
@@ -109,6 +112,7 @@ export default function TabsLayout() {
             title: 'Settings',
             tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
           }}
+          listeners={{ tabPress: () => setIsFabOpen(false) }}
         />
       </Tabs>
       {isFabOpen ? <FabSpeedDial actions={fabActions} onClose={() => setIsFabOpen(false)} /> : null}

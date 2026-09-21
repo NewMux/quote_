@@ -19,6 +19,7 @@ export default function EditItemScreen() {
 
   useEffect(() => {
     navigation.setOptions({
+      title: item ? `Edit ${item.name}` : 'Edit Item',
       headerRight: () => (
         <Pressable onPress={confirmArchive}>
           <Text className="text-red-500">Archive</Text>
@@ -26,7 +27,7 @@ export default function EditItemScreen() {
       ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, id]);
+  }, [navigation, id, item]);
 
   function confirmArchive() {
     Alert.alert('Archive item?', 'It will no longer appear in the item catalog.', [

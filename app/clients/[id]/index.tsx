@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from 'react-native';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Avatar } from '../../../src/components/Avatar';
 import { Button } from '../../../src/components/Button';
 import { Card } from '../../../src/components/Card';
@@ -14,6 +14,7 @@ import type { Client, DocumentListItem } from '../../../src/types/models';
 
 export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const navigation = useNavigation();
   const archiveClient = useClientsStore((s) => s.archive);
   const [client, setClient] = useState<Client | null>(null);
   const [documents, setDocuments] = useState<DocumentListItem[]>([]);
@@ -24,6 +25,10 @@ export default function ClientDetailScreen() {
       listDocuments().then((all) => setDocuments(all.filter((d) => d.client_id === id)));
     }, [id])
   );
+
+  useEffect(() => {
+    if (client) navigation.setOptions({ title: client.display_name });
+  }, [navigation, client]);
 
   if (!client) {
     return (

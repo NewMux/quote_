@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
 import { Avatar } from '../../../src/components/Avatar';
@@ -47,6 +47,7 @@ import type {
 
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const profile = useBusinessProfileStore((s) => s.profile);
   const [document, setDocument] = useState<DocumentRecord | null>(null);
@@ -73,6 +74,10 @@ export default function DocumentDetailScreen() {
       reload();
     }, [reload])
   );
+
+  useEffect(() => {
+    if (document) navigation.setOptions({ title: document.doc_number });
+  }, [navigation, document]);
 
   if (!document) {
     return (
@@ -270,6 +275,13 @@ export default function DocumentDetailScreen() {
           </Text>
         </View>
       </Card>
+
+      {!canEdit(document) && document.status !== 'void' ? (
+        <Text className="text-xs text-gray-400">
+          Editing is locked because this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} has been
+          issued.
+        </Text>
+      ) : null}
 
       <View className="flex-row flex-wrap gap-2">
         {canEdit(document) ? (

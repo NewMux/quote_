@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { ClientForm } from '../../../src/components/ClientForm';
 import { getClient, type ClientInput } from '../../../src/db/repositories/clients.repo';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
@@ -8,6 +8,7 @@ import type { Client } from '../../../src/types/models';
 
 export default function EditClientScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const navigation = useNavigation();
   const update = useClientsStore((s) => s.update);
   const [client, setClient] = useState<Client | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -15,6 +16,10 @@ export default function EditClientScreen() {
   useEffect(() => {
     getClient(id).then(setClient);
   }, [id]);
+
+  useEffect(() => {
+    if (client) navigation.setOptions({ title: `Edit ${client.display_name}` });
+  }, [navigation, client]);
 
   async function handleSubmit(input: ClientInput) {
     setIsSaving(true);

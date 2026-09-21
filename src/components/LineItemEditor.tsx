@@ -1,4 +1,5 @@
 import { Pressable, Switch, Text, TextInput, View } from 'react-native';
+import { router } from 'expo-router';
 import { computeLineItem } from '../lib/documentCalculations';
 import { formatMinor } from '../lib/money';
 import { MoneyInput } from './MoneyInput';
@@ -77,7 +78,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
       </View>
 
       {line.isTaxable ? (
-        <View className="flex-row flex-wrap gap-2 mb-2">
+        <View className="flex-row flex-wrap gap-2 mb-2 items-center">
           {taxBrackets.map((bracket) => {
             const selected = bracket.id === line.taxBracketId;
             return (
@@ -98,6 +99,11 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
               </Pressable>
             );
           })}
+          {taxBrackets.length <= 1 ? (
+            <Pressable onPress={() => router.push('/settings/tax-brackets')}>
+              <Text className="text-brand text-xs font-medium">+ Add a tax rate</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
 

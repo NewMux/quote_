@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { Button } from '../../../src/components/Button';
 import { DateField } from '../../../src/components/DateField';
@@ -13,6 +13,7 @@ import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
 
 export default function EditDocumentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const navigation = useNavigation();
   const editor = useDocumentEditorStore();
   const { taxBrackets, load: loadTaxBrackets } = useTaxBracketsStore();
 
@@ -37,6 +38,10 @@ export default function EditDocumentScreen() {
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor.isDirty, editor.lines, editor.discountType, editor.discountValue, editor.notes, editor.termsOverride, editor.issueDate, editor.dueDate, editor.expiryDate, editor.clientId]);
+
+  useEffect(() => {
+    if (editor.docNumber) navigation.setOptions({ title: `Edit ${editor.docNumber}` });
+  }, [navigation, editor.docNumber]);
 
   if (editor.isLoading || !editor.documentId) {
     return <View className="flex-1 bg-white" />;
@@ -143,7 +148,8 @@ export default function EditDocumentScreen() {
         </View>
       </ScrollView>
 
-      <View className="p-4 bg-white border-t border-gray-100">
+      <View className="p-4 bg-white border-t border-gray-100 gap-2">
+        <Text className="text-xs text-gray-400 text-center">Changes save automatically as you go</Text>
         <Button label="Done" variant="filled" size="large" onPress={handleDone} />
       </View>
     </View>
