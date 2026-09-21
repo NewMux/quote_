@@ -30,11 +30,17 @@ export default function ItemsScreen() {
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`/items/${item.id}/edit`)}>
             <Card className="mb-3 p-4 flex-row justify-between items-center">
-              <View>
-                <Text className="text-base font-semibold text-gray-900">{item.name}</Text>
-                {item.description ? <Text className="text-sm text-gray-500">{item.description}</Text> : null}
+              <View className="flex-1 pr-3">
+                <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                  {item.name}
+                </Text>
+                {item.description ? (
+                  <Text className="text-sm text-gray-500" numberOfLines={1}>
+                    {item.description}
+                  </Text>
+                ) : null}
               </View>
-              <Text className="text-base font-medium text-gray-900">
+              <Text className="text-base font-medium text-gray-900" numberOfLines={1}>
                 {formatMinor(item.default_unit_price_minor, currencyCode)}
               </Text>
             </Card>

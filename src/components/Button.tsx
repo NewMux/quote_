@@ -65,7 +65,9 @@ export function Button({ label, onPress, variant = 'filled', size = 'medium', di
     >
       <Animated.View style={{ transform: [{ scale }] }}>
         <View className={`${CONTAINER_CLASSES[variant]} ${SIZE_CLASSES[size]}`}>
-          <Text className={`${TEXT_CLASSES[variant]} ${TEXT_SIZE_CLASSES[size]}`}>{label}</Text>
+          <Text className={`${TEXT_CLASSES[variant]} ${TEXT_SIZE_CLASSES[size]}`} numberOfLines={1}>
+            {label}
+          </Text>
         </View>
       </Animated.View>
     </Pressable>

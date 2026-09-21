@@ -91,6 +91,7 @@ export default function RootLayout() {
             sheetAllowedDetents: [1.0],
             sheetGrabberVisible: true,
             sheetCornerRadius: 20,
+            gestureEnabled: false,
           }}
         />
         <Stack.Screen

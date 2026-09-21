@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityLogList } from '../../../src/components/ActivityLogList';
 import { Avatar } from '../../../src/components/Avatar';
 import { Button } from '../../../src/components/Button';
@@ -48,7 +47,6 @@ import type {
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
   const profile = useBusinessProfileStore((s) => s.profile);
   const [document, setDocument] = useState<DocumentRecord | null>(null);
   const [client, setClient] = useState<Client | null>(null);
@@ -195,10 +193,8 @@ export default function DocumentDetailScreen() {
   });
 
   return (
-    <ScrollView
-      className="flex-1 bg-surface"
-      contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 32, gap: 16 }}
-    >
+    <View className="flex-1 bg-surface">
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 16 }}>
       <Card>
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-lg font-bold text-gray-900">{document.doc_number}</Text>
@@ -277,43 +273,15 @@ export default function DocumentDetailScreen() {
         </Text>
       ) : null}
 
-      <View className="flex-row flex-wrap gap-2">
+      <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
         {canEdit(document) ? (
           <Button label="Edit" variant="tinted" onPress={() => router.push(`/documents/${id}/edit`)} />
         ) : null}
         <Button label="Share PDF" variant="tinted" onPress={() => handleGeneratePdfAnd('view')} />
-      </View>
-
-      <View className="flex-row flex-wrap gap-x-4 gap-y-1">
-        <Button
-          label="Sign as Me"
-          variant="plain"
-          size="small"
-          onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'merchant' } })}
-        />
-        <Button
-          label="Get Client's Signature"
-          variant="plain"
-          size="small"
-          onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role: 'client' } })}
-        />
         {canMarkViewed(document) ? (
           <Button label="Mark as Viewed" variant="plain" size="small" onPress={handleMarkViewed} />
         ) : null}
       </View>
-
-      {canVoid(document) || canDelete(document) ? (
-        <View className="flex-row flex-wrap gap-2">
-          {canVoid(document) ? (
-            <Button
-              label={document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice'}
-              variant="destructive"
-              onPress={handleVoid}
-            />
-          ) : null}
-          {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
-        </View>
-      ) : null}
 
       {settlements.length > 0 ? (
         <Card>
@@ -336,12 +304,11 @@ export default function DocumentDetailScreen() {
         </Card>
       ) : null}
 
-      {signatures.length > 0 ? (
-        <Card>
-          <Text className="text-sm font-semibold text-gray-900 mb-2">Signatures</Text>
-          {(['merchant', 'client'] as const).map((role) => {
-            const sig = signatures.find((s) => s.signer_role === role);
-            if (!sig) return null;
+      <Card>
+        <Text className="text-sm font-semibold text-gray-900 mb-2">Signatures</Text>
+        {(['merchant', 'client'] as const).map((role) => {
+          const sig = signatures.find((s) => s.signer_role === role);
+          if (sig) {
             return (
               <View key={role} className="flex-row justify-between items-center py-1">
                 <Text className="text-sm text-gray-700">
@@ -350,17 +317,44 @@ export default function DocumentDetailScreen() {
                 <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
               </View>
             );
-          })}
-        </Card>
-      ) : null}
+          }
+          return (
+            <View key={role} className="flex-row justify-between items-center py-1">
+              <Text className="text-sm text-gray-500">
+                {role === 'merchant' ? "You haven't signed" : "Client hasn't signed"}
+              </Text>
+              <Button
+                label={role === 'merchant' ? 'Sign as Me' : 'Get Signature'}
+                variant="tinted"
+                size="small"
+                onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role } })}
+              />
+            </View>
+          );
+        })}
+      </Card>
 
       <Card>
         <Text className="text-sm font-semibold text-gray-900 mb-2">Activity</Text>
         <ActivityLogList entries={activity} />
       </Card>
 
+      {canVoid(document) || canDelete(document) ? (
+        <View className="flex-row flex-wrap gap-2">
+          {canVoid(document) ? (
+            <Button
+              label={document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice'}
+              variant="destructive"
+              onPress={handleVoid}
+            />
+          ) : null}
+          {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
+        </View>
+      ) : null}
+      </ScrollView>
+
       {primaryAction ? (
-        <View className="gap-1.5">
+        <View className="p-4 bg-white border-t border-gray-100 gap-1.5">
           <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
           <Text className="text-xs text-gray-500 text-center">{primaryAction.caption}</Text>
         </View>
@@ -396,7 +390,7 @@ export default function DocumentDetailScreen() {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 

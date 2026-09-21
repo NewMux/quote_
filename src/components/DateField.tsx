@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 
@@ -25,15 +25,18 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
         </Text>
       </Pressable>
       {show ? (
-        <DateTimePicker
-          value={value ? parseISO(value) : new Date()}
-          mode="date"
-          onValueChange={(_event, date) => {
-            setShow(false);
-            onChange(date.toISOString().slice(0, 10));
-          }}
-          onDismiss={() => setShow(false)}
-        />
+        <View className="border border-gray-200 rounded-xl mt-2 p-2 bg-white">
+          <DateTimePicker
+            value={value ? parseISO(value) : new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
+            onChange={(_event, date) => {
+              setShow(false);
+              if (date) onChange(date.toISOString().slice(0, 10));
+            }}
+            onDismiss={() => setShow(false)}
+          />
+        </View>
       ) : null}
     </View>
   );
