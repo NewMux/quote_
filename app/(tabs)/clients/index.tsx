@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '../../../src/components/Avatar';
 import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
 
 export default function ClientsScreen() {
@@ -18,11 +19,12 @@ export default function ClientsScreen() {
 
   return (
     <View className="flex-1 bg-surface">
+      <ScreenHeader title="Clients" />
       <FlatList
+        style={{ flex: 1 }}
         data={clients}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, gap: 12 }}
-        contentInsetAdjustmentBehavior="automatic"
         ListEmptyComponent={
           <EmptyState title="No clients yet" subtitle="Add a client to start building documents for them." />
         }

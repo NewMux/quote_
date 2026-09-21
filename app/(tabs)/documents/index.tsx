@@ -6,6 +6,7 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 import { Avatar } from '../../../src/components/Avatar';
 import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { StatStrip } from '../../../src/components/StatStrip';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { formatMinor } from '../../../src/lib/money';
@@ -35,11 +36,12 @@ export default function DocumentsScreen() {
 
   return (
     <View className="flex-1 bg-surface">
+      <ScreenHeader title="Documents" />
       <FlatList
+        style={{ flex: 1 }}
         data={documents}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingTop: 16, gap: 12 }}
-        contentInsetAdjustmentBehavior="automatic"
         ListHeaderComponent={
           <View className="gap-4 mb-2">
             <StatStrip

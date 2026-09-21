@@ -6,6 +6,7 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 import { BarChart } from '../../../src/components/charts/BarChart';
 import { LineChart } from '../../../src/components/charts/LineChart';
 import { Card } from '../../../src/components/Card';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { StatStrip } from '../../../src/components/StatStrip';
 import { formatMinor } from '../../../src/lib/money';
 import { formatPeriodLabel, type ReportPeriod } from '../../../src/lib/reportPeriods';
@@ -53,62 +54,61 @@ export default function HomeScreen() {
   const selectedPeriodIndex = PERIODS.findIndex((p) => p.kind === period.kind);
 
   return (
-    <ScrollView
-      className="flex-1 bg-surface"
-      contentContainerStyle={{ padding: 16, gap: 16 }}
-      contentInsetAdjustmentBehavior="automatic"
-    >
-      <SegmentedControl
-        values={PERIODS.map((p) => p.label)}
-        selectedIndex={selectedPeriodIndex}
-        tintColor={BRAND.default}
-        onChange={(e) => handlePeriodChange(e.nativeEvent.selectedSegmentIndex)}
-      />
-
-      <LinearGradient
-        colors={[BRAND.default, BRAND.darker]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ borderRadius: 24, padding: 20 }}
-      >
-        <Text className="text-white text-lg font-bold mb-1">{formatPeriodLabel(period)} Report</Text>
-        <Text className="text-white/60 text-xs mb-4">Overview of your invoices</Text>
-        <StatStrip
-          items={[
-            { label: 'Paid', value: formatMinor(breakdown.paidMinor, currencyCode) },
-            { label: 'Unpaid', value: formatMinor(breakdown.unpaidMinor, currencyCode) },
-            { label: 'Overdue', value: formatMinor(breakdown.overdueMinor, currencyCode) },
-          ]}
+    <View className="flex-1 bg-surface">
+      <ScreenHeader title="Home" />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 16 }}>
+        <SegmentedControl
+          values={PERIODS.map((p) => p.label)}
+          selectedIndex={selectedPeriodIndex}
+          tintColor={BRAND.default}
+          onChange={(e) => handlePeriodChange(e.nativeEvent.selectedSegmentIndex)}
         />
-      </LinearGradient>
 
-      <Card>
-        <View className="flex-row justify-between items-start mb-2">
-          <View>
-            <Text className="text-xs text-gray-500">Received</Text>
-            <Text className="text-2xl font-bold text-gray-900">
-              {formatMinor(receivedThisMonth, currencyCode)}
-            </Text>
-          </View>
-          <Text className="text-xs text-gray-400 mt-1">Monthly</Text>
-        </View>
-        <LineChart data={revenueByMonth} />
-      </Card>
+        <LinearGradient
+          colors={[BRAND.default, BRAND.darker]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ borderRadius: 24, padding: 20 }}
+        >
+          <Text className="text-white text-lg font-bold mb-1">{formatPeriodLabel(period)} Report</Text>
+          <Text className="text-white/60 text-xs mb-4">Overview of your invoices</Text>
+          <StatStrip
+            items={[
+              { label: 'Paid', value: formatMinor(breakdown.paidMinor, currencyCode) },
+              { label: 'Unpaid', value: formatMinor(breakdown.unpaidMinor, currencyCode) },
+              { label: 'Overdue', value: formatMinor(breakdown.overdueMinor, currencyCode) },
+            ]}
+          />
+        </LinearGradient>
 
-      <Card>
-        <View className="flex-row justify-between items-center mb-3">
-          <Text className="text-sm font-semibold text-gray-900">Paid</Text>
-          <View style={{ width: 140 }}>
-            <SegmentedControl
-              values={GRANULARITIES.map((g) => g.label)}
-              selectedIndex={GRANULARITIES.findIndex((g) => g.value === granularity)}
-              tintColor={BRAND.default}
-              onChange={(e) => setGranularity(GRANULARITIES[e.nativeEvent.selectedSegmentIndex].value)}
-            />
+        <Card>
+          <View className="flex-row justify-between items-start mb-2">
+            <View>
+              <Text className="text-xs text-gray-500">Received</Text>
+              <Text className="text-2xl font-bold text-gray-900">
+                {formatMinor(receivedThisMonth, currencyCode)}
+              </Text>
+            </View>
+            <Text className="text-xs text-gray-400 mt-1">Monthly</Text>
           </View>
-        </View>
-        <BarChart data={paidByPeriod} />
-      </Card>
-    </ScrollView>
+          <LineChart data={revenueByMonth} />
+        </Card>
+
+        <Card>
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-sm font-semibold text-gray-900">Paid</Text>
+            <View style={{ width: 140 }}>
+              <SegmentedControl
+                values={GRANULARITIES.map((g) => g.label)}
+                selectedIndex={GRANULARITIES.findIndex((g) => g.value === granularity)}
+                tintColor={BRAND.default}
+                onChange={(e) => setGranularity(GRANULARITIES[e.nativeEvent.selectedSegmentIndex].value)}
+              />
+            </View>
+          </View>
+          <BarChart data={paidByPeriod} />
+        </Card>
+      </ScrollView>
+    </View>
   );
 }
