@@ -37,7 +37,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="documents/[id]/settlement-new"
           options={{
-            title: 'Log Payment',
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.6, 1.0],
             sheetGrabberVisible: true,
@@ -56,7 +56,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="modals/sign"
           options={{
-            title: 'Signature',
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [1.0],
             sheetGrabberVisible: true,
@@ -66,7 +66,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="modals/client-picker"
           options={{
-            title: 'Select Client',
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.6, 1.0],
             sheetGrabberVisible: true,
@@ -76,7 +76,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="modals/item-picker"
           options={{
-            title: 'Select Item',
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.6, 1.0],
             sheetGrabberVisible: true,
@@ -86,7 +86,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="modals/custom-range"
           options={{
-            title: 'Custom Range',
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.5, 1.0],
             sheetGrabberVisible: true,
@@ -96,7 +96,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="modals/currency-picker"
           options={{
-            title: 'Select Currency',
+            headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.6, 1.0],
             sheetGrabberVisible: true,

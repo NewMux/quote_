@@ -3,6 +3,7 @@ import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button } from '../../src/components/Button';
 import { EmptyState } from '../../src/components/EmptyState';
+import { SheetHeader } from '../../src/components/SheetHeader';
 import { formatMinor } from '../../src/lib/money';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
@@ -30,6 +31,7 @@ export default function ItemPickerModal() {
 
   return (
     <View className="flex-1 bg-surface">
+      <SheetHeader title="Select Item" />
       <View className="p-4 bg-white border-b border-gray-100">
         <TextInput
           className="border border-gray-300 rounded-lg px-3 py-2 text-base"

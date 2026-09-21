@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { Button } from './Button';
 import { MoneyInput } from './MoneyInput';
+import { useBusinessProfileStore } from '../stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../stores/useTaxBracketsStore';
 import type { ItemInput } from '../db/repositories/itemCatalog.repo';
 import type { ItemCatalogEntry } from '../types/models';
@@ -14,6 +15,7 @@ interface ItemFormProps {
 
 export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
   const { taxBrackets, load } = useTaxBracketsStore();
+  const currencyCode = useBusinessProfileStore((s) => s.profile?.default_currency_code ?? 'USD');
   const [name, setName] = useState(initial?.name ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [priceMinor, setPriceMinor] = useState(initial?.default_unit_price_minor ?? 0);
@@ -48,7 +50,12 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
 
       <View className="flex-row gap-2">
         <View className="flex-1">
-          <MoneyInput label="Default Rate" valueMinor={priceMinor} onChangeMinor={setPriceMinor} />
+          <MoneyInput
+            label="Default Rate"
+            valueMinor={priceMinor}
+            currencyCode={currencyCode}
+            onChangeMinor={setPriceMinor}
+          />
         </View>
         <View className="w-24">
           <Text className="text-xs text-gray-500 mb-1">Unit</Text>

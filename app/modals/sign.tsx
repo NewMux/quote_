@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { File, Paths } from 'expo-file-system';
+import { SheetHeader } from '../../src/components/SheetHeader';
 import { SignaturePad } from '../../src/components/SignaturePad';
 import { logActivity } from '../../src/db/repositories/activityLog.repo';
 import { upsertSignature } from '../../src/db/repositories/signatures.repo';
@@ -23,8 +24,11 @@ export default function SignModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface p-4">
-      <SignaturePad onSave={handleSave} />
+    <View className="flex-1 bg-surface">
+      <SheetHeader title="Signature" />
+      <View className="flex-1 p-4">
+        <SignaturePad onSave={handleSave} />
+      </View>
     </View>
   );
 }

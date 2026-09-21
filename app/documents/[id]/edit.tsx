@@ -6,7 +6,7 @@ import { Button } from '../../../src/components/Button';
 import { DateField } from '../../../src/components/DateField';
 import { LineItemEditor } from '../../../src/components/LineItemEditor';
 import { computeDocumentTotals } from '../../../src/lib/documentCalculations';
-import { formatMinor, parseToMinor } from '../../../src/lib/money';
+import { formatMinor, minorToDecimalString, parseToMinor } from '../../../src/lib/money';
 import { BRAND } from '../../../src/lib/theme';
 import { useDocumentEditorStore } from '../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
@@ -102,6 +102,7 @@ export default function EditDocumentScreen() {
         <DocumentDiscountEditor
           discountType={editor.discountType}
           discountValue={editor.discountValue}
+          currencyCode={editor.currencyCode}
           onChange={editor.setDocumentDiscount}
         />
 
@@ -172,10 +173,12 @@ function TotalsRow({
 function DocumentDiscountEditor({
   discountType,
   discountValue,
+  currencyCode,
   onChange,
 }: {
   discountType: 'percent' | 'fixed' | null;
   discountValue: number | null;
+  currencyCode: string;
   onChange: (type: 'percent' | 'fixed' | null, value: number | null) => void;
 }) {
   const enabled = discountType !== null;
@@ -206,11 +209,12 @@ function DocumentDiscountEditor({
             value={
               discountType === 'percent'
                 ? String((discountValue ?? 0) / 100)
-                : (((discountValue ?? 0) / 100).toFixed(2))
+                : minorToDecimalString(discountValue ?? 0, currencyCode)
             }
             onChangeText={(text) => {
               const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-              const minorOrBp = discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text);
+              const minorOrBp =
+                discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
               onChange(discountType, minorOrBp);
             }}
           />

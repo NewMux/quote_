@@ -31,9 +31,19 @@ export default function ClientsScreen() {
             <Card className="p-4 flex-row items-center gap-3">
               <Avatar name={item.display_name} photoUri={item.photo_uri} seed={item.id} size={44} />
               <View className="flex-1">
-                <Text className="text-base font-semibold text-gray-900">{item.display_name}</Text>
-                {item.email ? <Text className="text-sm text-gray-500">{item.email}</Text> : null}
-                {item.phone ? <Text className="text-sm text-gray-500">{item.phone}</Text> : null}
+                <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                  {item.display_name}
+                </Text>
+                {item.email ? (
+                  <Text className="text-sm text-gray-500" numberOfLines={1}>
+                    {item.email}
+                  </Text>
+                ) : null}
+                {item.phone ? (
+                  <Text className="text-sm text-gray-500" numberOfLines={1}>
+                    {item.phone}
+                  </Text>
+                ) : null}
               </View>
             </Card>
           </Pressable>

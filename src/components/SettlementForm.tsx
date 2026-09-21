@@ -28,6 +28,7 @@ export interface SettlementFormValue {
 
 interface SettlementFormProps {
   defaultAmountMinor: number;
+  currencyCode: string;
   initial?: Settlement;
   onSubmit: (value: SettlementFormValue) => void;
   onDelete?: () => void;
@@ -36,6 +37,7 @@ interface SettlementFormProps {
 
 export function SettlementForm({
   defaultAmountMinor,
+  currencyCode,
   initial,
   onSubmit,
   onDelete,
@@ -75,7 +77,7 @@ export function SettlementForm({
         />
       </View>
 
-      <MoneyInput label="Amount" valueMinor={amountMinor} onChangeMinor={setAmountMinor} />
+      <MoneyInput label="Amount" valueMinor={amountMinor} currencyCode={currencyCode} onChangeMinor={setAmountMinor} />
 
       <DateField label="Date" value={settledDate} onChange={setSettledDate} />
 

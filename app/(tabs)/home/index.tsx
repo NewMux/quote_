@@ -73,15 +73,13 @@ export default function HomeScreen() {
       >
         <Text className="text-white text-lg font-bold mb-1">{formatPeriodLabel(period)} Report</Text>
         <Text className="text-white/60 text-xs mb-4">Overview of your invoices</Text>
-        {breakdown ? (
-          <StatStrip
-            items={[
-              { label: 'Paid', value: formatMinor(breakdown.paidMinor, currencyCode) },
-              { label: 'Unpaid', value: formatMinor(breakdown.unpaidMinor, currencyCode) },
-              { label: 'Overdue', value: formatMinor(breakdown.overdueMinor, currencyCode) },
-            ]}
-          />
-        ) : null}
+        <StatStrip
+          items={[
+            { label: 'Paid', value: formatMinor(breakdown.paidMinor, currencyCode) },
+            { label: 'Unpaid', value: formatMinor(breakdown.unpaidMinor, currencyCode) },
+            { label: 'Overdue', value: formatMinor(breakdown.overdueMinor, currencyCode) },
+          ]}
+        />
       </LinearGradient>
 
       <Card>

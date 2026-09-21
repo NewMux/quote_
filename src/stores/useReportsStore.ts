@@ -9,8 +9,19 @@ import {
 import { getPeriodRange, type ReportPeriod } from '../lib/reportPeriods';
 import type { ChartPoint } from '../types/models';
 
+const ZERO_BREAKDOWN: StatusBreakdown = {
+  paidCount: 0,
+  paidMinor: 0,
+  unpaidCount: 0,
+  unpaidMinor: 0,
+  overdueCount: 0,
+  overdueMinor: 0,
+  draftCount: 0,
+  draftMinor: 0,
+};
+
 interface ReportsState {
-  breakdown: StatusBreakdown | null;
+  breakdown: StatusBreakdown;
   revenueByMonth: ChartPoint[];
   paidByPeriod: ChartPoint[];
   granularity: ReportGranularity;
@@ -22,7 +33,7 @@ interface ReportsState {
 }
 
 export const useReportsStore = create<ReportsState>((set, get) => ({
-  breakdown: null,
+  breakdown: ZERO_BREAKDOWN,
   revenueByMonth: [],
   paidByPeriod: [],
   granularity: 'month',

@@ -56,6 +56,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           <MoneyInput
             label="Rate"
             valueMinor={line.unitPriceMinor}
+            currencyCode={currencyCode}
             onChangeMinor={(unitPriceMinor) => onChange({ unitPriceMinor })}
           />
         </View>

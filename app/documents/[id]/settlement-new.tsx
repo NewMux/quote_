@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SettlementForm, type SettlementFormValue } from '../../../src/components/SettlementForm';
+import { SheetHeader } from '../../../src/components/SheetHeader';
 import { getDocument } from '../../../src/db/repositories/documents.repo';
 import {
   createSettlement,
@@ -61,7 +62,8 @@ export default function SettlementFormScreen() {
   if (!document || settlement === undefined) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator />
+        <SheetHeader title={settlementId ? 'Edit Payment' : 'Log Payment'} />
+        <ActivityIndicator style={{ flex: 1 }} />
       </View>
     );
   }
@@ -69,14 +71,18 @@ export default function SettlementFormScreen() {
   const balanceDue = document.total_minor - document.amount_paid_minor;
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16 }}>
-      <SettlementForm
-        defaultAmountMinor={balanceDue}
-        initial={settlement ?? undefined}
-        onSubmit={handleSubmit}
-        onDelete={settlementId ? handleDelete : undefined}
-        isSubmitting={isSubmitting}
-      />
-    </ScrollView>
+    <View className="flex-1 bg-surface">
+      <SheetHeader title={settlementId ? 'Edit Payment' : 'Log Payment'} />
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+        <SettlementForm
+          currencyCode={document.currency_code}
+          defaultAmountMinor={balanceDue}
+          initial={settlement ?? undefined}
+          onSubmit={handleSubmit}
+          onDelete={settlementId ? handleDelete : undefined}
+          isSubmitting={isSubmitting}
+        />
+      </ScrollView>
+    </View>
   );
 }

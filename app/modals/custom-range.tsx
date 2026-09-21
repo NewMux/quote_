@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button } from '../../src/components/Button';
 import { DateField } from '../../src/components/DateField';
+import { SheetHeader } from '../../src/components/SheetHeader';
 import { useReportsStore } from '../../src/stores/useReportsStore';
 
 export default function CustomRangeModal() {
@@ -23,14 +24,16 @@ export default function CustomRangeModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface p-4 gap-4">
-      <Text className="text-lg font-semibold text-gray-900">Custom Date Range</Text>
-      <DateField label="Start Date" value={startDate} onChange={setStartDate} />
-      <DateField label="End Date" value={endDate} onChange={setEndDate} />
-      {startDate && endDate && startDate > endDate ? (
-        <Text className="text-xs text-red-500">Start date must be before end date.</Text>
-      ) : null}
-      <Button label="Apply" size="large" disabled={!canApply} onPress={apply} />
+    <View className="flex-1 bg-surface">
+      <SheetHeader title="Custom Range" />
+      <View className="p-4 gap-4">
+        <DateField label="Start Date" value={startDate} onChange={setStartDate} />
+        <DateField label="End Date" value={endDate} onChange={setEndDate} />
+        {startDate && endDate && startDate > endDate ? (
+          <Text className="text-xs text-red-500">Start date must be before end date.</Text>
+        ) : null}
+        <Button label="Apply" size="large" disabled={!canApply} onPress={apply} />
+      </View>
     </View>
   );
 }

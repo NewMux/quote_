@@ -73,12 +73,14 @@ export default function ClientDetailScreen() {
         ListEmptyComponent={<EmptyState title="No documents for this client yet" />}
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`/documents/${item.id}`)}>
-            <Card className="p-4 flex-row justify-between items-center">
-              <View>
-                <Text className="text-base font-semibold text-gray-900">{item.doc_number}</Text>
+            <Card className="p-4 flex-row justify-between items-center gap-3">
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                  {item.doc_number}
+                </Text>
                 <StatusBadge document={item} />
               </View>
-              <Text className="text-base font-medium text-gray-900">
+              <Text className="text-base font-medium text-gray-900" numberOfLines={1}>
                 {formatMinor(item.total_minor, item.currency_code)}
               </Text>
             </Card>
