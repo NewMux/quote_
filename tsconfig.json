@@ -2,7 +2,8 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "jsxImportSource": "nativewind"
+    "jsxImportSource": "nativewind",
+    "types": ["jest", "node"]
   },
   "exclude": [
     "node_modules",
