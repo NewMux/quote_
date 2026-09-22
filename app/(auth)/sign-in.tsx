@@ -62,6 +62,9 @@ export default function SignInScreen() {
               autoComplete="password"
             />
           </View>
+          <Pressable onPress={() => router.push('/(auth)/forgot-password')} className="self-end">
+            <Text className="text-brand text-sm font-medium">Forgot password?</Text>
+          </Pressable>
         </View>
       </View>
 
