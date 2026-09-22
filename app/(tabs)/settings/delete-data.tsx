@@ -32,8 +32,8 @@ export default function DeleteDataScreen() {
         <Text className="text-base font-semibold text-gray-900 mb-2">This can't be undone</Text>
         <Text className="text-sm text-gray-700 leading-5">
           This permanently erases every client, invoice, estimate, item, tax rate, signature,
-          photo, and payment record stored on this device — and resets your business profile.
-          There's no backup and no way to get this back.
+          photo, and payment record in your account — and resets your business profile. There's
+          no backup and no way to get this back.
         </Text>
       </View>
 

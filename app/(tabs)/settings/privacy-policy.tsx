@@ -13,23 +13,28 @@ export default function PrivacyPolicyScreen() {
   return (
     <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16 }}>
       <Section title="What this app stores">
-        The business info you enter in Business Profile, the clients and items you add, the
-        invoices and estimates you create, and any signatures, photos, or payment records you
-        attach to them.
+        The email address and password you sign up with, the business info you enter in Business
+        Profile, the clients and items you add, the invoices and estimates you create, and any
+        signatures, photos, or payment records you attach to them.
       </Section>
       <Section title="Where it's stored">
-        Everything is saved in a database and file storage on this device only — nothing is
-        uploaded anywhere. There is no account, no sign-in, and no cloud sync.
+        Your data is stored in a secure cloud database and file storage (provided by Supabase),
+        tied to your account. This lets you sign in and access your invoices and clients from more
+        than one device, and means your data survives a lost or reset phone. Your business's
+        records are kept private and isolated from every other business using this app — enforced
+        at the database level, not just hidden in the app's interface.
       </Section>
-      <Section title="What this app doesn't do">
-        This app makes no network requests of any kind. There's no analytics, no advertising, no
-        tracking, and your data is never shared with or sold to anyone — because it never leaves
-        your device in the first place. Sharing a PDF or emailing an invoice is something you
-        choose to do, using your own device's share sheet or mail app.
+      <Section title="What this app does and doesn't do">
+        This app connects to the internet to save and sync your data. It doesn't run ads, sell
+        your data, or share it with third parties, and it doesn't use analytics or tracking beyond
+        what's needed to keep the app itself working correctly. Sharing a PDF or emailing an
+        invoice is something you choose to do, using your own device's share sheet or mail app.
       </Section>
       <Section title="Deleting your data">
-        You can permanently erase everything this app has stored — all clients, documents, items,
-        tax rates, signatures, and payment records — from Settings → Delete All Data.
+        Settings → Delete All Data permanently erases every client, document, item, tax rate,
+        signature, and payment record, and resets your business profile — while keeping your
+        account and login. Settings → Delete Account goes further: it deletes all of that and your
+        account itself, signing you out for good.
       </Section>
     </ScrollView>
   );

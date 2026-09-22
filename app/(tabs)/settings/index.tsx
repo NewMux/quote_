@@ -119,7 +119,7 @@ export default function SettingsScreen() {
               <View className="flex-1">
                 <Text className="text-base text-red-600 font-medium">Delete All Data</Text>
                 <Text className="text-xs text-red-400" numberOfLines={1}>
-                  Permanently erase everything stored on this device
+                  Permanently erase everything in your account
                 </Text>
               </View>
             </View>
