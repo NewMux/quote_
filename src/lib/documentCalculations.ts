@@ -71,3 +71,12 @@ export function computeDocumentTotals<T extends LineItemDraft>(
     lines: computedLines,
   };
 }
+
+/** Shows the actual tax bracket name (e.g. "VAT") when every taxed line agrees on one;
+ * falls back to the generic label when lines mix different tax names or none are taxed. */
+export function getTaxLabel(items: Array<{ isTaxable: boolean; taxName: string | null }>): string {
+  const names = new Set(
+    items.filter((i) => i.isTaxable && i.taxName).map((i) => i.taxName as string)
+  );
+  return names.size === 1 ? [...names][0] : 'Tax';
+}

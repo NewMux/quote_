@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { useCallback, useEffect } from 'react';
+import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '../../../src/components/Avatar';
@@ -9,13 +9,18 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
 
 export default function ClientsScreen() {
-  const { clients, load } = useClientsStore();
+  const { clients, search, setSearch, load } = useClientsStore();
 
   useFocusEffect(
     useCallback(() => {
       load();
     }, [load])
   );
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   return (
     <View className="flex-1 bg-surface">
@@ -25,6 +30,17 @@ export default function ClientsScreen() {
         data={clients}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, gap: 12 }}
+        ListHeaderComponent={
+          <View className="flex-row items-center bg-white rounded-2xl px-3 border border-gray-200 mb-2">
+            <Ionicons name="search" size={18} color="#9CA3AF" />
+            <TextInput
+              className="flex-1 py-2.5 px-2 text-base text-gray-900"
+              placeholder="Search clients…"
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
+        }
         ListEmptyComponent={
           <EmptyState title="No clients yet" subtitle="Add a client to start building documents for them." />
         }

@@ -5,6 +5,8 @@ import { ActivityLogList } from '../../../src/components/ActivityLogList';
 import { Avatar } from '../../../src/components/Avatar';
 import { Button } from '../../../src/components/Button';
 import { Card } from '../../../src/components/Card';
+import { DocumentStageIndicator } from '../../../src/components/DocumentStageIndicator';
+import { IconButton } from '../../../src/components/IconButton';
 import { LineItemRow } from '../../../src/components/LineItemRow';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { listActivity } from '../../../src/db/repositories/activityLog.repo';
@@ -22,6 +24,7 @@ import { listSettlements } from '../../../src/db/repositories/settlements.repo';
 import { deleteSignature, listSignatures } from '../../../src/db/repositories/signatures.repo';
 import { generateDocumentPdf } from '../../../src/lib/pdf/generatePdf';
 import { emailPdf, sharePdf } from '../../../src/lib/share';
+import { getTaxLabel } from '../../../src/lib/documentCalculations';
 import { formatMinor } from '../../../src/lib/money';
 import {
   canConvertToInvoice,
@@ -196,9 +199,12 @@ export default function DocumentDetailScreen() {
     <View className="flex-1 bg-surface">
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 16 }}>
       <Card>
-        <View className="flex-row justify-between items-center mb-3">
+        <View className="flex-row justify-between items-center mb-2">
           <Text className="text-lg font-bold text-gray-900">{document.doc_number}</Text>
           <StatusBadge document={document} />
+        </View>
+        <View className="mb-3">
+          <DocumentStageIndicator document={document} />
         </View>
         <View className="flex-row items-center gap-3 mb-3">
           <Avatar
@@ -253,7 +259,11 @@ export default function DocumentDetailScreen() {
               currencyCode={document.currency_code}
             />
           ) : null}
-          <TotalsRow label="Tax" valueMinor={document.tax_total_minor} currencyCode={document.currency_code} />
+          <TotalsRow
+            label={getTaxLabel(lines.map((l) => ({ isTaxable: l.is_taxable === 1, taxName: l.tax_bracket_name_snapshot })))}
+            valueMinor={document.tax_total_minor}
+            currencyCode={document.currency_code}
+          />
           {document.amount_paid_minor > 0 ? (
             <TotalsRow label="Paid" valueMinor={document.amount_paid_minor} currencyCode={document.currency_code} />
           ) : null}
@@ -273,11 +283,24 @@ export default function DocumentDetailScreen() {
         </Text>
       ) : null}
 
-      <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
-        {canEdit(document) ? (
-          <Button label="Edit" variant="tinted" onPress={() => router.push(`/documents/${id}/edit`)} />
-        ) : null}
-        <Button label="Share PDF" variant="tinted" onPress={() => handleGeneratePdfAnd('view')} />
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-3">
+          {canEdit(document) ? (
+            <IconButton icon="create-outline" variant="tinted" accessibilityLabel="Edit" onPress={() => router.push(`/documents/${id}/edit`)} />
+          ) : null}
+          <IconButton icon="share-outline" variant="tinted" accessibilityLabel="Share PDF" onPress={() => handleGeneratePdfAnd('view')} />
+          {canVoid(document) ? (
+            <IconButton
+              icon="close-circle-outline"
+              variant="destructive"
+              accessibilityLabel={document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice'}
+              onPress={handleVoid}
+            />
+          ) : null}
+          {canDelete(document) ? (
+            <IconButton icon="trash-outline" variant="destructive" accessibilityLabel="Delete Draft" onPress={handleDelete} />
+          ) : null}
+        </View>
         {canMarkViewed(document) ? (
           <Button label="Mark as Viewed" variant="plain" size="small" onPress={handleMarkViewed} />
         ) : null}
@@ -338,19 +361,6 @@ export default function DocumentDetailScreen() {
         <Text className="text-sm font-semibold text-gray-900 mb-2">Activity</Text>
         <ActivityLogList entries={activity} />
       </Card>
-
-      {canVoid(document) || canDelete(document) ? (
-        <View className="flex-row flex-wrap gap-2">
-          {canVoid(document) ? (
-            <Button
-              label={document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice'}
-              variant="destructive"
-              onPress={handleVoid}
-            />
-          ) : null}
-          {canDelete(document) ? <Button label="Delete Draft" variant="destructive" onPress={handleDelete} /> : null}
-        </View>
-      ) : null}
       </ScrollView>
 
       {primaryAction ? (

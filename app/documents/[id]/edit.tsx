@@ -5,7 +5,7 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 import { Button } from '../../../src/components/Button';
 import { DateField } from '../../../src/components/DateField';
 import { LineItemEditor } from '../../../src/components/LineItemEditor';
-import { computeDocumentTotals } from '../../../src/lib/documentCalculations';
+import { computeDocumentTotals, getTaxLabel } from '../../../src/lib/documentCalculations';
 import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../src/lib/money';
 import { BRAND } from '../../../src/lib/theme';
 import { useDocumentEditorStore } from '../../../src/stores/useDocumentEditorStore';
@@ -120,7 +120,11 @@ export default function EditDocumentScreen() {
               currencyCode={editor.currencyCode}
             />
           ) : null}
-          <TotalsRow label="Tax" valueMinor={totals.taxTotalMinor} currencyCode={editor.currencyCode} />
+          <TotalsRow
+            label={getTaxLabel(editor.lines.map((l) => ({ isTaxable: l.isTaxable, taxName: l.taxBracketNameSnapshot })))}
+            valueMinor={totals.taxTotalMinor}
+            currencyCode={editor.currencyCode}
+          />
           <View className="border-t border-gray-200 mt-2 pt-2">
             <TotalsRow label="Total" valueMinor={totals.totalMinor} currencyCode={editor.currencyCode} bold />
           </View>

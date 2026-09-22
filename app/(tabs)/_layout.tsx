@@ -52,13 +52,11 @@ export default function TabsLayout() {
   const fabActions: FabAction[] = [
     {
       label: 'New Invoice',
-      subtitle: 'A bill your client can pay',
       icon: 'document-text-outline',
       onPress: () => router.push({ pathname: '/documents/new', params: { type: 'invoice' } }),
     },
     {
       label: 'New Estimate',
-      subtitle: 'A quote you can convert to an invoice later',
       icon: 'receipt-outline',
       onPress: () => router.push({ pathname: '/documents/new', params: { type: 'estimate' } }),
     },

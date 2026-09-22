@@ -26,6 +26,7 @@ export default function DocumentsScreen() {
   const { breakdown, load: loadReports } = useReportsStore();
   const [activeTypeIndex, setActiveTypeIndex] = useState(0);
   const [search, setSearch] = useState('');
+  const hasActiveFilter = !!(filter.status || filter.clientId || filter.dateFrom || filter.dateTo);
 
   useFocusEffect(
     useCallback(() => {
@@ -53,18 +54,37 @@ export default function DocumentsScreen() {
               ]}
             />
 
-            <View className="flex-row items-center bg-white rounded-2xl px-3 border border-gray-200">
-              <Ionicons name="search" size={18} color="#9CA3AF" />
-              <TextInput
-                className="flex-1 py-2.5 px-2 text-base text-gray-900"
-                placeholder="Search documents…"
-                value={search}
-                onChangeText={(text) => {
-                  setSearch(text);
-                  setFilter({ ...filter, search: text || undefined });
-                }}
-              />
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1 flex-row items-center bg-white rounded-2xl px-3 border border-gray-200">
+                <Ionicons name="search" size={18} color="#9CA3AF" />
+                <TextInput
+                  className="flex-1 py-2.5 px-2 text-base text-gray-900"
+                  placeholder="Search documents…"
+                  value={search}
+                  onChangeText={(text) => {
+                    setSearch(text);
+                    setFilter({ ...filter, search: text || undefined });
+                  }}
+                />
+              </View>
+              <Pressable
+                onPress={() => router.push('/modals/document-filter')}
+                accessibilityLabel="Filter documents"
+                className={`w-11 h-11 rounded-full items-center justify-center ${
+                  hasActiveFilter ? 'bg-brand' : 'bg-white border border-gray-200'
+                }`}
+              >
+                <Ionicons name="options-outline" size={20} color={hasActiveFilter ? 'white' : '#374151'} />
+              </Pressable>
             </View>
+
+            {hasActiveFilter ? (
+              <Pressable
+                onPress={() => setFilter({ ...filter, status: undefined, clientId: undefined, dateFrom: undefined, dateTo: undefined })}
+              >
+                <Text className="text-brand text-sm font-medium">Clear filters</Text>
+              </Pressable>
+            ) : null}
 
             <SegmentedControl
               values={TYPE_FILTERS.map((f) => f.label)}

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import {
   createClient,
   listClients,
+  searchClients,
   setClientArchived,
   updateClient,
   type ClientInput,
@@ -11,6 +12,8 @@ import type { Client } from '../types/models';
 interface ClientsState {
   clients: Client[];
   isLoading: boolean;
+  search: string;
+  setSearch: (search: string) => void;
   load: () => Promise<void>;
   create: (input: ClientInput) => Promise<Client>;
   update: (id: string, input: ClientInput) => Promise<void>;
@@ -20,9 +23,12 @@ interface ClientsState {
 export const useClientsStore = create<ClientsState>((set, get) => ({
   clients: [],
   isLoading: false,
+  search: '',
+  setSearch: (search) => set({ search }),
   load: async () => {
     set({ isLoading: true });
-    const clients = await listClients();
+    const search = get().search.trim();
+    const clients = search ? await searchClients(search) : await listClients();
     set({ clients, isLoading: false });
   },
   create: async (input) => {

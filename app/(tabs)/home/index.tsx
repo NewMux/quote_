@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { BarChart } from '../../../src/components/charts/BarChart';
 import { LineChart } from '../../../src/components/charts/LineChart';
@@ -26,7 +27,6 @@ const PERIODS: Array<{ label: string; kind: ReportPeriod['kind'] }> = [
   { label: 'This Month', kind: 'month' },
   { label: 'Last 90 Days', kind: 'last90' },
   { label: 'This Year', kind: 'year' },
-  { label: 'Pick Dates…', kind: 'custom' },
 ];
 
 export default function HomeScreen() {
@@ -43,12 +43,7 @@ export default function HomeScreen() {
   const receivedThisMonth = revenueByMonth[revenueByMonth.length - 1]?.value ?? 0;
 
   function handlePeriodChange(index: number) {
-    const chosen = PERIODS[index];
-    if (chosen.kind === 'custom') {
-      router.push('/modals/custom-range');
-      return;
-    }
-    setPeriod({ kind: chosen.kind } as ReportPeriod);
+    setPeriod({ kind: PERIODS[index].kind } as ReportPeriod);
   }
 
   const selectedPeriodIndex = PERIODS.findIndex((p) => p.kind === period.kind);
@@ -57,12 +52,25 @@ export default function HomeScreen() {
     <View className="flex-1 bg-surface">
       <ScreenHeader title="Home" />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 16 }}>
-        <SegmentedControl
-          values={PERIODS.map((p) => p.label)}
-          selectedIndex={selectedPeriodIndex}
-          tintColor={BRAND.default}
-          onChange={(e) => handlePeriodChange(e.nativeEvent.selectedSegmentIndex)}
-        />
+        <View className="flex-row items-center gap-2">
+          <View className="flex-1">
+            <SegmentedControl
+              values={PERIODS.map((p) => p.label)}
+              selectedIndex={selectedPeriodIndex}
+              tintColor={BRAND.default}
+              onChange={(e) => handlePeriodChange(e.nativeEvent.selectedSegmentIndex)}
+            />
+          </View>
+          <Pressable
+            onPress={() => router.push('/modals/custom-range')}
+            accessibilityLabel="Pick a custom date range"
+            className={`w-11 h-11 rounded-full items-center justify-center ${
+              period.kind === 'custom' ? 'bg-brand' : 'bg-gray-100'
+            }`}
+          >
+            <Ionicons name="calendar-outline" size={20} color={period.kind === 'custom' ? 'white' : '#374151'} />
+          </Pressable>
+        </View>
 
         <LinearGradient
           colors={[BRAND.default, BRAND.darker]}

@@ -105,6 +105,16 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="modals/document-filter"
+          options={{
+            headerShown: false,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.75, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
+        <Stack.Screen
           name="modals/item-picker"
           options={{
             headerShown: false,

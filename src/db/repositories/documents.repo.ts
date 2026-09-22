@@ -17,7 +17,10 @@ import type {
 
 export interface DocumentListFilter {
   docType?: DocType;
-  status?: DocStatus;
+  status?: DocStatus | 'overdue';
+  clientId?: string;
+  dateFrom?: string;
+  dateTo?: string;
   search?: string;
 }
 
@@ -29,9 +32,26 @@ export async function listDocuments(filter: DocumentListFilter = {}): Promise<Do
     clauses.push('d.doc_type = ?');
     params.push(filter.docType);
   }
-  if (filter.status) {
+  if (filter.status === 'overdue') {
+    clauses.push(
+      "d.status IN ('issued', 'partially_paid') AND d.due_date IS NOT NULL AND d.due_date < ? AND d.amount_paid_minor < d.total_minor"
+    );
+    params.push(new Date().toISOString().slice(0, 10));
+  } else if (filter.status) {
     clauses.push('d.status = ?');
     params.push(filter.status);
+  }
+  if (filter.clientId) {
+    clauses.push('d.client_id = ?');
+    params.push(filter.clientId);
+  }
+  if (filter.dateFrom) {
+    clauses.push('d.issue_date >= ?');
+    params.push(filter.dateFrom);
+  }
+  if (filter.dateTo) {
+    clauses.push('d.issue_date <= ?');
+    params.push(filter.dateTo);
   }
   if (filter.search) {
     clauses.push('(d.doc_number LIKE ? OR c.display_name LIKE ?)');
