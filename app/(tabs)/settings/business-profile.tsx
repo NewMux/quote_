@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button } from '../../../src/components/Button';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { persistPickedFile } from '../../../src/lib/fileStorage';
+import { useSignedUrl } from '../../../src/lib/useSignedUrl';
 import { getCurrencyName } from '../../../src/lib/currencies';
 
 const ACCENT_COLORS = ['#2563EB', '#059669', '#DC2626', '#D97706', '#7C3AED', '#0891B2', '#111827'];
@@ -22,6 +23,7 @@ export default function BusinessProfileScreen() {
   const [paymentInstructions, setPaymentInstructions] = useState('');
   const [footerTerms, setFooterTerms] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const signedLogoUrl = useSignedUrl(logoUri);
 
   useEffect(() => {
     load();
@@ -72,8 +74,8 @@ export default function BusinessProfileScreen() {
     <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View>
         <Text className="text-xs text-gray-500 mb-2">Logo</Text>
-        {logoUri ? (
-          <Image source={{ uri: logoUri }} className="w-24 h-24 rounded-lg mb-2" resizeMode="contain" />
+        {signedLogoUrl ? (
+          <Image source={{ uri: signedLogoUrl }} className="w-24 h-24 rounded-lg mb-2" resizeMode="contain" />
         ) : null}
         <View className="self-start">
           <Button label={logoUri ? 'Change logo' : 'Add logo'} variant="tinted" onPress={pickLogo} />

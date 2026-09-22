@@ -38,7 +38,9 @@ export async function generateDocumentPdf(documentId: string): Promise<string> {
   });
 
   const { uri } = await Print.printToFileAsync({ html, base64: false });
-  const persistedUri = await persistPickedFile(uri, 'pdfs', `${document.doc_number}.pdf`);
-  await setPdfUri(documentId, persistedUri);
-  return persistedUri;
+  const storagePath = await persistPickedFile(uri, 'pdfs', `${document.doc_number}.pdf`);
+  await setPdfUri(documentId, storagePath);
+  // Share/email need a real local file:// uri, not a Storage path — return the freshly-generated
+  // local file rather than the persisted path, since it still exists in the cache right now.
+  return uri;
 }

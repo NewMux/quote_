@@ -231,9 +231,9 @@ export async function deleteDocument(id: string): Promise<void> {
   if (!doc || doc.converted_to_document_id) return;
 
   const [signatures, settlements] = await Promise.all([listSignatures(id), listSettlements(id)]);
-  deleteFileIfExists(doc.pdf_uri);
-  for (const sig of signatures) deleteFileIfExists(sig.signature_image_uri);
-  for (const settlement of settlements) deleteFileIfExists(settlement.receipt_photo_uri);
+  await deleteFileIfExists(doc.pdf_uri);
+  await Promise.all(signatures.map((sig) => deleteFileIfExists(sig.signature_image_uri)));
+  await Promise.all(settlements.map((settlement) => deleteFileIfExists(settlement.receipt_photo_uri)));
 
   const { error } = await supabase.from('documents').delete().eq('id', id);
   if (error) throw error;

@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { deleteFileIfExists } from '../../lib/fileStorage';
 import { requireOwnerId } from '../ownerId';
 import type { Client } from '../../types/models';
 
@@ -135,6 +136,8 @@ export async function setClientArchived(id: string, archived: boolean): Promise<
 }
 
 export async function deleteClient(id: string): Promise<void> {
+  const { data: client } = await supabase.from('clients').select('photo_uri').eq('id', id).maybeSingle();
   const { error } = await supabase.from('clients').delete().eq('id', id);
   if (error) throw error;
+  await deleteFileIfExists(client?.photo_uri ?? null);
 }

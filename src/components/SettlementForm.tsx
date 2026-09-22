@@ -6,6 +6,7 @@ import { Button } from './Button';
 import { DateField } from './DateField';
 import { MoneyInput } from './MoneyInput';
 import { persistPickedFile } from '../lib/fileStorage';
+import { useSignedUrl } from '../lib/useSignedUrl';
 import { newId } from '../lib/id';
 import { BRAND } from '../lib/theme';
 import type { Settlement, SettlementMethod } from '../types/models';
@@ -49,6 +50,7 @@ export function SettlementForm({
   const [referenceNumber, setReferenceNumber] = useState(initial?.reference_number ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [receiptUri, setReceiptUri] = useState<string | null>(initial?.receipt_photo_uri ?? null);
+  const signedReceiptUrl = useSignedUrl(receiptUri);
 
   async function pickReceiptPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -103,8 +105,8 @@ export function SettlementForm({
 
       <View>
         <Text className="text-xs text-gray-500 mb-2">Receipt Photo (optional)</Text>
-        {receiptUri ? (
-          <Image source={{ uri: receiptUri }} className="w-full h-40 rounded-lg mb-2" resizeMode="cover" />
+        {signedReceiptUrl ? (
+          <Image source={{ uri: signedReceiptUrl }} className="w-full h-40 rounded-lg mb-2" resizeMode="cover" />
         ) : null}
         <Button label={receiptUri ? 'Change photo' : 'Attach photo'} variant="tinted" onPress={pickReceiptPhoto} />
       </View>

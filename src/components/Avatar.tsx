@@ -1,5 +1,6 @@
 import { Image, Text, View } from 'react-native';
 import { AVATAR_PALETTE } from '../lib/theme';
+import { useSignedUrl } from '../lib/useSignedUrl';
 
 interface AvatarProps {
   name: string;
@@ -25,9 +26,10 @@ function hashToIndex(value: string, mod: number): number {
 
 export function Avatar({ name, photoUri, seed, size = 40 }: AvatarProps) {
   const dimension = { width: size, height: size, borderRadius: size / 2 };
+  const signedUrl = useSignedUrl(photoUri);
 
-  if (photoUri) {
-    return <Image source={{ uri: photoUri }} style={dimension} />;
+  if (signedUrl) {
+    return <Image source={{ uri: signedUrl }} style={dimension} />;
   }
 
   const color = AVATAR_PALETTE[hashToIndex(seed ?? name, AVATAR_PALETTE.length)];

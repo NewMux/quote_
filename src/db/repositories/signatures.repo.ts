@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { deleteFileIfExists } from '../../lib/fileStorage';
 import { requireOwnerId } from '../ownerId';
 import type { SignatureRecord, SignerRole } from '../../types/models';
 
@@ -34,6 +35,13 @@ export async function upsertSignature(
 }
 
 export async function deleteSignature(documentId: string, role: SignerRole): Promise<void> {
+  const { data: signature } = await supabase
+    .from('signatures')
+    .select('signature_image_uri')
+    .eq('document_id', documentId)
+    .eq('signer_role', role)
+    .maybeSingle();
   const { error } = await supabase.from('signatures').delete().eq('document_id', documentId).eq('signer_role', role);
   if (error) throw error;
+  await deleteFileIfExists(signature?.signature_image_uri ?? null);
 }

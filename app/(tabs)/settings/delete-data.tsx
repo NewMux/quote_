@@ -17,7 +17,7 @@ export default function DeleteDataScreen() {
     setIsDeleting(true);
     try {
       await wipeAllData();
-      wipeAllFiles();
+      await wipeAllFiles();
       await useBusinessProfileStore.getState().load();
       router.replace('/onboarding');
     } catch (err) {
