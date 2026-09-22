@@ -26,20 +26,22 @@ export default function CurrencyPickerModal() {
   return (
     <View className="flex-1 bg-surface">
       <SheetHeader title="Select Currency" />
-      <View className="p-4 bg-white border-b border-gray-100">
-        <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 text-base"
-          placeholder="Search currencies…"
-          value={query}
-          onChangeText={setQuery}
-        />
-      </View>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.code}
         contentContainerStyle={{ padding: 16 }}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          <View className="-mx-4 -mt-4 mb-4 p-4 bg-white border-b border-gray-100">
+            <TextInput
+              className="border border-gray-300 rounded-lg px-3 py-2 text-base"
+              placeholder="Search currencies…"
+              value={query}
+              onChangeText={setQuery}
+            />
+          </View>
+        }
         ListEmptyComponent={<EmptyState title="No currencies found" />}
         renderItem={({ item }) => (
           <Pressable

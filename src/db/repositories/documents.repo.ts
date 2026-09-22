@@ -286,7 +286,7 @@ export async function convertEstimateToInvoice(
       [invoiceId, nowIso(), estimateId]
     );
 
-    await logActivity(estimateId, 'converted_to_invoice', invoiceId);
+    await logActivity(estimateId, 'converted_to_invoice', docNumber);
     await logActivity(invoiceId, 'created', `Converted from estimate ${estimate.doc_number}`);
   });
 

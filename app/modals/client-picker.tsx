@@ -47,31 +47,33 @@ export default function ClientPickerModal() {
   return (
     <View className="flex-1 bg-surface">
       <SheetHeader title={isFilterMode ? 'Filter by Client' : 'Select Client'} />
-      <View className="p-4 bg-white border-b border-gray-100">
-        <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 text-base"
-          placeholder="Search clients…"
-          value={query}
-          onChangeText={setQuery}
-        />
-      </View>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         ListHeaderComponent={
-          isFilterMode ? (
-            <Pressable
-              onPress={() => {
-                setFilter({ ...filter, clientId: undefined });
-                router.back();
-              }}
-              className="bg-white rounded-xl p-4 mb-3 border border-gray-100"
-            >
-              <Text className="text-base text-brand font-medium">All Clients</Text>
-            </Pressable>
-          ) : null
+          <View>
+            <View className="-mx-4 -mt-4 mb-4 p-4 bg-white border-b border-gray-100">
+              <TextInput
+                className="border border-gray-300 rounded-lg px-3 py-2 text-base"
+                placeholder="Search clients…"
+                value={query}
+                onChangeText={setQuery}
+              />
+            </View>
+            {isFilterMode ? (
+              <Pressable
+                onPress={() => {
+                  setFilter({ ...filter, clientId: undefined });
+                  router.back();
+                }}
+                className="bg-white rounded-xl p-4 mb-3 border border-gray-100"
+              >
+                <Text className="text-base text-brand font-medium">All Clients</Text>
+              </Pressable>
+            ) : null}
+          </View>
         }
         ListEmptyComponent={<EmptyState title="No clients found" />}
         renderItem={({ item }) => (

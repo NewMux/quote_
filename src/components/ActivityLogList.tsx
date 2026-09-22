@@ -29,11 +29,13 @@ export function ActivityLogList({ entries }: ActivityLogListProps) {
     <View>
       {entries.map((entry) => (
         <View key={entry.id} className="flex-row justify-between py-1.5">
-          <Text className="text-sm text-gray-700">
-            {LABELS[entry.event_type]}
-            {entry.event_detail ? ` — ${entry.event_detail}` : ''}
-          </Text>
-          <Text className="text-xs text-gray-500">
+          <View className="flex-1 pr-2">
+            <Text className="text-sm text-gray-700" numberOfLines={2}>
+              {LABELS[entry.event_type]}
+              {entry.event_detail ? ` — ${entry.event_detail}` : ''}
+            </Text>
+          </View>
+          <Text className="text-xs text-gray-500 flex-shrink-0">
             {format(parseISO(entry.created_at), 'MMM d, h:mm a')}
           </Text>
         </View>

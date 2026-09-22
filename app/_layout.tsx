@@ -89,7 +89,7 @@ export default function RootLayout() {
           options={{
             headerShown: false,
             presentation: 'formSheet',
-            sheetAllowedDetents: [0.6, 1.0],
+            sheetAllowedDetents: [0.9],
             sheetGrabberVisible: true,
             sheetCornerRadius: 20,
           }}
@@ -119,7 +119,7 @@ export default function RootLayout() {
           options={{
             headerShown: false,
             presentation: 'formSheet',
-            sheetAllowedDetents: [0.6, 1.0],
+            sheetAllowedDetents: [0.9],
             sheetGrabberVisible: true,
             sheetCornerRadius: 20,
           }}
@@ -139,7 +139,7 @@ export default function RootLayout() {
           options={{
             headerShown: false,
             presentation: 'formSheet',
-            sheetAllowedDetents: [0.6, 1.0],
+            sheetAllowedDetents: [0.9],
             sheetGrabberVisible: true,
             sheetCornerRadius: 20,
           }}

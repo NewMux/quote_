@@ -30,11 +30,12 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
             className="flex-1 items-center justify-center bg-black/40 px-6"
             onPress={() => setShow(false)}
           >
-            <View className="bg-white rounded-2xl p-2">
+            <View className="bg-white rounded-2xl p-2" style={{ width: 320 }}>
               <DateTimePicker
                 value={value ? parseISO(value) : new Date()}
                 mode="date"
                 display="inline"
+                style={{ width: 320, height: 380 }}
                 onChange={(_event, date) => {
                   setShow(false);
                   if (date) onChange(date.toISOString().slice(0, 10));
