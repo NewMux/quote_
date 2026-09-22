@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   createClient,
+  deleteClient,
   listClients,
   setClientArchived,
   updateClient,
@@ -21,6 +22,7 @@ interface ClientsState {
   create: (input: ClientInput) => Promise<Client>;
   update: (id: string, input: ClientInput) => Promise<void>;
   archive: (id: string, archived: boolean) => Promise<void>;
+  delete: (id: string) => Promise<void>;
 }
 
 export const useClientsStore = create<ClientsState>((set, get) => ({
@@ -55,6 +57,10 @@ export const useClientsStore = create<ClientsState>((set, get) => ({
   },
   archive: async (id, archived) => {
     await setClientArchived(id, archived);
+    await get().load();
+  },
+  delete: async (id) => {
+    await deleteClient(id);
     await get().load();
   },
 }));

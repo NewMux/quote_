@@ -10,6 +10,7 @@ import { EmptyState } from '../../../src/components/EmptyState';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { StatStrip } from '../../../src/components/StatStrip';
 import { StatusBadge } from '../../../src/components/StatusBadge';
+import { SwipeAction } from '../../../src/components/SwipeAction';
 import { convertEstimateToInvoice, deleteDraftDocument } from '../../../src/db/repositories/documents.repo';
 import { generateDocumentPdf } from '../../../src/lib/pdf/generatePdf';
 import { sharePdf } from '../../../src/lib/share';
@@ -20,32 +21,6 @@ import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileS
 import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
 import { useReportsStore } from '../../../src/stores/useReportsStore';
 import type { DocType, DocumentListItem } from '../../../src/types/models';
-
-const SWIPE_ACTION_WIDTH = 76;
-
-function SwipeAction({
-  label,
-  icon,
-  color,
-  onPress,
-}: {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityLabel={label}
-      style={{ width: SWIPE_ACTION_WIDTH, backgroundColor: color }}
-      className="items-center justify-center gap-1"
-    >
-      <Ionicons name={icon} size={20} color="white" />
-      <Text className="text-white text-xs font-medium">{label}</Text>
-    </Pressable>
-  );
-}
 
 const TYPE_FILTERS: Array<{ label: string; value: DocType | undefined }> = [
   { label: 'All', value: undefined },

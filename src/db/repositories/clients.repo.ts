@@ -110,3 +110,7 @@ export async function setClientArchived(id: string, archived: boolean): Promise<
     id,
   ]);
 }
+
+export async function deleteClient(id: string): Promise<void> {
+  await db.runAsync('DELETE FROM clients WHERE id = ?', [id]);
+}
