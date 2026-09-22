@@ -2,14 +2,14 @@ import { useEffect } from 'react';
 import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
-import { Button } from '../../../src/components/Button';
-import { DateField } from '../../../src/components/DateField';
-import { LineItemEditor } from '../../../src/components/LineItemEditor';
-import { computeDocumentTotals, getTaxLabel } from '../../../src/lib/documentCalculations';
-import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../src/lib/money';
-import { BRAND } from '../../../src/lib/theme';
-import { useDocumentEditorStore } from '../../../src/stores/useDocumentEditorStore';
-import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
+import { Button } from '../../../../src/components/Button';
+import { DateField } from '../../../../src/components/DateField';
+import { LineItemEditor } from '../../../../src/components/LineItemEditor';
+import { computeDocumentTotals, getTaxLabel } from '../../../../src/lib/documentCalculations';
+import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../../src/lib/money';
+import { BRAND } from '../../../../src/lib/theme';
+import { useDocumentEditorStore } from '../../../../src/stores/useDocumentEditorStore';
+import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
 
 export default function EditDocumentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

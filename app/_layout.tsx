@@ -33,8 +33,6 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />
-        <Stack.Screen name="documents/[id]/index" options={{ title: 'Document' }} />
-        <Stack.Screen name="documents/[id]/edit" options={{ title: 'Edit Document' }} />
         <Stack.Screen
           name="documents/[id]/settlement-new"
           options={{
@@ -55,8 +53,6 @@ export default function RootLayout() {
             sheetCornerRadius: 20,
           }}
         />
-        <Stack.Screen name="clients/[id]/index" options={{ title: 'Client' }} />
-        <Stack.Screen name="clients/[id]/edit" options={{ title: 'Edit Client' }} />
         <Stack.Screen
           name="items/new"
           options={{
@@ -67,10 +63,6 @@ export default function RootLayout() {
             sheetCornerRadius: 20,
           }}
         />
-        <Stack.Screen name="items/[id]/edit" options={{ title: 'Edit Item' }} />
-        <Stack.Screen name="settings/business-profile" options={{ title: 'Business Profile' }} />
-        <Stack.Screen name="settings/items" options={{ title: 'Item Catalog' }} />
-        <Stack.Screen name="settings/tax-brackets/index" options={{ title: 'Tax Rates' }} />
         <Stack.Screen
           name="settings/tax-brackets/new"
           options={{
@@ -81,8 +73,6 @@ export default function RootLayout() {
             sheetCornerRadius: 20,
           }}
         />
-        <Stack.Screen name="settings/tax-brackets/[id]/edit" options={{ title: 'Edit Tax Rate' }} />
-        <Stack.Screen name="settings/numbering" options={{ title: 'Invoice & Estimate Numbers' }} />
         <Stack.Screen
           name="modals/sign"
           options={{
@@ -110,6 +100,16 @@ export default function RootLayout() {
             headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.75, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
+        <Stack.Screen
+          name="modals/client-filter"
+          options={{
+            headerShown: false,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.5, 1.0],
             sheetGrabberVisible: true,
             sheetCornerRadius: 20,
           }}

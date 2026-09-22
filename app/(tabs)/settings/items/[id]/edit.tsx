@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ItemForm } from '../../../src/components/ItemForm';
-import { getItem, type ItemInput } from '../../../src/db/repositories/itemCatalog.repo';
-import { useItemCatalogStore } from '../../../src/stores/useItemCatalogStore';
-import type { ItemCatalogEntry } from '../../../src/types/models';
+import { ItemForm } from '../../../../../src/components/ItemForm';
+import { getItem, type ItemInput } from '../../../../../src/db/repositories/itemCatalog.repo';
+import { useItemCatalogStore } from '../../../../../src/stores/useItemCatalogStore';
+import type { ItemCatalogEntry } from '../../../../../src/types/models';
 
 export default function EditItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

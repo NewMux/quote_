@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Button } from '../../src/components/Button';
-import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
-import { persistPickedFile } from '../../src/lib/fileStorage';
-import { getCurrencyName } from '../../src/lib/currencies';
+import { Button } from '../../../src/components/Button';
+import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+import { persistPickedFile } from '../../../src/lib/fileStorage';
+import { getCurrencyName } from '../../../src/lib/currencies';
 
 const ACCENT_COLORS = ['#2563EB', '#059669', '#DC2626', '#D97706', '#7C3AED', '#0891B2', '#111827'];
 

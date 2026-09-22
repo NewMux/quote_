@@ -2,10 +2,10 @@ import { useCallback } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Button } from '../../../src/components/Button';
-import { EmptyState } from '../../../src/components/EmptyState';
-import { formatRateBp } from '../../../src/lib/money';
-import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
+import { Button } from '../../../../src/components/Button';
+import { EmptyState } from '../../../../src/components/EmptyState';
+import { formatRateBp } from '../../../../src/lib/money';
+import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
 
 export default function TaxBracketsScreen() {
   const { taxBrackets, load, setDefault } = useTaxBracketsStore();

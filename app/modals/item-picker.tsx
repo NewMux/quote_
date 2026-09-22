@@ -40,7 +40,6 @@ export default function ItemPickerModal() {
           placeholder="Search items…"
           value={query}
           onChangeText={setQuery}
-          autoFocus
         />
       </View>
       <FlatList

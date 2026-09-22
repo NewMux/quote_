@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
-import { Avatar } from '../../../src/components/Avatar';
-import { Card } from '../../../src/components/Card';
-import { EmptyState } from '../../../src/components/EmptyState';
-import { StatusBadge } from '../../../src/components/StatusBadge';
-import { getClient } from '../../../src/db/repositories/clients.repo';
-import { listDocuments } from '../../../src/db/repositories/documents.repo';
-import { formatMinor } from '../../../src/lib/money';
-import { useClientsStore } from '../../../src/stores/useClientsStore';
-import type { Client, DocumentListItem } from '../../../src/types/models';
+import { Avatar } from '../../../../src/components/Avatar';
+import { Card } from '../../../../src/components/Card';
+import { EmptyState } from '../../../../src/components/EmptyState';
+import { StatusBadge } from '../../../../src/components/StatusBadge';
+import { getClient } from '../../../../src/db/repositories/clients.repo';
+import { listDocuments } from '../../../../src/db/repositories/documents.repo';
+import { formatMinor } from '../../../../src/lib/money';
+import { useClientsStore } from '../../../../src/stores/useClientsStore';
+import type { Client, DocumentListItem } from '../../../../src/types/models';
 
 export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

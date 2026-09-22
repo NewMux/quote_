@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { Button } from '../../../../src/components/Button';
-import { formatRateBp, parseRateBp } from '../../../../src/lib/money';
-import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
-import type { TaxBracket } from '../../../../src/types/models';
+import { Button } from '../../../../../src/components/Button';
+import { formatRateBp, parseRateBp } from '../../../../../src/lib/money';
+import { useTaxBracketsStore } from '../../../../../src/stores/useTaxBracketsStore';
+import type { TaxBracket } from '../../../../../src/types/models';
 
 export default function EditTaxBracketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

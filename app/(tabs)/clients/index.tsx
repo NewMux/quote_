@@ -9,7 +9,8 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
 
 export default function ClientsScreen() {
-  const { clients, search, setSearch, load } = useClientsStore();
+  const { clients, search, setSearch, sortBy, hasBalanceOnly, load } = useClientsStore();
+  const hasActiveFilter = sortBy !== 'name' || hasBalanceOnly;
 
   useFocusEffect(
     useCallback(() => {
@@ -31,14 +32,25 @@ export default function ClientsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, gap: 12 }}
         ListHeaderComponent={
-          <View className="flex-row items-center bg-white rounded-2xl px-3 border border-gray-200 mb-2">
-            <Ionicons name="search" size={18} color="#9CA3AF" />
-            <TextInput
-              className="flex-1 py-2.5 px-2 text-base text-gray-900"
-              placeholder="Search clients…"
-              value={search}
-              onChangeText={setSearch}
-            />
+          <View className="flex-row items-center gap-2 mb-2">
+            <View className="flex-1 flex-row items-center bg-white rounded-2xl px-3 border border-gray-200">
+              <Ionicons name="search" size={18} color="#9CA3AF" />
+              <TextInput
+                className="flex-1 py-2.5 px-2 text-base text-gray-900"
+                placeholder="Search clients…"
+                value={search}
+                onChangeText={setSearch}
+              />
+            </View>
+            <Pressable
+              onPress={() => router.push('/modals/client-filter')}
+              accessibilityLabel="Filter clients"
+              className={`w-11 h-11 rounded-full items-center justify-center ${
+                hasActiveFilter ? 'bg-brand' : 'bg-white border border-gray-200'
+              }`}
+            >
+              <Ionicons name="options-outline" size={20} color={hasActiveFilter ? 'white' : '#374151'} />
+            </Pressable>
           </View>
         }
         ListEmptyComponent={

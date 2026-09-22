@@ -1,16 +1,27 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import {
+  ActionSheetIOS,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ActivityLogList } from '../../../src/components/ActivityLogList';
-import { Avatar } from '../../../src/components/Avatar';
-import { Button } from '../../../src/components/Button';
-import { Card } from '../../../src/components/Card';
-import { DocumentStageIndicator } from '../../../src/components/DocumentStageIndicator';
-import { IconButton } from '../../../src/components/IconButton';
-import { LineItemRow } from '../../../src/components/LineItemRow';
-import { StatusBadge } from '../../../src/components/StatusBadge';
-import { listActivity } from '../../../src/db/repositories/activityLog.repo';
-import { getClient } from '../../../src/db/repositories/clients.repo';
+import { Ionicons } from '@expo/vector-icons';
+import { ActivityLogList } from '../../../../src/components/ActivityLogList';
+import { Avatar } from '../../../../src/components/Avatar';
+import { Button } from '../../../../src/components/Button';
+import { Card } from '../../../../src/components/Card';
+import { DocumentStageIndicator } from '../../../../src/components/DocumentStageIndicator';
+import { LineItemRow } from '../../../../src/components/LineItemRow';
+import { StatusBadge } from '../../../../src/components/StatusBadge';
+import { listActivity } from '../../../../src/db/repositories/activityLog.repo';
+import { getClient } from '../../../../src/db/repositories/clients.repo';
 import {
   convertEstimateToInvoice,
   deleteDraftDocument,
@@ -18,14 +29,14 @@ import {
   issueDocument,
   markViewed,
   voidDocument,
-} from '../../../src/db/repositories/documents.repo';
-import { listLineItems } from '../../../src/db/repositories/lineItems.repo';
-import { listSettlements } from '../../../src/db/repositories/settlements.repo';
-import { deleteSignature, listSignatures } from '../../../src/db/repositories/signatures.repo';
-import { generateDocumentPdf } from '../../../src/lib/pdf/generatePdf';
-import { emailPdf, sharePdf } from '../../../src/lib/share';
-import { getTaxLabel } from '../../../src/lib/documentCalculations';
-import { formatMinor } from '../../../src/lib/money';
+} from '../../../../src/db/repositories/documents.repo';
+import { listLineItems } from '../../../../src/db/repositories/lineItems.repo';
+import { listSettlements } from '../../../../src/db/repositories/settlements.repo';
+import { deleteSignature, listSignatures } from '../../../../src/db/repositories/signatures.repo';
+import { generateDocumentPdf } from '../../../../src/lib/pdf/generatePdf';
+import { emailPdf, sharePdf } from '../../../../src/lib/share';
+import { getTaxLabel } from '../../../../src/lib/documentCalculations';
+import { formatMinor } from '../../../../src/lib/money';
 import {
   canConvertToInvoice,
   canDelete,
@@ -35,9 +46,9 @@ import {
   canMarkViewed,
   canVoid,
   isOverdue,
-} from '../../../src/lib/statusMachine';
-import { BRAND } from '../../../src/lib/theme';
-import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+} from '../../../../src/lib/statusMachine';
+import { BRAND } from '../../../../src/lib/theme';
+import { useBusinessProfileStore } from '../../../../src/stores/useBusinessProfileStore';
 import type {
   ActivityLogEntry,
   Client,
@@ -45,7 +56,7 @@ import type {
   LineItem,
   Settlement,
   SignatureRecord,
-} from '../../../src/types/models';
+} from '../../../../src/types/models';
 
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -79,7 +90,23 @@ export default function DocumentDetailScreen() {
   );
 
   useEffect(() => {
-    if (document) navigation.setOptions({ title: document.doc_number });
+    if (!document) return;
+    const doc = document;
+    navigation.setOptions({
+      title: doc.doc_number,
+      headerRight: () => (
+        <View className="flex-row items-center gap-4">
+          {canEdit(doc) ? (
+            <Pressable onPress={() => router.push(`/documents/${id}/edit`)} hitSlop={8} accessibilityLabel="Edit">
+              <Ionicons name="create-outline" size={22} color={BRAND.default} />
+            </Pressable>
+          ) : null}
+          <Pressable onPress={openActionsMenu} hitSlop={8} accessibilityLabel="More actions">
+            <Ionicons name="ellipsis-horizontal-circle-outline" size={22} color={BRAND.default} />
+          </Pressable>
+        </View>
+      ),
+    });
   }, [navigation, document]);
 
   if (!document) {
@@ -149,6 +176,51 @@ export default function DocumentDetailScreen() {
         },
       },
     ]);
+  }
+
+  function openActionsMenu() {
+    if (!document) return;
+    const options: Array<{ label: string; onPress: () => void; destructive?: boolean }> = [
+      { label: 'Share PDF', onPress: () => handleGeneratePdfAnd('view') },
+    ];
+    if (canMarkViewed(document)) {
+      options.push({ label: 'Mark as Viewed', onPress: handleMarkViewed });
+    }
+    if (canVoid(document)) {
+      options.push({
+        label: document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice',
+        onPress: handleVoid,
+        destructive: true,
+      });
+    }
+    if (canDelete(document)) {
+      options.push({ label: 'Delete Draft', onPress: handleDelete, destructive: true });
+    }
+
+    if (Platform.OS === 'ios') {
+      const destructiveButtonIndex = options
+        .map((o, i) => (o.destructive ? i : -1))
+        .filter((i) => i >= 0);
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [...options.map((o) => o.label), 'Close'],
+          cancelButtonIndex: options.length,
+          destructiveButtonIndex,
+        },
+        (index) => {
+          if (index < options.length) options[index].onPress();
+        }
+      );
+    } else {
+      Alert.alert('Document Actions', undefined, [
+        ...options.map((o) => ({
+          text: o.label,
+          style: o.destructive ? ('destructive' as const) : undefined,
+          onPress: o.onPress,
+        })),
+        { text: 'Close', style: 'cancel' as const },
+      ]);
+    }
   }
 
   async function handleConvert() {
@@ -282,29 +354,6 @@ export default function DocumentDetailScreen() {
           issued.
         </Text>
       ) : null}
-
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-3">
-          {canEdit(document) ? (
-            <IconButton icon="create-outline" variant="tinted" accessibilityLabel="Edit" onPress={() => router.push(`/documents/${id}/edit`)} />
-          ) : null}
-          <IconButton icon="share-outline" variant="tinted" accessibilityLabel="Share PDF" onPress={() => handleGeneratePdfAnd('view')} />
-          {canVoid(document) ? (
-            <IconButton
-              icon="close-circle-outline"
-              variant="destructive"
-              accessibilityLabel={document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice'}
-              onPress={handleVoid}
-            />
-          ) : null}
-          {canDelete(document) ? (
-            <IconButton icon="trash-outline" variant="destructive" accessibilityLabel="Delete Draft" onPress={handleDelete} />
-          ) : null}
-        </View>
-        {canMarkViewed(document) ? (
-          <Button label="Mark as Viewed" variant="plain" size="small" onPress={handleMarkViewed} />
-        ) : null}
-      </View>
 
       {settlements.length > 0 ? (
         <Card>

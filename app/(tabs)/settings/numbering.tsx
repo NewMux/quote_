@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, Switch, Text, TextInput, View } from 'react-native';
-import { Button } from '../../src/components/Button';
-import { formatDocNumber } from '../../src/lib/docNumber';
-import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
+import { Button } from '../../../src/components/Button';
+import { formatDocNumber } from '../../../src/lib/docNumber';
+import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
 export default function NumberingScreen() {
   const { profile, load, update } = useBusinessProfileStore();

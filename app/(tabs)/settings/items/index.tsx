@@ -2,11 +2,11 @@ import { useCallback } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Card } from '../../src/components/Card';
-import { EmptyState } from '../../src/components/EmptyState';
-import { formatMinor } from '../../src/lib/money';
-import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
-import { useItemCatalogStore } from '../../src/stores/useItemCatalogStore';
+import { Card } from '../../../../src/components/Card';
+import { EmptyState } from '../../../../src/components/EmptyState';
+import { formatMinor } from '../../../../src/lib/money';
+import { useBusinessProfileStore } from '../../../../src/stores/useBusinessProfileStore';
+import { useItemCatalogStore } from '../../../../src/stores/useItemCatalogStore';
 
 export default function ItemsScreen() {
   const { items, load } = useItemCatalogStore();

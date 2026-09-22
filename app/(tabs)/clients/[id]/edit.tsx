@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ClientForm } from '../../../src/components/ClientForm';
-import { getClient, type ClientInput } from '../../../src/db/repositories/clients.repo';
-import { useClientsStore } from '../../../src/stores/useClientsStore';
-import type { Client } from '../../../src/types/models';
+import { ClientForm } from '../../../../src/components/ClientForm';
+import { getClient, type ClientInput } from '../../../../src/db/repositories/clients.repo';
+import { useClientsStore } from '../../../../src/stores/useClientsStore';
+import type { Client } from '../../../../src/types/models';
 
 export default function EditClientScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

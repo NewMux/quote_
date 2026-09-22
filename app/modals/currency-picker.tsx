@@ -32,7 +32,6 @@ export default function CurrencyPickerModal() {
           placeholder="Search currencies…"
           value={query}
           onChangeText={setQuery}
-          autoFocus
         />
       </View>
       <FlatList

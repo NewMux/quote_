@@ -53,7 +53,6 @@ export default function ClientPickerModal() {
           placeholder="Search clients…"
           value={query}
           onChangeText={setQuery}
-          autoFocus
         />
       </View>
       <FlatList

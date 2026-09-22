@@ -1,13 +1,37 @@
+import type { SQLiteBindValue } from 'expo-sqlite';
 import { db } from '../client';
 import { newId, nowIso } from '../../lib/id';
 import type { Client } from '../../types/models';
 
-export async function listClients(includeArchived = false): Promise<Client[]> {
-  if (includeArchived) {
-    return db.getAllAsync<Client>('SELECT * FROM clients ORDER BY display_name COLLATE NOCASE');
+export interface ClientListOptions {
+  search?: string;
+  sortBy?: 'name' | 'recent';
+  hasBalanceOnly?: boolean;
+}
+
+export async function listClients(options: ClientListOptions = {}): Promise<Client[]> {
+  const clauses: string[] = ['c.is_archived = 0'];
+  const params: SQLiteBindValue[] = [];
+
+  if (options.search) {
+    clauses.push('c.display_name LIKE ? COLLATE NOCASE');
+    params.push(`%${options.search}%`);
   }
+  if (options.hasBalanceOnly) {
+    clauses.push(`c.id IN (
+      SELECT client_id FROM documents
+      WHERE client_id IS NOT NULL AND status NOT IN ('draft', 'void')
+      GROUP BY client_id
+      HAVING SUM(total_minor - amount_paid_minor) > 0
+    )`);
+  }
+
+  const orderBy = options.sortBy === 'recent' ? 'c.created_at DESC' : 'c.display_name COLLATE NOCASE';
+  const limit = options.search ? ' LIMIT 50' : '';
+
   return db.getAllAsync<Client>(
-    'SELECT * FROM clients WHERE is_archived = 0 ORDER BY display_name COLLATE NOCASE'
+    `SELECT c.* FROM clients c WHERE ${clauses.join(' AND ')} ORDER BY ${orderBy}${limit}`,
+    params
   );
 }
 
