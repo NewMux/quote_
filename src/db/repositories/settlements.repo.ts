@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { cancelOverdueReminder, scheduleOverdueReminder } from '../../lib/notifications';
 import { requireOwnerId } from '../ownerId';
 import { logActivity } from './activityLog.repo';
 import type { DocumentRecord, Settlement, SettlementMethod } from '../../types/models';
@@ -68,6 +69,14 @@ async function recalculateDocumentPayment(documentId: string): Promise<void> {
 
   if (newStatus !== doc.status) {
     await logActivity(documentId, 'status_changed', newStatus);
+  }
+
+  if (doc.doc_type === 'invoice') {
+    if (newStatus === 'paid') {
+      await cancelOverdueReminder(documentId);
+    } else if (newStatus === 'issued' || newStatus === 'partially_paid') {
+      await scheduleOverdueReminder({ id: documentId, doc_number: doc.doc_number, due_date: doc.due_date });
+    }
   }
 }
 

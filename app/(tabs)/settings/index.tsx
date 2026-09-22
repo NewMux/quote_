@@ -1,9 +1,12 @@
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../../src/components/Card';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { exportBackup } from '../../../src/lib/backup';
+import { disableReminders, enableReminders, isRemindersEnabled } from '../../../src/lib/notifications';
+import { BRAND } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
@@ -43,6 +46,36 @@ const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof t
 export default function SettingsScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
   const signOut = useAuthStore((s) => s.signOut);
+  const [remindersEnabled, setRemindersEnabled] = useState(false);
+  const [isTogglingReminders, setIsTogglingReminders] = useState(false);
+
+  useEffect(() => {
+    isRemindersEnabled().then(setRemindersEnabled);
+  }, []);
+
+  async function handleToggleReminders(value: boolean) {
+    setIsTogglingReminders(true);
+    try {
+      if (value) {
+        const granted = await enableReminders();
+        setRemindersEnabled(granted);
+        if (!granted) {
+          Alert.alert(
+            'Notifications are off',
+            'Enable notifications for this app in your device Settings, then try again.',
+            [{ text: 'OK' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }]
+          );
+        }
+      } else {
+        await disableReminders();
+        setRemindersEnabled(false);
+      }
+    } catch (err) {
+      Alert.alert('Could not update reminders', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsTogglingReminders(false);
+    }
+  }
 
   async function handleExport() {
     try {
@@ -111,6 +144,24 @@ export default function SettingsScreen() {
             </View>
           </View>
         </Pressable>
+
+        <View className="bg-white rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-gray-100">
+          <View className="flex-row items-center gap-3 flex-1">
+            <Ionicons name="notifications-outline" size={20} color="#374151" />
+            <View className="flex-1">
+              <Text className="text-base text-gray-900">Overdue Invoice Reminders</Text>
+              <Text className="text-xs text-gray-500" numberOfLines={2}>
+                Get notified on this device when an invoice becomes overdue
+              </Text>
+            </View>
+          </View>
+          <Switch
+            value={remindersEnabled}
+            onValueChange={handleToggleReminders}
+            disabled={isTogglingReminders}
+            trackColor={{ true: BRAND.default }}
+          />
+        </View>
 
         <Pressable onPress={() => router.push('/settings/delete-data')}>
           <View className="bg-red-50 rounded-2xl p-4 mt-6 flex-row items-center justify-between border border-red-100">

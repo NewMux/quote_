@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
+import { refreshAllReminders } from '../src/lib/notifications';
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -26,6 +27,10 @@ export default function RootLayout() {
     (async () => {
       await loadProfile();
       setReady(true);
+      // A document's status can change from a different device while this one was closed, so
+      // this resyncs every scheduled reminder against the current data on each sign-in/launch.
+      // Non-critical — never blocks the app from becoming ready.
+      refreshAllReminders().catch(() => {});
     })();
   }, [isAuthLoading, session, loadProfile]);
 

@@ -2,6 +2,7 @@ import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
 import { computeDocumentTotals } from '../../lib/documentCalculations';
 import { deleteFileIfExists } from '../../lib/fileStorage';
+import { cancelOverdueReminder, scheduleOverdueReminder } from '../../lib/notifications';
 import { requireOwnerId } from '../ownerId';
 import { reserveNextDocNumber } from './docCounters.repo';
 import { replaceLineItems } from './lineItems.repo';
@@ -203,6 +204,9 @@ export async function issueDocument(id: string): Promise<void> {
     .eq('id', id);
   if (error) throw error;
   await logActivity(id, 'issued');
+  if (doc.doc_type === 'invoice') {
+    await scheduleOverdueReminder({ id, doc_number: doc.doc_number, due_date: doc.due_date });
+  }
 }
 
 export async function markViewed(id: string): Promise<void> {
@@ -224,6 +228,7 @@ export async function voidDocument(id: string, reason: string): Promise<void> {
     .eq('id', id);
   if (error) throw error;
   await logActivity(id, 'voided', reason);
+  await cancelOverdueReminder(id);
 }
 
 export async function deleteDocument(id: string): Promise<void> {
@@ -237,6 +242,7 @@ export async function deleteDocument(id: string): Promise<void> {
 
   const { error } = await supabase.from('documents').delete().eq('id', id);
   if (error) throw error;
+  await cancelOverdueReminder(id);
 }
 
 export async function setPdfUri(id: string, pdfUri: string): Promise<void> {

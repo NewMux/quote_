@@ -28,6 +28,7 @@
     "plugins": [
       "expo-router",
       "expo-file-system",
+      "expo-notifications",
       [
         "expo-image-picker",
         {
