@@ -34,12 +34,12 @@ export default function DeleteAccountScreen() {
   return (
     <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View className="bg-white rounded-xl p-4 border border-red-200">
-        <Text className="text-base font-semibold text-gray-900 mb-2">This can't be undone</Text>
+        <Text className="text-base font-semibold text-gray-900 mb-2">This can&apos;t be undone</Text>
         <Text className="text-sm text-gray-700 leading-5">
           This permanently deletes your account and everything in it — every client, invoice,
           estimate, item, tax rate, signature, photo, and payment record — and signs you out for
-          good. There's no backup and no way to get this back. If you just want to clear your data
-          and keep your account, use "Delete All Data" instead.
+          good. There&apos;s no backup and no way to get this back. If you just want to clear your
+          data and keep your account, use &quot;Delete All Data&quot; instead.
         </Text>
       </View>
 

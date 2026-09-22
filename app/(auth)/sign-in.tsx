@@ -76,7 +76,7 @@ export default function SignInScreen() {
           onPress={handleSignIn}
         />
         <Pressable onPress={() => router.push('/(auth)/sign-up')} className="items-center py-2">
-          <Text className="text-brand text-sm font-medium">Don't have an account? Sign Up</Text>
+          <Text className="text-brand text-sm font-medium">Don&apos;t have an account? Sign Up</Text>
         </Pressable>
       </View>
     </SafeAreaView>

@@ -46,12 +46,12 @@ export async function getStatusBreakdown(
     draftMinor: 0,
   };
 
-  for (const row of (data ?? []) as Array<{
+  for (const row of (data ?? []) as {
     status: DocStatus;
     due_date: string | null;
     total_minor: number;
     amount_paid_minor: number;
-  }>) {
+  }[]) {
     const display = getDisplayStatus(row);
     const balanceMinor = row.total_minor - row.amount_paid_minor;
     if (display === 'paid') {
@@ -110,7 +110,7 @@ export async function getPaidTotalsByPeriod(
   const settlements = data ?? [];
 
   const now = new Date();
-  const buckets: Array<{ label: string; start: Date; end: Date }> = [];
+  const buckets: { label: string; start: Date; end: Date }[] = [];
 
   for (let i = bucketsBack - 1; i >= 0; i--) {
     let start: Date;

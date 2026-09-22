@@ -20,7 +20,7 @@ export async function listLineItems(documentId: string): Promise<LineItem[]> {
  * sequential-edit usage; a Postgres RPC would be needed to make this fully atomic. */
 export async function replaceLineItems(
   documentId: string,
-  lines: Array<LineItemEditable & LineItemComputedFields>
+  lines: (LineItemEditable & LineItemComputedFields)[]
 ): Promise<void> {
   const ownerId = requireOwnerId();
   const { error: deleteError } = await supabase.from('line_items').delete().eq('document_id', documentId);

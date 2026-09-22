@@ -10,7 +10,7 @@ import { BRAND } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
-const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }> = [
+const ROWS: { label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   {
     label: 'Business Profile',
     subtitle: 'Your business name, logo, and contact info',

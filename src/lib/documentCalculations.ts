@@ -26,7 +26,7 @@ export interface DocumentTotals<T extends LineItemDraft = LineItemDraft> {
   discountAmountMinor: number;
   taxTotalMinor: number;
   totalMinor: number;
-  lines: Array<T & LineItemComputedFields>;
+  lines: (T & LineItemComputedFields)[];
 }
 
 /** Generic so callers can pass richer line objects (e.g. with persistence-only fields like
@@ -74,7 +74,7 @@ export function computeDocumentTotals<T extends LineItemDraft>(
 
 /** Shows the actual tax bracket name (e.g. "VAT") when every taxed line agrees on one;
  * falls back to the generic label when lines mix different tax names or none are taxed. */
-export function getTaxLabel(items: Array<{ isTaxable: boolean; taxName: string | null }>): string {
+export function getTaxLabel(items: { isTaxable: boolean; taxName: string | null }[]): string {
   const names = new Set(
     items.filter((i) => i.isTaxable && i.taxName).map((i) => i.taxName as string)
   );

@@ -22,7 +22,7 @@ import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
 import { useReportsStore } from '../../../src/stores/useReportsStore';
 import type { DocType, DocumentListItem } from '../../../src/types/models';
 
-const TYPE_FILTERS: Array<{ label: string; value: DocType | undefined }> = [
+const TYPE_FILTERS: { label: string; value: DocType | undefined }[] = [
   { label: 'All', value: undefined },
   { label: 'Estimates', value: 'estimate' },
   { label: 'Invoices', value: 'invoice' },

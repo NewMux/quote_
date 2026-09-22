@@ -107,6 +107,7 @@ export default function DocumentDetailScreen() {
         </View>
       ),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, document]);
 
   if (!document) {
@@ -194,7 +195,7 @@ export default function DocumentDetailScreen() {
 
   function openActionsMenu() {
     if (!document) return;
-    const options: Array<{ label: string; onPress: () => void; destructive?: boolean }> = [
+    const options: { label: string; onPress: () => void; destructive?: boolean }[] = [
       { label: 'Share PDF', onPress: () => handleGeneratePdfAnd('view') },
     ];
     if (canMarkViewed(document)) {
@@ -451,7 +452,7 @@ export default function DocumentDetailScreen() {
             </Text>
             <Text className="text-sm text-gray-600">
               This {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} will be canceled. It stays on
-              record but can't be edited, sent, or paid anymore.
+              record but can&apos;t be edited, sent, or paid anymore.
             </Text>
             <TextInput
               className="border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900"

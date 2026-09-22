@@ -2,7 +2,7 @@ import { Pressable, Switch, Text, View } from 'react-native';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 
-const SORT_OPTIONS: Array<{ label: string; value: 'name' | 'recent' }> = [
+const SORT_OPTIONS: { label: string; value: 'name' | 'recent' }[] = [
   { label: 'Name A-Z', value: 'name' },
   { label: 'Recently Added', value: 'recent' },
 ];

@@ -64,7 +64,7 @@ export default function OnboardingScreen() {
           <View className="gap-3">
             <Text className="text-2xl font-bold text-gray-900 text-center">Welcome!</Text>
             <Text className="text-base text-gray-500 text-center">
-              Let's get your business set up — this takes about a minute.
+              Let&apos;s get your business set up — this takes about a minute.
             </Text>
           </View>
         ) : null}
@@ -129,7 +129,7 @@ export default function OnboardingScreen() {
 
         {step === 3 ? (
           <View className="gap-3">
-            <Text className="text-2xl font-bold text-gray-900 text-center">You're all set!</Text>
+            <Text className="text-2xl font-bold text-gray-900 text-center">You&apos;re all set!</Text>
             <Text className="text-base text-gray-500 text-center">
               You can customize invoice numbering and tax rates anytime in Settings.
             </Text>

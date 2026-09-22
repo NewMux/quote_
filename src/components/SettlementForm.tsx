@@ -11,7 +11,7 @@ import { newId } from '../lib/id';
 import { BRAND } from '../lib/theme';
 import type { Settlement, SettlementMethod } from '../types/models';
 
-const METHODS: Array<{ value: SettlementMethod; label: string }> = [
+const METHODS: { value: SettlementMethod; label: string }[] = [
   { value: 'cash', label: 'Cash' },
   { value: 'bank_transfer', label: 'Bank' },
   { value: 'check', label: 'Check' },

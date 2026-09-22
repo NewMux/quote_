@@ -16,14 +16,14 @@ import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileS
 import { useReportsStore } from '../../../src/stores/useReportsStore';
 import type { ReportGranularity } from '../../../src/db/repositories/reports.repo';
 
-const GRANULARITIES: Array<{ label: string; value: ReportGranularity }> = [
+const GRANULARITIES: { label: string; value: ReportGranularity }[] = [
   { label: 'Day', value: 'day' },
   { label: 'Week', value: 'week' },
   { label: 'Month', value: 'month' },
   { label: 'Year', value: 'year' },
 ];
 
-const PERIODS: Array<{ label: string; kind: ReportPeriod['kind'] }> = [
+const PERIODS: { label: string; kind: ReportPeriod['kind'] }[] = [
   { label: 'This Month', kind: 'month' },
   { label: 'Last 90 Days', kind: 'last90' },
   { label: 'This Year', kind: 'year' },

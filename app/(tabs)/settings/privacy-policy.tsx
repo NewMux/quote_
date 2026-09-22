@@ -20,15 +20,16 @@ export default function PrivacyPolicyScreen() {
       <Section title="Where it's stored">
         Your data is stored in a secure cloud database and file storage (provided by Supabase),
         tied to your account. This lets you sign in and access your invoices and clients from more
-        than one device, and means your data survives a lost or reset phone. Your business's
+        than one device, and means your data survives a lost or reset phone. Your business&apos;s
         records are kept private and isolated from every other business using this app — enforced
-        at the database level, not just hidden in the app's interface.
+        at the database level, not just hidden in the app&apos;s interface.
       </Section>
       <Section title="What this app does and doesn't do">
-        This app connects to the internet to save and sync your data. It doesn't run ads, sell
-        your data, or share it with third parties, and it doesn't use analytics or tracking beyond
-        what's needed to keep the app itself working correctly. Sharing a PDF or emailing an
-        invoice is something you choose to do, using your own device's share sheet or mail app.
+        This app connects to the internet to save and sync your data. It doesn&apos;t run ads,
+        sell your data, or share it with third parties, and it doesn&apos;t use analytics or
+        tracking beyond what&apos;s needed to keep the app itself working correctly. Sharing a PDF
+        or emailing an invoice is something you choose to do, using your own device&apos;s share
+        sheet or mail app.
       </Section>
       <Section title="Deleting your data">
         Settings → Delete All Data permanently erases every client, document, item, tax rate,

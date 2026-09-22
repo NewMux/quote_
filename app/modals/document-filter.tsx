@@ -8,7 +8,7 @@ import { getClient } from '../../src/db/repositories/clients.repo';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
 import type { DocStatus } from '../../src/types/models';
 
-const STATUS_OPTIONS: Array<{ label: string; value: DocStatus | 'overdue' | undefined }> = [
+const STATUS_OPTIONS: { label: string; value: DocStatus | 'overdue' | undefined }[] = [
   { label: 'All', value: undefined },
   { label: 'Draft', value: 'draft' },
   { label: 'Issued', value: 'issued' },
