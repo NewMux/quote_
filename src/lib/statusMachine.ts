@@ -29,8 +29,8 @@ export function canEdit(doc: Pick<DocumentRecord, 'status'>): boolean {
   return doc.status === 'draft';
 }
 
-export function canDelete(doc: Pick<DocumentRecord, 'status' | 'converted_to_document_id'>): boolean {
-  return doc.status === 'draft' && !doc.converted_to_document_id;
+export function canDelete(doc: Pick<DocumentRecord, 'converted_to_document_id'>): boolean {
+  return !doc.converted_to_document_id;
 }
 
 export function canIssue(doc: Pick<DocumentRecord, 'status'>): boolean {

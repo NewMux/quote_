@@ -24,7 +24,7 @@ import { listActivity } from '../../../../src/db/repositories/activityLog.repo';
 import { getClient } from '../../../../src/db/repositories/clients.repo';
 import {
   convertEstimateToInvoice,
-  deleteDraftDocument,
+  deleteDocument,
   getDocument,
   issueDocument,
   markViewed,
@@ -169,21 +169,27 @@ export default function DocumentDetailScreen() {
   }
 
   function handleDelete() {
-    Alert.alert('Delete draft?', 'This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteDraftDocument(id);
-            router.replace('/(tabs)/documents');
-          } catch (err) {
-            Alert.alert('Could not delete', err instanceof Error ? err.message : 'Something went wrong.');
-          }
+    if (!document) return;
+    const docType = document.doc_type === 'estimate' ? 'estimate' : 'invoice';
+    Alert.alert(
+      `Delete this ${docType}?`,
+      "This will permanently delete it, along with its line items, signatures, and payment records. This can't be undone.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteDocument(id);
+              router.replace('/(tabs)/documents');
+            } catch (err) {
+              Alert.alert('Could not delete', err instanceof Error ? err.message : 'Something went wrong.');
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   }
 
   function openActionsMenu() {
@@ -202,7 +208,11 @@ export default function DocumentDetailScreen() {
       });
     }
     if (canDelete(document)) {
-      options.push({ label: 'Delete Draft', onPress: handleDelete, destructive: true });
+      options.push({
+        label: document.doc_type === 'estimate' ? 'Delete Estimate' : 'Delete Invoice',
+        onPress: handleDelete,
+        destructive: true,
+      });
     }
 
     if (Platform.OS === 'ios') {

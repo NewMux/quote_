@@ -11,7 +11,7 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { StatStrip } from '../../../src/components/StatStrip';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { SwipeAction } from '../../../src/components/SwipeAction';
-import { convertEstimateToInvoice, deleteDraftDocument } from '../../../src/db/repositories/documents.repo';
+import { convertEstimateToInvoice, deleteDocument } from '../../../src/db/repositories/documents.repo';
 import { generateDocumentPdf } from '../../../src/lib/pdf/generatePdf';
 import { sharePdf } from '../../../src/lib/share';
 import { formatMinor } from '../../../src/lib/money';
@@ -57,7 +57,7 @@ export default function DocumentsScreen() {
     swipeable.close();
     Alert.alert(
       `Delete ${item.doc_number}?`,
-      "This draft will be permanently deleted. This can't be undone.",
+      "This will permanently delete this document, along with its line items, signatures, and payment records. This can't be undone.",
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -65,7 +65,7 @@ export default function DocumentsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteDraftDocument(item.id);
+              await deleteDocument(item.id);
               load();
               loadReports();
             } catch (err) {

@@ -2,9 +2,12 @@ import type { SQLiteBindValue } from 'expo-sqlite';
 import { db } from '../client';
 import { newId, nowIso } from '../../lib/id';
 import { computeDocumentTotals } from '../../lib/documentCalculations';
+import { deleteFileIfExists } from '../../lib/fileStorage';
 import { reserveNextDocNumber } from './docCounters.repo';
 import { replaceLineItems } from './lineItems.repo';
 import { logActivity } from './activityLog.repo';
+import { listSignatures } from './signatures.repo';
+import { listSettlements } from './settlements.repo';
 import type {
   BusinessProfile,
   DiscountType,
@@ -188,9 +191,15 @@ export async function voidDocument(id: string, reason: string): Promise<void> {
   await logActivity(id, 'voided', reason);
 }
 
-export async function deleteDraftDocument(id: string): Promise<void> {
+export async function deleteDocument(id: string): Promise<void> {
   const doc = await getDocument(id);
-  if (!doc || doc.status !== 'draft') return;
+  if (!doc || doc.converted_to_document_id) return;
+
+  const [signatures, settlements] = await Promise.all([listSignatures(id), listSettlements(id)]);
+  deleteFileIfExists(doc.pdf_uri);
+  for (const sig of signatures) deleteFileIfExists(sig.signature_image_uri);
+  for (const settlement of settlements) deleteFileIfExists(settlement.receipt_photo_uri);
+
   await db.runAsync('DELETE FROM documents WHERE id = ?', [id]);
 }
 
