@@ -61,6 +61,7 @@ export default function SettingsScreen() {
         onPress: async () => {
           try {
             await signOut();
+            router.replace('/(auth)/sign-in');
           } catch (err) {
             Alert.alert('Could not sign out', err instanceof Error ? err.message : 'Something went wrong.');
           }

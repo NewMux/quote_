@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { useAuthStore } from '../../src/stores/useAuthStore';
+import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 
 export default function SignInScreen() {
   const signIn = useAuthStore((s) => s.signIn);
@@ -15,6 +16,9 @@ export default function SignInScreen() {
     setIsSubmitting(true);
     try {
       await signIn(email.trim(), password);
+      await useBusinessProfileStore.getState().load();
+      const profile = useBusinessProfileStore.getState().profile;
+      router.replace(profile?.business_name?.trim() ? '/(tabs)/home' : '/onboarding');
     } catch (err) {
       Alert.alert('Could not sign in', err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
