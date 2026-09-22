@@ -1,8 +1,10 @@
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../../src/components/Card';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
+import { exportBackup } from '../../../src/lib/backup';
+import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
 const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }> = [
   {
@@ -38,6 +40,16 @@ const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof t
 ];
 
 export default function SettingsScreen() {
+  const profile = useBusinessProfileStore((s) => s.profile);
+
+  async function handleExport() {
+    try {
+      await exportBackup(profile?.business_name ?? null);
+    } catch (err) {
+      Alert.alert('Could not export data', err instanceof Error ? err.message : 'Something went wrong.');
+    }
+  }
+
   return (
     <View className="flex-1 bg-surface">
       <ScreenHeader title="Settings" />
@@ -64,6 +76,21 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </Card>
+
+        <Pressable onPress={handleExport}>
+          <View className="bg-white rounded-2xl p-4 mt-4 flex-row items-center justify-between border border-gray-100">
+            <View className="flex-row items-center gap-3 flex-1">
+              <Ionicons name="share-outline" size={20} color="#374151" />
+              <View className="flex-1">
+                <Text className="text-base text-gray-900">Export Data</Text>
+                <Text className="text-xs text-gray-500" numberOfLines={2}>
+                  Save a backup of your clients, invoices, and estimates to Files, email, or cloud
+                  storage
+                </Text>
+              </View>
+            </View>
+          </View>
+        </Pressable>
 
         <Pressable onPress={() => router.push('/settings/delete-data')}>
           <View className="bg-red-50 rounded-2xl p-4 mt-6 flex-row items-center justify-between border border-red-100">
