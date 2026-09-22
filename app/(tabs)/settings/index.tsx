@@ -29,6 +29,12 @@ const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof t
     href: '/settings/numbering',
     icon: 'list-outline',
   },
+  {
+    label: 'Privacy Policy',
+    subtitle: 'What this app stores and how it uses it',
+    href: '/settings/privacy-policy',
+    icon: 'shield-checkmark-outline',
+  },
 ];
 
 export default function SettingsScreen() {
@@ -58,6 +64,21 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </Card>
+
+        <Pressable onPress={() => router.push('/settings/delete-data')}>
+          <View className="bg-red-50 rounded-2xl p-4 mt-6 flex-row items-center justify-between border border-red-100">
+            <View className="flex-row items-center gap-3 flex-1">
+              <Ionicons name="trash-outline" size={20} color="#DC2626" />
+              <View className="flex-1">
+                <Text className="text-base text-red-600 font-medium">Delete All Data</Text>
+                <Text className="text-xs text-red-400" numberOfLines={1}>
+                  Permanently erase everything stored on this device
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#F87171" />
+          </View>
+        </Pressable>
       </ScrollView>
     </View>
   );

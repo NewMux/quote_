@@ -10,6 +10,8 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="tax-brackets/index" options={{ title: 'Tax Rates' }} />
       <Stack.Screen name="tax-brackets/[id]/edit" options={{ title: 'Edit Tax Rate' }} />
       <Stack.Screen name="numbering" options={{ title: 'Invoice & Estimate Numbers' }} />
+      <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy' }} />
+      <Stack.Screen name="delete-data" options={{ title: 'Delete All Data' }} />
     </Stack>
   );
 }

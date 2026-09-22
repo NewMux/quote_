@@ -35,3 +35,15 @@ export function deleteFileIfExists(uri: string | null | undefined): void {
     file.delete();
   }
 }
+
+const ALL_CATEGORIES: StorageCategory[] = ['branding', 'signatures', 'receipts', 'pdfs', 'client-photos'];
+
+/** Recursively deletes every stored file across all categories (signatures, photos, PDFs, logos). */
+export function wipeAllFiles(): void {
+  for (const category of ALL_CATEGORIES) {
+    const dir = new Directory(Paths.document, category);
+    if (dir.exists) {
+      dir.delete();
+    }
+  }
+}
