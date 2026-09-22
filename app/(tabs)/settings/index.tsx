@@ -127,6 +127,21 @@ export default function SettingsScreen() {
           </View>
         </Pressable>
 
+        <Pressable onPress={() => router.push('/settings/delete-account')}>
+          <View className="bg-red-50 rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-red-100">
+            <View className="flex-row items-center gap-3 flex-1">
+              <Ionicons name="person-remove-outline" size={20} color="#DC2626" />
+              <View className="flex-1">
+                <Text className="text-base text-red-600 font-medium">Delete Account</Text>
+                <Text className="text-xs text-red-400" numberOfLines={2}>
+                  Permanently delete your account and everything in it
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#F87171" />
+          </View>
+        </Pressable>
+
         <Pressable onPress={handleSignOut}>
           <View className="bg-white rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-gray-100">
             <View className="flex-row items-center gap-3 flex-1">

@@ -12,6 +12,7 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="numbering" options={{ title: 'Invoice & Estimate Numbers' }} />
       <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy' }} />
       <Stack.Screen name="delete-data" options={{ title: 'Delete All Data' }} />
+      <Stack.Screen name="delete-account" options={{ title: 'Delete Account' }} />
     </Stack>
   );
 }
