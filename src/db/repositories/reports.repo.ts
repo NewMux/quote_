@@ -1,5 +1,6 @@
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { getDisplayStatus } from '../../lib/statusMachine';
+import { requireOwnerId } from '../ownerId';
 import type { ChartPoint, DocStatus, DocType } from '../../types/models';
 
 export interface StatusBreakdown {
@@ -16,33 +17,23 @@ export interface StatusBreakdown {
 /** Pulls all non-void documents (optionally of one type, optionally within a created_at range)
  * and buckets them by display status (draft/unpaid/overdue/paid), reusing statusMachine's
  * overdue derivation rather than re-implementing the date comparison in SQL. Dataset sizes for
- * a local single-user app are small enough that aggregating in JS is simpler and safer than
- * duplicating that logic in SQL. */
+ * a single business are small enough that aggregating in JS is simpler and safer than
+ * duplicating that logic server-side. */
 export async function getStatusBreakdown(
   docType?: DocType,
   range?: { startIso: string; endIso: string }
 ): Promise<StatusBreakdown> {
-  const conditions = ["status != 'void'"];
-  const params: string[] = [];
-  if (docType) {
-    conditions.push('doc_type = ?');
-    params.push(docType);
-  }
-  if (range) {
-    conditions.push('created_at >= ? AND created_at <= ?');
-    params.push(range.startIso, range.endIso);
-  }
+  const ownerId = requireOwnerId();
+  let query = supabase
+    .from('documents')
+    .select('status, due_date, total_minor, amount_paid_minor')
+    .eq('owner_id', ownerId)
+    .neq('status', 'void');
+  if (docType) query = query.eq('doc_type', docType);
+  if (range) query = query.gte('created_at', range.startIso).lte('created_at', range.endIso);
 
-  const rows = await db.getAllAsync<{
-    status: DocStatus;
-    due_date: string | null;
-    total_minor: number;
-    amount_paid_minor: number;
-  }>(
-    `SELECT status, due_date, total_minor, amount_paid_minor FROM documents
-     WHERE ${conditions.join(' AND ')}`,
-    params
-  );
+  const { data, error } = await query;
+  if (error) throw error;
 
   const result: StatusBreakdown = {
     paidCount: 0,
@@ -55,7 +46,12 @@ export async function getStatusBreakdown(
     draftMinor: 0,
   };
 
-  for (const row of rows) {
+  for (const row of (data ?? []) as Array<{
+    status: DocStatus;
+    due_date: string | null;
+    total_minor: number;
+    amount_paid_minor: number;
+  }>) {
     const display = getDisplayStatus(row);
     const balanceMinor = row.total_minor - row.amount_paid_minor;
     if (display === 'paid') {
@@ -78,11 +74,15 @@ export async function getStatusBreakdown(
 
 /** Paid (settled) amount per calendar month, oldest to newest, for the revenue trend chart. */
 export async function getRevenueByMonth(monthsBack = 6): Promise<ChartPoint[]> {
-  const rows = await db.getAllAsync<{ ymonth: string; total: number }>(
-    `SELECT substr(settled_date, 1, 7) AS ymonth, SUM(amount_minor) AS total
-     FROM settlements GROUP BY ymonth`
-  );
-  const totalsByMonth = new Map(rows.map((r) => [r.ymonth, r.total]));
+  const ownerId = requireOwnerId();
+  const { data, error } = await supabase.from('settlements').select('settled_date, amount_minor').eq('owner_id', ownerId);
+  if (error) throw error;
+
+  const totalsByMonth = new Map<string, number>();
+  for (const row of data ?? []) {
+    const ymonth = row.settled_date.slice(0, 7);
+    totalsByMonth.set(ymonth, (totalsByMonth.get(ymonth) ?? 0) + row.amount_minor);
+  }
 
   const now = new Date();
   const points: ChartPoint[] = [];
@@ -104,9 +104,10 @@ export async function getPaidTotalsByPeriod(
   granularity: ReportGranularity,
   bucketsBack = 7
 ): Promise<ChartPoint[]> {
-  const settlements = await db.getAllAsync<{ settled_date: string; amount_minor: number }>(
-    'SELECT settled_date, amount_minor FROM settlements'
-  );
+  const ownerId = requireOwnerId();
+  const { data, error } = await supabase.from('settlements').select('settled_date, amount_minor').eq('owner_id', ownerId);
+  if (error) throw error;
+  const settlements = data ?? [];
 
   const now = new Date();
   const buckets: Array<{ label: string; start: Date; end: Date }> = [];

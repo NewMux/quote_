@@ -1,34 +1,42 @@
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { formatDocNumber } from '../../lib/docNumber';
+import { requireOwnerId } from '../ownerId';
 import type { BusinessProfile, DocType } from '../../types/models';
 
-/** Must be called from within db.withTransactionAsync(...) alongside the document insert, so the
- * reservation and the row creation commit or roll back together. Reserves and returns the next
- * formatted document number. */
-export async function reserveNextDocNumber(
-  docType: DocType,
-  profile: BusinessProfile
-): Promise<string> {
+/** Reserves and returns the next formatted document number. Not run inside a database
+ * transaction with the document insert that follows it (no client-side transaction API over
+ * PostgREST) — a read-then-write, same class of race as any client-side counter without a
+ * Postgres RPC. Low risk for this app's single-device, sequential usage; worth converting to an
+ * RPC (e.g. a SQL function using `SELECT ... FOR UPDATE`) if that ever changes. */
+export async function reserveNextDocNumber(docType: DocType, profile: BusinessProfile): Promise<string> {
+  const ownerId = requireOwnerId();
   const yearBucket = profile.reset_numbering_yearly ? new Date().getFullYear() : 0;
   const prefix = docType === 'estimate' ? profile.estimate_prefix : profile.invoice_prefix;
 
-  const existing = await db.getFirstAsync<{ next_number: number }>(
-    'SELECT next_number FROM doc_counters WHERE doc_type = ? AND year_bucket = ?',
-    [docType, yearBucket]
-  );
+  const { data: existing, error: selectError } = await supabase
+    .from('doc_counters')
+    .select('next_number')
+    .eq('owner_id', ownerId)
+    .eq('doc_type', docType)
+    .eq('year_bucket', yearBucket)
+    .maybeSingle();
+  if (selectError) throw selectError;
 
   const nextNumber = existing?.next_number ?? 1;
 
   if (existing) {
-    await db.runAsync(
-      'UPDATE doc_counters SET next_number = next_number + 1 WHERE doc_type = ? AND year_bucket = ?',
-      [docType, yearBucket]
-    );
+    const { error } = await supabase
+      .from('doc_counters')
+      .update({ next_number: nextNumber + 1 })
+      .eq('owner_id', ownerId)
+      .eq('doc_type', docType)
+      .eq('year_bucket', yearBucket);
+    if (error) throw error;
   } else {
-    await db.runAsync(
-      'INSERT INTO doc_counters (doc_type, year_bucket, next_number) VALUES (?, ?, 2)',
-      [docType, yearBucket]
-    );
+    const { error } = await supabase
+      .from('doc_counters')
+      .insert({ owner_id: ownerId, doc_type: docType, year_bucket: yearBucket, next_number: 2 });
+    if (error) throw error;
   }
 
   return formatDocNumber(prefix, nextNumber, profile.number_padding, yearBucket);

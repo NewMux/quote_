@@ -1,36 +1,58 @@
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { db } from '../db/client';
+import { supabase } from './supabase';
+import { requireOwnerId } from '../db/ownerId';
 
 function sanitizeFileNamePart(value: string): string {
   return value.trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'Quote';
 }
 
-/** Copies the live SQLite database (clients, documents, line items, tax rates, item catalog,
- * business profile, settlements, activity log) to a shareable file and hands it to the OS share
- * sheet. Signatures/receipt photos/PDFs/logo aren't included — those are separate files under
- * Paths.document, referenced by URI from the DB, not bundled here. */
+const OWNER_SCOPED_TABLES = [
+  'clients',
+  'tax_brackets',
+  'item_catalog',
+  'doc_counters',
+  'documents',
+  'line_items',
+  'signatures',
+  'settlements',
+  'activity_logs',
+] as const;
+
+/** Fetches every table this business owns from Supabase and hands the result to the OS share
+ * sheet as a JSON file. Signatures/receipt photos/PDFs/logo aren't included — those are still
+ * local-only files (Round 23 will move them to Supabase Storage), referenced by URI rather than
+ * bundled here. */
 export async function exportBackup(businessName: string | null): Promise<void> {
   const available = await Sharing.isAvailableAsync();
   if (!available) {
     throw new Error('Sharing is not available on this device.');
   }
 
-  // Defensive no-op outside WAL mode (this app never enables it) — cheap insurance that the
-  // main .db file is a complete, checkpointed snapshot before it's copied.
-  await db.execAsync('PRAGMA wal_checkpoint(TRUNCATE)');
+  const ownerId = requireOwnerId();
+  const backup: Record<string, unknown> = { exportedAt: new Date().toISOString() };
+
+  const { data: profile, error: profileError } = await supabase
+    .from('business_profile')
+    .select('*')
+    .eq('id', ownerId)
+    .maybeSingle();
+  if (profileError) throw profileError;
+  backup.business_profile = profile;
+
+  for (const table of OWNER_SCOPED_TABLES) {
+    const { data, error } = await supabase.from(table).select('*').eq('owner_id', ownerId);
+    if (error) throw error;
+    backup[table] = data ?? [];
+  }
 
   const dateStamp = new Date().toISOString().slice(0, 10);
-  const fileName = `${sanitizeFileNamePart(businessName ?? 'Quote')}-Backup-${dateStamp}.db`;
+  const fileName = `${sanitizeFileNamePart(businessName ?? 'Quote')}-Backup-${dateStamp}.json`;
   const dest = new File(Paths.cache, fileName);
-  // db.databasePath is a plain filesystem path (no file:// scheme) — expo-file-system's File
-  // expects a proper URI.
-  const sourceUri = db.databasePath.startsWith('file://') ? db.databasePath : `file://${db.databasePath}`;
-  const source = new File(sourceUri);
-  await source.copy(dest, { overwrite: true });
+  dest.write(JSON.stringify(backup, null, 2));
 
   await Sharing.shareAsync(dest.uri, {
-    mimeType: 'application/x-sqlite3',
+    mimeType: 'application/json',
     dialogTitle: 'Save backup',
   });
 }

@@ -1,17 +1,24 @@
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { requireOwnerId } from '../ownerId';
 import { logActivity } from './activityLog.repo';
 import type { DocumentRecord, Settlement, SettlementMethod } from '../../types/models';
 
 export async function listSettlements(documentId: string): Promise<Settlement[]> {
-  return db.getAllAsync<Settlement>(
-    'SELECT * FROM settlements WHERE document_id = ? ORDER BY settled_date DESC, created_at DESC',
-    [documentId]
-  );
+  const { data, error } = await supabase
+    .from('settlements')
+    .select('*')
+    .eq('document_id', documentId)
+    .order('settled_date', { ascending: false })
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function getSettlement(id: string): Promise<Settlement | null> {
-  return db.getFirstAsync<Settlement>('SELECT * FROM settlements WHERE id = ?', [id]);
+  const { data, error } = await supabase.from('settlements').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export interface SettlementInput {
@@ -25,17 +32,24 @@ export interface SettlementInput {
 
 /** Recomputes amount_paid_minor from the settlements table and transitions the document's status
  * accordingly (issued/partially_paid/paid), including reverting to 'issued' if settlements were
- * removed/reduced enough to drop below fully paid. Must be called from within the same
- * db.withTransactionAsync block as the settlement insert/update/delete it follows. */
+ * removed/reduced enough to drop below fully paid. Not run inside a database transaction with the
+ * settlement write that precedes it — see the docCounters.repo.ts note on this app's accepted
+ * read-then-write trade-off without a Postgres RPC. */
 async function recalculateDocumentPayment(documentId: string): Promise<void> {
-  const doc = await db.getFirstAsync<DocumentRecord>('SELECT * FROM documents WHERE id = ?', [documentId]);
+  const { data: doc, error: docError } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('id', documentId)
+    .maybeSingle<DocumentRecord>();
+  if (docError) throw docError;
   if (!doc) throw new Error('Document not found');
 
-  const sumRow = await db.getFirstAsync<{ total: number }>(
-    'SELECT COALESCE(SUM(amount_minor), 0) AS total FROM settlements WHERE document_id = ?',
-    [documentId]
-  );
-  const amountPaidMinor = sumRow?.total ?? 0;
+  const { data: settlements, error: settlementsError } = await supabase
+    .from('settlements')
+    .select('amount_minor')
+    .eq('document_id', documentId);
+  if (settlementsError) throw settlementsError;
+  const amountPaidMinor = (settlements ?? []).reduce((sum, s) => sum + s.amount_minor, 0);
 
   let newStatus = doc.status;
   if (amountPaidMinor >= doc.total_minor && doc.total_minor > 0) {
@@ -46,74 +60,59 @@ async function recalculateDocumentPayment(documentId: string): Promise<void> {
     newStatus = 'issued';
   }
 
-  await db.runAsync('UPDATE documents SET amount_paid_minor = ?, status = ?, updated_at = ? WHERE id = ?', [
-    amountPaidMinor,
-    newStatus,
-    nowIso(),
-    documentId,
-  ]);
+  const { error } = await supabase
+    .from('documents')
+    .update({ amount_paid_minor: amountPaidMinor, status: newStatus, updated_at: nowIso() })
+    .eq('id', documentId);
+  if (error) throw error;
 
   if (newStatus !== doc.status) {
     await logActivity(documentId, 'status_changed', newStatus);
   }
 }
 
-/** Inserts a settlement, recomputes amount_paid_minor, and auto-transitions the document's status
- * (issued/partially_paid -> partially_paid or paid) — all inside one transaction. */
 export async function createSettlement(documentId: string, input: SettlementInput): Promise<void> {
-  const now = nowIso();
-
-  await db.withTransactionAsync(async () => {
-    await db.runAsync(
-      `INSERT INTO settlements (id, document_id, method, amount_minor, settled_date, reference_number, receipt_photo_uri, notes, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        newId(),
-        documentId,
-        input.method,
-        input.amountMinor,
-        input.settledDate,
-        input.referenceNumber ?? null,
-        input.receiptPhotoUri ?? null,
-        input.notes ?? null,
-        now,
-      ]
-    );
-
-    await logActivity(documentId, 'settlement_logged');
-    await recalculateDocumentPayment(documentId);
+  const ownerId = requireOwnerId();
+  const { error } = await supabase.from('settlements').insert({
+    id: newId(),
+    owner_id: ownerId,
+    document_id: documentId,
+    method: input.method,
+    amount_minor: input.amountMinor,
+    settled_date: input.settledDate,
+    reference_number: input.referenceNumber ?? null,
+    receipt_photo_uri: input.receiptPhotoUri ?? null,
+    notes: input.notes ?? null,
+    created_at: nowIso(),
   });
+  if (error) throw error;
+
+  await logActivity(documentId, 'settlement_logged');
+  await recalculateDocumentPayment(documentId);
 }
 
-export async function updateSettlement(
-  id: string,
-  documentId: string,
-  input: SettlementInput
-): Promise<void> {
-  await db.withTransactionAsync(async () => {
-    await db.runAsync(
-      `UPDATE settlements SET method = ?, amount_minor = ?, settled_date = ?, reference_number = ?,
-         receipt_photo_uri = ?, notes = ? WHERE id = ?`,
-      [
-        input.method,
-        input.amountMinor,
-        input.settledDate,
-        input.referenceNumber ?? null,
-        input.receiptPhotoUri ?? null,
-        input.notes ?? null,
-        id,
-      ]
-    );
+export async function updateSettlement(id: string, documentId: string, input: SettlementInput): Promise<void> {
+  const { error } = await supabase
+    .from('settlements')
+    .update({
+      method: input.method,
+      amount_minor: input.amountMinor,
+      settled_date: input.settledDate,
+      reference_number: input.referenceNumber ?? null,
+      receipt_photo_uri: input.receiptPhotoUri ?? null,
+      notes: input.notes ?? null,
+    })
+    .eq('id', id);
+  if (error) throw error;
 
-    await logActivity(documentId, 'settlement_logged', 'updated');
-    await recalculateDocumentPayment(documentId);
-  });
+  await logActivity(documentId, 'settlement_logged', 'updated');
+  await recalculateDocumentPayment(documentId);
 }
 
 export async function deleteSettlement(id: string, documentId: string): Promise<void> {
-  await db.withTransactionAsync(async () => {
-    await db.runAsync('DELETE FROM settlements WHERE id = ?', [id]);
-    await logActivity(documentId, 'settlement_logged', 'deleted');
-    await recalculateDocumentPayment(documentId);
-  });
+  const { error } = await supabase.from('settlements').delete().eq('id', id);
+  if (error) throw error;
+
+  await logActivity(documentId, 'settlement_logged', 'deleted');
+  await recalculateDocumentPayment(documentId);
 }

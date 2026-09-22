@@ -1,6 +1,6 @@
-import type { SQLiteBindValue } from 'expo-sqlite';
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { requireOwnerId } from '../ownerId';
 import type { Client } from '../../types/models';
 
 export interface ClientListOptions {
@@ -9,42 +9,67 @@ export interface ClientListOptions {
   hasBalanceOnly?: boolean;
 }
 
+function sortClients(clients: Client[], sortBy: ClientListOptions['sortBy']): Client[] {
+  const sorted = [...clients];
+  if (sortBy === 'recent') {
+    sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+  } else {
+    // PostgREST can't order by a case-insensitive expression, so this mirrors the old
+    // SQLite `COLLATE NOCASE` ordering client-side instead.
+    sorted.sort((a, b) => a.display_name.localeCompare(b.display_name, undefined, { sensitivity: 'base' }));
+  }
+  return sorted;
+}
+
 export async function listClients(options: ClientListOptions = {}): Promise<Client[]> {
-  const clauses: string[] = ['c.is_archived = 0'];
-  const params: SQLiteBindValue[] = [];
+  const ownerId = requireOwnerId();
+  let query = supabase.from('clients').select('*').eq('owner_id', ownerId).eq('is_archived', 0);
 
   if (options.search) {
-    clauses.push('c.display_name LIKE ? COLLATE NOCASE');
-    params.push(`%${options.search}%`);
+    query = query.ilike('display_name', `%${options.search}%`).limit(50);
   }
+
   if (options.hasBalanceOnly) {
-    clauses.push(`c.id IN (
-      SELECT client_id FROM documents
-      WHERE client_id IS NOT NULL AND status NOT IN ('draft', 'void')
-      GROUP BY client_id
-      HAVING SUM(total_minor - amount_paid_minor) > 0
-    )`);
+    const { data: docs, error: docsError } = await supabase
+      .from('documents')
+      .select('client_id, total_minor, amount_paid_minor')
+      .eq('owner_id', ownerId)
+      .not('client_id', 'is', null)
+      .not('status', 'in', '("draft","void")');
+    if (docsError) throw docsError;
+
+    const balanceByClient = new Map<string, number>();
+    for (const d of docs ?? []) {
+      if (!d.client_id) continue;
+      balanceByClient.set(d.client_id, (balanceByClient.get(d.client_id) ?? 0) + (d.total_minor - d.amount_paid_minor));
+    }
+    const idsWithBalance = [...balanceByClient.entries()].filter(([, balance]) => balance > 0).map(([id]) => id);
+    if (idsWithBalance.length === 0) return [];
+    query = query.in('id', idsWithBalance);
   }
 
-  const orderBy = options.sortBy === 'recent' ? 'c.created_at DESC' : 'c.display_name COLLATE NOCASE';
-  const limit = options.search ? ' LIMIT 50' : '';
-
-  return db.getAllAsync<Client>(
-    `SELECT c.* FROM clients c WHERE ${clauses.join(' AND ')} ORDER BY ${orderBy}${limit}`,
-    params
-  );
+  const { data, error } = await query;
+  if (error) throw error;
+  return sortClients(data ?? [], options.sortBy);
 }
 
 export async function searchClients(query: string): Promise<Client[]> {
-  return db.getAllAsync<Client>(
-    `SELECT * FROM clients WHERE is_archived = 0 AND display_name LIKE ? COLLATE NOCASE
-     ORDER BY display_name COLLATE NOCASE LIMIT 50`,
-    [`%${query}%`]
-  );
+  const ownerId = requireOwnerId();
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .eq('is_archived', 0)
+    .ilike('display_name', `%${query}%`)
+    .limit(50);
+  if (error) throw error;
+  return sortClients(data ?? [], 'name');
 }
 
 export async function getClient(id: string): Promise<Client | null> {
-  return db.getFirstAsync<Client>('SELECT * FROM clients WHERE id = ?', [id]);
+  const { data, error } = await supabase.from('clients').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export interface ClientInput {
@@ -59,58 +84,57 @@ export interface ClientInput {
 }
 
 export async function createClient(input: ClientInput): Promise<Client> {
-  const id = newId();
+  const ownerId = requireOwnerId();
   const now = nowIso();
-  await db.runAsync(
-    `INSERT INTO clients
-      (id, display_name, contact_name, email, phone, address, tax_registration_number, notes, photo_uri, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      input.display_name,
-      input.contact_name ?? null,
-      input.email ?? null,
-      input.phone ?? null,
-      input.address ?? null,
-      input.tax_registration_number ?? null,
-      input.notes ?? null,
-      input.photo_uri ?? null,
-      now,
-      now,
-    ]
-  );
-  const created = await getClient(id);
-  if (!created) throw new Error('Failed to create client');
-  return created;
+  const { data, error } = await supabase
+    .from('clients')
+    .insert({
+      id: newId(),
+      owner_id: ownerId,
+      display_name: input.display_name,
+      contact_name: input.contact_name ?? null,
+      email: input.email ?? null,
+      phone: input.phone ?? null,
+      address: input.address ?? null,
+      tax_registration_number: input.tax_registration_number ?? null,
+      notes: input.notes ?? null,
+      photo_uri: input.photo_uri ?? null,
+      created_at: now,
+      updated_at: now,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export async function updateClient(id: string, input: ClientInput): Promise<void> {
-  await db.runAsync(
-    `UPDATE clients SET display_name = ?, contact_name = ?, email = ?, phone = ?, address = ?,
-       tax_registration_number = ?, notes = ?, photo_uri = ?, updated_at = ? WHERE id = ?`,
-    [
-      input.display_name,
-      input.contact_name ?? null,
-      input.email ?? null,
-      input.phone ?? null,
-      input.address ?? null,
-      input.tax_registration_number ?? null,
-      input.notes ?? null,
-      input.photo_uri ?? null,
-      nowIso(),
-      id,
-    ]
-  );
+  const { error } = await supabase
+    .from('clients')
+    .update({
+      display_name: input.display_name,
+      contact_name: input.contact_name ?? null,
+      email: input.email ?? null,
+      phone: input.phone ?? null,
+      address: input.address ?? null,
+      tax_registration_number: input.tax_registration_number ?? null,
+      notes: input.notes ?? null,
+      photo_uri: input.photo_uri ?? null,
+      updated_at: nowIso(),
+    })
+    .eq('id', id);
+  if (error) throw error;
 }
 
 export async function setClientArchived(id: string, archived: boolean): Promise<void> {
-  await db.runAsync('UPDATE clients SET is_archived = ?, updated_at = ? WHERE id = ?', [
-    archived ? 1 : 0,
-    nowIso(),
-    id,
-  ]);
+  const { error } = await supabase
+    .from('clients')
+    .update({ is_archived: archived ? 1 : 0, updated_at: nowIso() })
+    .eq('id', id);
+  if (error) throw error;
 }
 
 export async function deleteClient(id: string): Promise<void> {
-  await db.runAsync('DELETE FROM clients WHERE id = ?', [id]);
+  const { error } = await supabase.from('clients').delete().eq('id', id);
+  if (error) throw error;
 }

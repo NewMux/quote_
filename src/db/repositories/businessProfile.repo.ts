@@ -1,27 +1,24 @@
-import type { SQLiteBindValue } from 'expo-sqlite';
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { nowIso } from '../../lib/id';
+import { requireOwnerId } from '../ownerId';
 import type { BusinessProfile } from '../../types/models';
 
 export async function getBusinessProfile(): Promise<BusinessProfile> {
-  const row = await db.getFirstAsync<BusinessProfile>(
-    'SELECT * FROM business_profile WHERE id = 1'
-  );
-  if (!row) {
-    throw new Error('Business profile row missing — migration did not seed it.');
-  }
-  return row;
+  const ownerId = requireOwnerId();
+  const { data, error } = await supabase.from('business_profile').select('*').eq('id', ownerId).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('Business profile row missing — the signup trigger did not seed it.');
+  return data;
 }
 
 export async function updateBusinessProfile(
   patch: Partial<Omit<BusinessProfile, 'id' | 'created_at' | 'updated_at'>>
 ): Promise<void> {
-  const keys = Object.keys(patch);
-  if (keys.length === 0) return;
-  const setClause = keys.map((k) => `${k} = ?`).join(', ');
-  const values = keys.map((k) => (patch as Record<string, SQLiteBindValue>)[k]);
-  await db.runAsync(
-    `UPDATE business_profile SET ${setClause}, updated_at = ? WHERE id = 1`,
-    [...values, nowIso()]
-  );
+  const ownerId = requireOwnerId();
+  if (Object.keys(patch).length === 0) return;
+  const { error } = await supabase
+    .from('business_profile')
+    .update({ ...patch, updated_at: nowIso() })
+    .eq('id', ownerId);
+  if (error) throw error;
 }

@@ -1,26 +1,38 @@
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { requireOwnerId } from '../ownerId';
 import type { ItemCatalogEntry } from '../../types/models';
 
+function sortByName(items: ItemCatalogEntry[]): ItemCatalogEntry[] {
+  return [...items].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+}
+
 export async function listItems(includeArchived = false): Promise<ItemCatalogEntry[]> {
-  if (includeArchived) {
-    return db.getAllAsync<ItemCatalogEntry>('SELECT * FROM item_catalog ORDER BY name COLLATE NOCASE');
-  }
-  return db.getAllAsync<ItemCatalogEntry>(
-    'SELECT * FROM item_catalog WHERE is_archived = 0 ORDER BY name COLLATE NOCASE'
-  );
+  const ownerId = requireOwnerId();
+  let query = supabase.from('item_catalog').select('*').eq('owner_id', ownerId);
+  if (!includeArchived) query = query.eq('is_archived', 0);
+  const { data, error } = await query;
+  if (error) throw error;
+  return sortByName(data ?? []);
 }
 
 export async function searchItems(query: string): Promise<ItemCatalogEntry[]> {
-  return db.getAllAsync<ItemCatalogEntry>(
-    `SELECT * FROM item_catalog WHERE is_archived = 0 AND name LIKE ? COLLATE NOCASE
-     ORDER BY name COLLATE NOCASE LIMIT 50`,
-    [`%${query}%`]
-  );
+  const ownerId = requireOwnerId();
+  const { data, error } = await supabase
+    .from('item_catalog')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .eq('is_archived', 0)
+    .ilike('name', `%${query}%`)
+    .limit(50);
+  if (error) throw error;
+  return sortByName(data ?? []);
 }
 
 export async function getItem(id: string): Promise<ItemCatalogEntry | null> {
-  return db.getFirstAsync<ItemCatalogEntry>('SELECT * FROM item_catalog WHERE id = ?', [id]);
+  const { data, error } = await supabase.from('item_catalog').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export interface ItemInput {
@@ -33,50 +45,48 @@ export interface ItemInput {
 }
 
 export async function createItem(input: ItemInput): Promise<ItemCatalogEntry> {
-  const id = newId();
+  const ownerId = requireOwnerId();
   const now = nowIso();
-  await db.runAsync(
-    `INSERT INTO item_catalog
-      (id, name, description, default_unit_price_minor, unit_label, is_taxable, default_tax_bracket_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      input.name,
-      input.description ?? null,
-      input.default_unit_price_minor,
-      input.unit_label,
-      input.is_taxable ? 1 : 0,
-      input.default_tax_bracket_id ?? null,
-      now,
-      now,
-    ]
-  );
-  const created = await getItem(id);
-  if (!created) throw new Error('Failed to create item');
-  return created;
+  const { data, error } = await supabase
+    .from('item_catalog')
+    .insert({
+      id: newId(),
+      owner_id: ownerId,
+      name: input.name,
+      description: input.description ?? null,
+      default_unit_price_minor: input.default_unit_price_minor,
+      unit_label: input.unit_label,
+      is_taxable: input.is_taxable ? 1 : 0,
+      default_tax_bracket_id: input.default_tax_bracket_id ?? null,
+      created_at: now,
+      updated_at: now,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export async function updateItem(id: string, input: ItemInput): Promise<void> {
-  await db.runAsync(
-    `UPDATE item_catalog SET name = ?, description = ?, default_unit_price_minor = ?, unit_label = ?,
-       is_taxable = ?, default_tax_bracket_id = ?, updated_at = ? WHERE id = ?`,
-    [
-      input.name,
-      input.description ?? null,
-      input.default_unit_price_minor,
-      input.unit_label,
-      input.is_taxable ? 1 : 0,
-      input.default_tax_bracket_id ?? null,
-      nowIso(),
-      id,
-    ]
-  );
+  const { error } = await supabase
+    .from('item_catalog')
+    .update({
+      name: input.name,
+      description: input.description ?? null,
+      default_unit_price_minor: input.default_unit_price_minor,
+      unit_label: input.unit_label,
+      is_taxable: input.is_taxable ? 1 : 0,
+      default_tax_bracket_id: input.default_tax_bracket_id ?? null,
+      updated_at: nowIso(),
+    })
+    .eq('id', id);
+  if (error) throw error;
 }
 
 export async function setItemArchived(id: string, archived: boolean): Promise<void> {
-  await db.runAsync('UPDATE item_catalog SET is_archived = ?, updated_at = ? WHERE id = ?', [
-    archived ? 1 : 0,
-    nowIso(),
-    id,
-  ]);
+  const { error } = await supabase
+    .from('item_catalog')
+    .update({ is_archived: archived ? 1 : 0, updated_at: nowIso() })
+    .eq('id', id);
+  if (error) throw error;
 }

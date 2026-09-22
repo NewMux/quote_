@@ -1,11 +1,12 @@
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { requireOwnerId } from '../ownerId';
 import type { SignatureRecord, SignerRole } from '../../types/models';
 
 export async function listSignatures(documentId: string): Promise<SignatureRecord[]> {
-  return db.getAllAsync<SignatureRecord>('SELECT * FROM signatures WHERE document_id = ?', [
-    documentId,
-  ]);
+  const { data, error } = await supabase.from('signatures').select('*').eq('document_id', documentId);
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function upsertSignature(
@@ -14,18 +15,25 @@ export async function upsertSignature(
   imageUri: string,
   signerName?: string | null
 ): Promise<void> {
+  const ownerId = requireOwnerId();
   const now = nowIso();
-  await db.runAsync(
-    `INSERT INTO signatures (id, document_id, signer_role, signer_name, signature_image_uri, signed_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(document_id, signer_role) DO UPDATE SET
-       signer_name = excluded.signer_name,
-       signature_image_uri = excluded.signature_image_uri,
-       signed_at = excluded.signed_at`,
-    [newId(), documentId, role, signerName ?? null, imageUri, now, now]
+  const { error } = await supabase.from('signatures').upsert(
+    {
+      id: newId(),
+      owner_id: ownerId,
+      document_id: documentId,
+      signer_role: role,
+      signer_name: signerName ?? null,
+      signature_image_uri: imageUri,
+      signed_at: now,
+      created_at: now,
+    },
+    { onConflict: 'document_id,signer_role' }
   );
+  if (error) throw error;
 }
 
 export async function deleteSignature(documentId: string, role: SignerRole): Promise<void> {
-  await db.runAsync('DELETE FROM signatures WHERE document_id = ? AND signer_role = ?', [documentId, role]);
+  const { error } = await supabase.from('signatures').delete().eq('document_id', documentId).eq('signer_role', role);
+  if (error) throw error;
 }

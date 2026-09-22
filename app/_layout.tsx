@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
-import { db } from '../src/db/client';
-import { migrate } from '../src/db/migrate';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 
@@ -12,6 +10,7 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const loadProfile = useBusinessProfileStore((s) => s.load);
   const initializeAuth = useAuthStore((s) => s.initialize);
+  const session = useAuthStore((s) => s.session);
   const isAuthLoading = useAuthStore((s) => s.isLoading);
 
   useEffect(() => {
@@ -19,12 +18,16 @@ export default function RootLayout() {
   }, [initializeAuth]);
 
   useEffect(() => {
+    if (isAuthLoading) return;
+    if (!session) {
+      setReady(true);
+      return;
+    }
     (async () => {
-      await migrate(db);
       await loadProfile();
       setReady(true);
     })();
-  }, [loadProfile]);
+  }, [isAuthLoading, session, loadProfile]);
 
   if (!ready || isAuthLoading) {
     return (

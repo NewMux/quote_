@@ -1,5 +1,6 @@
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
+import { requireOwnerId } from '../ownerId';
 import type { ActivityEventType, ActivityLogEntry } from '../../types/models';
 
 export async function logActivity(
@@ -7,15 +8,24 @@ export async function logActivity(
   eventType: ActivityEventType,
   eventDetail?: string | null
 ): Promise<void> {
-  await db.runAsync(
-    'INSERT INTO activity_logs (id, document_id, event_type, event_detail, created_at) VALUES (?, ?, ?, ?, ?)',
-    [newId(), documentId, eventType, eventDetail ?? null, nowIso()]
-  );
+  const ownerId = requireOwnerId();
+  const { error } = await supabase.from('activity_logs').insert({
+    id: newId(),
+    owner_id: ownerId,
+    document_id: documentId,
+    event_type: eventType,
+    event_detail: eventDetail ?? null,
+    created_at: nowIso(),
+  });
+  if (error) throw error;
 }
 
 export async function listActivity(documentId: string): Promise<ActivityLogEntry[]> {
-  return db.getAllAsync<ActivityLogEntry>(
-    'SELECT * FROM activity_logs WHERE document_id = ? ORDER BY created_at DESC',
-    [documentId]
-  );
+  const { data, error } = await supabase
+    .from('activity_logs')
+    .select('*')
+    .eq('document_id', documentId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
 }

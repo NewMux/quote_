@@ -228,3 +228,10 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Trigger functions can't be meaningfully invoked outside trigger context (Postgres rejects a
+-- direct call), but Postgres grants EXECUTE to PUBLIC by default on every new function, which
+-- exposes it via PostgREST's /rest/v1/rpc/handle_new_user regardless. Revoking PUBLIC's execute
+-- closes that surface; the trigger itself keeps working since it runs with the table owner's
+-- privileges, not the caller's.
+revoke execute on function public.handle_new_user() from public;

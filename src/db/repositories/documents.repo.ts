@@ -1,8 +1,8 @@
-import type { SQLiteBindValue } from 'expo-sqlite';
-import { db } from '../client';
+import { supabase } from '../../lib/supabase';
 import { newId, nowIso } from '../../lib/id';
 import { computeDocumentTotals } from '../../lib/documentCalculations';
 import { deleteFileIfExists } from '../../lib/fileStorage';
+import { requireOwnerId } from '../ownerId';
 import { reserveNextDocNumber } from './docCounters.repo';
 import { replaceLineItems } from './lineItems.repo';
 import { logActivity } from './activityLog.repo';
@@ -27,58 +27,93 @@ export interface DocumentListFilter {
   search?: string;
 }
 
+/** Signature images/receipt photos/PDFs are still local-only (Round 23 will move them to
+ * Supabase Storage), so a document's own PDF/signatures/settlements files stay untouched here —
+ * only the structured row data moved to Supabase this round. */
 export async function listDocuments(filter: DocumentListFilter = {}): Promise<DocumentListItem[]> {
-  const clauses: string[] = [];
-  const params: SQLiteBindValue[] = [];
+  const ownerId = requireOwnerId();
+  let query = supabase
+    .from('documents')
+    .select(
+      'id, doc_type, doc_number, status, viewed_at, client_id, client_name_snapshot, due_date, total_minor, amount_paid_minor, currency_code, converted_to_document_id, created_at, updated_at, clients(display_name)'
+    )
+    .eq('owner_id', ownerId);
 
-  if (filter.docType) {
-    clauses.push('d.doc_type = ?');
-    params.push(filter.docType);
-  }
+  if (filter.docType) query = query.eq('doc_type', filter.docType);
   if (filter.status === 'overdue') {
-    clauses.push(
-      "d.status IN ('issued', 'partially_paid') AND d.due_date IS NOT NULL AND d.due_date < ? AND d.amount_paid_minor < d.total_minor"
-    );
-    params.push(new Date().toISOString().slice(0, 10));
+    query = query
+      .in('status', ['issued', 'partially_paid'])
+      .not('due_date', 'is', null)
+      .lt('due_date', new Date().toISOString().slice(0, 10));
   } else if (filter.status) {
-    clauses.push('d.status = ?');
-    params.push(filter.status);
+    query = query.eq('status', filter.status);
   }
-  if (filter.clientId) {
-    clauses.push('d.client_id = ?');
-    params.push(filter.clientId);
-  }
-  if (filter.dateFrom) {
-    clauses.push('d.issue_date >= ?');
-    params.push(filter.dateFrom);
-  }
-  if (filter.dateTo) {
-    clauses.push('d.issue_date <= ?');
-    params.push(filter.dateTo);
+  if (filter.clientId) query = query.eq('client_id', filter.clientId);
+  if (filter.dateFrom) query = query.gte('issue_date', filter.dateFrom);
+  if (filter.dateTo) query = query.lte('issue_date', filter.dateTo);
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+  if (error) throw error;
+
+  type Row = {
+    id: string;
+    doc_type: DocType;
+    doc_number: string;
+    status: DocStatus;
+    viewed_at: string | null;
+    client_id: string | null;
+    client_name_snapshot: string | null;
+    due_date: string | null;
+    total_minor: number;
+    amount_paid_minor: number;
+    currency_code: string;
+    converted_to_document_id: string | null;
+    created_at: string;
+    updated_at: string;
+    clients: { display_name: string } | { display_name: string }[] | null;
+  };
+
+  let rows: DocumentListItem[] = ((data ?? []) as Row[]).map((d) => {
+    const client = Array.isArray(d.clients) ? d.clients[0] : d.clients;
+    return {
+      id: d.id,
+      doc_type: d.doc_type,
+      doc_number: d.doc_number,
+      status: d.status,
+      viewed_at: d.viewed_at,
+      client_id: d.client_id,
+      client_name: client?.display_name ?? d.client_name_snapshot,
+      due_date: d.due_date,
+      total_minor: d.total_minor,
+      amount_paid_minor: d.amount_paid_minor,
+      currency_code: d.currency_code,
+      converted_to_document_id: d.converted_to_document_id,
+      created_at: d.created_at,
+      updated_at: d.updated_at,
+    };
+  });
+
+  // PostgREST can't express "amount_paid_minor < total_minor" as a column-to-column filter, and
+  // an OR search across the document's own column and the joined client's name isn't reliably
+  // expressible through the query builder either — both are filtered here instead, following the
+  // same "small dataset, filter in JS" approach already used in reports.repo.ts.
+  if (filter.status === 'overdue') {
+    rows = rows.filter((r) => r.amount_paid_minor < r.total_minor);
   }
   if (filter.search) {
-    clauses.push('(d.doc_number LIKE ? OR c.display_name LIKE ?)');
-    params.push(`%${filter.search}%`, `%${filter.search}%`);
+    const q = filter.search.toLowerCase();
+    rows = rows.filter(
+      (r) => r.doc_number.toLowerCase().includes(q) || (r.client_name ?? '').toLowerCase().includes(q)
+    );
   }
 
-  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-
-  return db.getAllAsync<DocumentListItem>(
-    `SELECT
-       d.id, d.doc_type, d.doc_number, d.status, d.viewed_at, d.client_id,
-       COALESCE(c.display_name, d.client_name_snapshot) AS client_name,
-       d.due_date, d.total_minor, d.amount_paid_minor, d.currency_code,
-       d.converted_to_document_id, d.created_at, d.updated_at
-     FROM documents d
-     LEFT JOIN clients c ON c.id = d.client_id
-     ${where}
-     ORDER BY d.created_at DESC`,
-    params
-  );
+  return rows;
 }
 
 export async function getDocument(id: string): Promise<DocumentRecord | null> {
-  return db.getFirstAsync<DocumentRecord>('SELECT * FROM documents WHERE id = ?', [id]);
+  const { data, error } = await supabase.from('documents').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export async function createDraftDocument(
@@ -87,24 +122,27 @@ export async function createDraftDocument(
   clientId: string | null,
   clientNameSnapshot: string | null
 ): Promise<DocumentRecord> {
+  const ownerId = requireOwnerId();
   const id = newId();
   const now = nowIso();
-  const dueDate =
-    docType === 'invoice'
-      ? addDays(now, profile.default_payment_terms_days)
-      : null;
+  const dueDate = docType === 'invoice' ? addDays(now, profile.default_payment_terms_days) : null;
 
-  await db.withTransactionAsync(async () => {
-    const docNumber = await reserveNextDocNumber(docType, profile);
-    await db.runAsync(
-      `INSERT INTO documents (
-        id, doc_type, doc_number, status, client_id, client_name_snapshot,
-        due_date, currency_code, created_at, updated_at
-      ) VALUES (?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?)`,
-      [id, docType, docNumber, clientId, clientNameSnapshot, dueDate, profile.default_currency_code, now, now]
-    );
-    await logActivity(id, 'created');
+  const docNumber = await reserveNextDocNumber(docType, profile);
+  const { error } = await supabase.from('documents').insert({
+    id,
+    owner_id: ownerId,
+    doc_type: docType,
+    doc_number: docNumber,
+    status: 'draft',
+    client_id: clientId,
+    client_name_snapshot: clientNameSnapshot,
+    due_date: dueDate,
+    currency_code: profile.default_currency_code,
+    created_at: now,
+    updated_at: now,
   });
+  if (error) throw error;
+  await logActivity(id, 'created');
 
   const created = await getDocument(id);
   if (!created) throw new Error('Failed to create document');
@@ -130,34 +168,27 @@ export async function saveDocumentEdit(
 ): Promise<void> {
   const totals = computeDocumentTotals(lines, header.discountType, header.discountValue);
 
-  await db.withTransactionAsync(async () => {
-    await replaceLineItems(documentId, totals.lines);
-    await db.runAsync(
-      `UPDATE documents SET
-        client_id = ?, client_name_snapshot = ?, issue_date = ?, due_date = ?, expiry_date = ?,
-        notes = ?, terms_override = ?, discount_type = ?, discount_value = ?,
-        subtotal_minor = ?, discount_amount_minor = ?, tax_total_minor = ?, total_minor = ?,
-        updated_at = ?
-       WHERE id = ?`,
-      [
-        header.clientId,
-        header.clientNameSnapshot,
-        header.issueDate,
-        header.dueDate,
-        header.expiryDate,
-        header.notes,
-        header.termsOverride,
-        header.discountType,
-        header.discountValue,
-        totals.subtotalMinor,
-        totals.discountAmountMinor,
-        totals.taxTotalMinor,
-        totals.totalMinor,
-        nowIso(),
-        documentId,
-      ]
-    );
-  });
+  await replaceLineItems(documentId, totals.lines);
+  const { error } = await supabase
+    .from('documents')
+    .update({
+      client_id: header.clientId,
+      client_name_snapshot: header.clientNameSnapshot,
+      issue_date: header.issueDate,
+      due_date: header.dueDate,
+      expiry_date: header.expiryDate,
+      notes: header.notes,
+      terms_override: header.termsOverride,
+      discount_type: header.discountType,
+      discount_value: header.discountValue,
+      subtotal_minor: totals.subtotalMinor,
+      discount_amount_minor: totals.discountAmountMinor,
+      tax_total_minor: totals.taxTotalMinor,
+      total_minor: totals.totalMinor,
+      updated_at: nowIso(),
+    })
+    .eq('id', documentId);
+  if (error) throw error;
 
   await logActivity(documentId, 'edited');
 }
@@ -166,28 +197,32 @@ export async function issueDocument(id: string): Promise<void> {
   const doc = await getDocument(id);
   if (!doc || doc.status !== 'draft') return;
   const now = nowIso();
-  await db.runAsync(
-    `UPDATE documents SET status = 'issued', issue_date = COALESCE(issue_date, ?), updated_at = ? WHERE id = ?`,
-    [now.slice(0, 10), now, id]
-  );
+  const { error } = await supabase
+    .from('documents')
+    .update({ status: 'issued', issue_date: doc.issue_date ?? now.slice(0, 10), updated_at: now })
+    .eq('id', id);
+  if (error) throw error;
   await logActivity(id, 'issued');
 }
 
 export async function markViewed(id: string): Promise<void> {
-  await db.runAsync('UPDATE documents SET viewed_at = ?, updated_at = ? WHERE id = ? AND viewed_at IS NULL', [
-    nowIso(),
-    nowIso(),
-    id,
-  ]);
+  const now = nowIso();
+  const { error } = await supabase
+    .from('documents')
+    .update({ viewed_at: now, updated_at: now })
+    .eq('id', id)
+    .is('viewed_at', null);
+  if (error) throw error;
   await logActivity(id, 'viewed_marked');
 }
 
 export async function voidDocument(id: string, reason: string): Promise<void> {
   const now = nowIso();
-  await db.runAsync(
-    `UPDATE documents SET status = 'void', voided_at = ?, void_reason = ?, updated_at = ? WHERE id = ?`,
-    [now, reason, now, id]
-  );
+  const { error } = await supabase
+    .from('documents')
+    .update({ status: 'void', voided_at: now, void_reason: reason, updated_at: now })
+    .eq('id', id);
+  if (error) throw error;
   await logActivity(id, 'voided', reason);
 }
 
@@ -200,104 +235,95 @@ export async function deleteDocument(id: string): Promise<void> {
   for (const sig of signatures) deleteFileIfExists(sig.signature_image_uri);
   for (const settlement of settlements) deleteFileIfExists(settlement.receipt_photo_uri);
 
-  await db.runAsync('DELETE FROM documents WHERE id = ?', [id]);
+  const { error } = await supabase.from('documents').delete().eq('id', id);
+  if (error) throw error;
 }
 
 export async function setPdfUri(id: string, pdfUri: string): Promise<void> {
-  await db.runAsync('UPDATE documents SET pdf_uri = ?, updated_at = ? WHERE id = ?', [
-    pdfUri,
-    nowIso(),
-    id,
-  ]);
+  const { error } = await supabase.from('documents').update({ pdf_uri: pdfUri, updated_at: nowIso() }).eq('id', id);
+  if (error) throw error;
 }
 
 export async function convertEstimateToInvoice(
   estimateId: string,
   profile: BusinessProfile
 ): Promise<DocumentRecord> {
+  const ownerId = requireOwnerId();
   const estimate = await getDocument(estimateId);
   if (!estimate) throw new Error('Estimate not found');
   if (estimate.doc_type !== 'estimate') throw new Error('Document is not an estimate');
 
-  const lines = await db.getAllAsync<{
-    catalog_item_id: string | null;
-    description: string;
-    quantity: number;
-    unit_label: string | null;
-    unit_price_minor: number;
-    discount_type: DiscountType | null;
-    discount_value: number | null;
-    is_taxable: number;
-    tax_bracket_id: string | null;
-    tax_bracket_name_snapshot: string | null;
-    tax_rate_bp: number;
-  }>('SELECT * FROM line_items WHERE document_id = ? ORDER BY position ASC', [estimateId]);
+  const { data: lines, error: linesError } = await supabase
+    .from('line_items')
+    .select(
+      'catalog_item_id, description, quantity, unit_label, unit_price_minor, discount_type, discount_value, is_taxable, tax_bracket_id, tax_bracket_name_snapshot, tax_rate_bp'
+    )
+    .eq('document_id', estimateId)
+    .order('position', { ascending: true });
+  if (linesError) throw linesError;
 
   const invoiceId = newId();
   const now = nowIso();
   const dueDate = addDays(now, profile.default_payment_terms_days);
 
-  await db.withTransactionAsync(async () => {
-    const docNumber = await reserveNextDocNumber('invoice', profile);
-    await db.runAsync(
-      `INSERT INTO documents (
-        id, doc_type, doc_number, status, client_id, client_name_snapshot, due_date,
-        currency_code, notes, terms_override, converted_from_document_id, created_at, updated_at
-      ) VALUES (?, 'invoice', ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        invoiceId,
-        docNumber,
-        estimate.client_id,
-        estimate.client_name_snapshot,
-        dueDate,
-        estimate.currency_code,
-        estimate.notes,
-        estimate.terms_override,
-        estimateId,
-        now,
-        now,
-      ]
-    );
-
-    const editableLines: LineItemEditable[] = lines.map((l) => ({
-      id: newId(),
-      catalogItemId: l.catalog_item_id,
-      description: l.description,
-      quantity: l.quantity,
-      unitLabel: l.unit_label,
-      unitPriceMinor: l.unit_price_minor,
-      discountType: l.discount_type,
-      discountValue: l.discount_value,
-      isTaxable: l.is_taxable === 1,
-      taxBracketId: l.tax_bracket_id,
-      taxBracketNameSnapshot: l.tax_bracket_name_snapshot,
-      taxRateBp: l.tax_rate_bp,
-    }));
-    const totals = computeDocumentTotals(editableLines, estimate.discount_type, estimate.discount_value);
-    await replaceLineItems(invoiceId, totals.lines);
-    await db.runAsync(
-      `UPDATE documents SET discount_type = ?, discount_value = ?, subtotal_minor = ?,
-         discount_amount_minor = ?, tax_total_minor = ?, total_minor = ?, updated_at = ? WHERE id = ?`,
-      [
-        estimate.discount_type,
-        estimate.discount_value,
-        totals.subtotalMinor,
-        totals.discountAmountMinor,
-        totals.taxTotalMinor,
-        totals.totalMinor,
-        nowIso(),
-        invoiceId,
-      ]
-    );
-
-    await db.runAsync(
-      'UPDATE documents SET converted_to_document_id = ?, updated_at = ? WHERE id = ?',
-      [invoiceId, nowIso(), estimateId]
-    );
-
-    await logActivity(estimateId, 'converted_to_invoice', docNumber);
-    await logActivity(invoiceId, 'created', `Converted from estimate ${estimate.doc_number}`);
+  const docNumber = await reserveNextDocNumber('invoice', profile);
+  const { error: insertError } = await supabase.from('documents').insert({
+    id: invoiceId,
+    owner_id: ownerId,
+    doc_type: 'invoice',
+    doc_number: docNumber,
+    status: 'draft',
+    client_id: estimate.client_id,
+    client_name_snapshot: estimate.client_name_snapshot,
+    due_date: dueDate,
+    currency_code: estimate.currency_code,
+    notes: estimate.notes,
+    terms_override: estimate.terms_override,
+    converted_from_document_id: estimateId,
+    created_at: now,
+    updated_at: now,
   });
+  if (insertError) throw insertError;
+
+  const editableLines: LineItemEditable[] = (lines ?? []).map((l) => ({
+    id: newId(),
+    catalogItemId: l.catalog_item_id,
+    description: l.description,
+    quantity: l.quantity,
+    unitLabel: l.unit_label,
+    unitPriceMinor: l.unit_price_minor,
+    discountType: l.discount_type,
+    discountValue: l.discount_value,
+    isTaxable: l.is_taxable === 1,
+    taxBracketId: l.tax_bracket_id,
+    taxBracketNameSnapshot: l.tax_bracket_name_snapshot,
+    taxRateBp: l.tax_rate_bp,
+  }));
+  const totals = computeDocumentTotals(editableLines, estimate.discount_type, estimate.discount_value);
+  await replaceLineItems(invoiceId, totals.lines);
+
+  const { error: totalsError } = await supabase
+    .from('documents')
+    .update({
+      discount_type: estimate.discount_type,
+      discount_value: estimate.discount_value,
+      subtotal_minor: totals.subtotalMinor,
+      discount_amount_minor: totals.discountAmountMinor,
+      tax_total_minor: totals.taxTotalMinor,
+      total_minor: totals.totalMinor,
+      updated_at: nowIso(),
+    })
+    .eq('id', invoiceId);
+  if (totalsError) throw totalsError;
+
+  const { error: linkError } = await supabase
+    .from('documents')
+    .update({ converted_to_document_id: invoiceId, updated_at: nowIso() })
+    .eq('id', estimateId);
+  if (linkError) throw linkError;
+
+  await logActivity(estimateId, 'converted_to_invoice', docNumber);
+  await logActivity(invoiceId, 'created', `Converted from estimate ${estimate.doc_number}`);
 
   const created = await getDocument(invoiceId);
   if (!created) throw new Error('Failed to convert estimate to invoice');
