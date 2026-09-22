@@ -5,11 +5,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { db } from '../src/db/client';
 import { migrate } from '../src/db/migrate';
+import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const loadProfile = useBusinessProfileStore((s) => s.load);
+  const initializeAuth = useAuthStore((s) => s.initialize);
+  const isAuthLoading = useAuthStore((s) => s.isLoading);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   useEffect(() => {
     (async () => {
@@ -19,7 +26,7 @@ export default function RootLayout() {
     })();
   }, [loadProfile]);
 
-  if (!ready) {
+  if (!ready || isAuthLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" />
@@ -30,6 +37,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />

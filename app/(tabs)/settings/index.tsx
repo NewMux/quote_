@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../../src/components/Card';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { exportBackup } from '../../../src/lib/backup';
+import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
 const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }> = [
@@ -41,6 +42,7 @@ const ROWS: Array<{ label: string; subtitle: string; href: string; icon: keyof t
 
 export default function SettingsScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
+  const signOut = useAuthStore((s) => s.signOut);
 
   async function handleExport() {
     try {
@@ -48,6 +50,23 @@ export default function SettingsScreen() {
     } catch (err) {
       Alert.alert('Could not export data', err instanceof Error ? err.message : 'Something went wrong.');
     }
+  }
+
+  function handleSignOut() {
+    Alert.alert('Sign out?', 'You can sign back in anytime with your email and password.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut();
+          } catch (err) {
+            Alert.alert('Could not sign out', err instanceof Error ? err.message : 'Something went wrong.');
+          }
+        },
+      },
+    ]);
   }
 
   return (
@@ -104,6 +123,15 @@ export default function SettingsScreen() {
               </View>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#F87171" />
+          </View>
+        </Pressable>
+
+        <Pressable onPress={handleSignOut}>
+          <View className="bg-white rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-gray-100">
+            <View className="flex-row items-center gap-3 flex-1">
+              <Ionicons name="log-out-outline" size={20} color="#374151" />
+              <Text className="text-base text-gray-900">Sign Out</Text>
+            </View>
           </View>
         </Pressable>
       </ScrollView>
