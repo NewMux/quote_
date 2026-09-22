@@ -144,6 +144,10 @@ export default function DocumentDetailScreen() {
 
   async function handleMarkViewed() {
     await withBusy(() => markViewed(id));
+    Alert.alert(
+      'Marked as viewed',
+      "This records that the client has seen this document — you'll see it in the Activity log below."
+    );
   }
 
   function handleClearSignature(role: 'merchant' | 'client') {
@@ -171,8 +175,12 @@ export default function DocumentDetailScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: async () => {
-          await deleteDraftDocument(id);
-          router.replace('/(tabs)/documents');
+          try {
+            await deleteDraftDocument(id);
+            router.replace('/(tabs)/documents');
+          } catch (err) {
+            Alert.alert('Could not delete', err instanceof Error ? err.message : 'Something went wrong.');
+          }
         },
       },
     ]);

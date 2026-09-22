@@ -1,4 +1,5 @@
 import { format, parseISO } from 'date-fns';
+import { getTaxLabel } from '../documentCalculations';
 import { formatMinor, formatRateBp } from '../money';
 import type { BusinessProfile, Client, DocumentRecord, LineItem, SignatureRecord } from '../../types/models';
 
@@ -126,7 +127,7 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
   <div class="totals">
     <div class="totals-row"><span>Subtotal</span><span>${formatMinor(document.subtotal_minor, document.currency_code)}</span></div>
     ${document.discount_amount_minor > 0 ? `<div class="totals-row"><span>Discount</span><span>-${formatMinor(document.discount_amount_minor, document.currency_code)}</span></div>` : ''}
-    <div class="totals-row"><span>Tax</span><span>${formatMinor(document.tax_total_minor, document.currency_code)}</span></div>
+    <div class="totals-row"><span>${escapeHtml(getTaxLabel(lines.map((l) => ({ isTaxable: l.is_taxable === 1, taxName: l.tax_bracket_name_snapshot }))))}</span><span>${formatMinor(document.tax_total_minor, document.currency_code)}</span></div>
     <div class="totals-row total"><span>Total</span><span>${formatMinor(document.total_minor, document.currency_code)}</span></div>
     ${document.amount_paid_minor > 0 ? `<div class="totals-row"><span>Paid</span><span>${formatMinor(document.amount_paid_minor, document.currency_code)}</span></div>
     <div class="totals-row"><span>Balance Due</span><span>${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}</span></div>` : ''}

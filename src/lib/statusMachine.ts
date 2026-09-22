@@ -29,8 +29,8 @@ export function canEdit(doc: Pick<DocumentRecord, 'status'>): boolean {
   return doc.status === 'draft';
 }
 
-export function canDelete(doc: Pick<DocumentRecord, 'status'>): boolean {
-  return doc.status === 'draft';
+export function canDelete(doc: Pick<DocumentRecord, 'status' | 'converted_to_document_id'>): boolean {
+  return doc.status === 'draft' && !doc.converted_to_document_id;
 }
 
 export function canIssue(doc: Pick<DocumentRecord, 'status'>): boolean {
@@ -45,8 +45,14 @@ export function canLogSettlement(doc: Pick<DocumentRecord, 'doc_type' | 'status'
   return doc.doc_type === 'invoice' && (doc.status === 'issued' || doc.status === 'partially_paid');
 }
 
-export function canConvertToInvoice(doc: Pick<DocumentRecord, 'doc_type' | 'status'>): boolean {
-  return doc.doc_type === 'estimate' && (doc.status === 'draft' || doc.status === 'issued');
+export function canConvertToInvoice(
+  doc: Pick<DocumentRecord, 'doc_type' | 'status' | 'converted_to_document_id'>
+): boolean {
+  return (
+    doc.doc_type === 'estimate' &&
+    (doc.status === 'draft' || doc.status === 'issued') &&
+    !doc.converted_to_document_id
+  );
 }
 
 export function canMarkViewed(doc: Pick<DocumentRecord, 'status' | 'viewed_at'>): boolean {

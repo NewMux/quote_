@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../../../src/components/Card';
 import { EmptyState } from '../../../../src/components/EmptyState';
 import { formatMinor } from '../../../../src/lib/money';
@@ -23,7 +22,7 @@ export default function ItemsScreen() {
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+        contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           <EmptyState title="No items yet" subtitle="Save items or services you bill often for one-tap insertion." />
         }
@@ -47,12 +46,6 @@ export default function ItemsScreen() {
           </Pressable>
         )}
       />
-      <Pressable
-        onPress={() => router.push('/items/new')}
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-brand items-center justify-center shadow-lg"
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </Pressable>
     </View>
   );
 }

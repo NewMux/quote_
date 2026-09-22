@@ -35,7 +35,7 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
                 value={value ? parseISO(value) : new Date()}
                 mode="date"
                 display="inline"
-                style={{ width: 320, height: 380 }}
+                style={{ width: 320 }}
                 onChange={(_event, date) => {
                   setShow(false);
                   if (date) onChange(date.toISOString().slice(0, 10));

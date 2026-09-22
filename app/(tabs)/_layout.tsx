@@ -62,6 +62,11 @@ export default function TabsLayout() {
     },
     { label: 'New Client', icon: 'person-add-outline', onPress: () => router.push('/clients/new') },
     { label: 'New Item', icon: 'pricetag-outline', onPress: () => router.push('/items/new') },
+    {
+      label: 'New Tax Rate',
+      icon: 'calculator-outline',
+      onPress: () => router.push('/settings/tax-brackets/new'),
+    },
   ];
 
   return (

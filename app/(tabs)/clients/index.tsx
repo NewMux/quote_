@@ -79,12 +79,6 @@ export default function ClientsScreen() {
           </Pressable>
         )}
       />
-      <Pressable
-        onPress={() => router.push('/clients/new')}
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-brand items-center justify-center shadow-lg"
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </Pressable>
     </View>
   );
 }

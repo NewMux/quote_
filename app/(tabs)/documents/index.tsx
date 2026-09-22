@@ -89,9 +89,13 @@ export default function DocumentsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            await deleteDraftDocument(item.id);
-            load();
-            loadReports();
+            try {
+              await deleteDraftDocument(item.id);
+              load();
+              loadReports();
+            } catch (err) {
+              Alert.alert('Could not delete', err instanceof Error ? err.message : 'Something went wrong.');
+            }
           },
         },
       ]
@@ -244,12 +248,6 @@ export default function DocumentsScreen() {
           </Swipeable>
         )}
       />
-      <Pressable
-        onPress={() => router.push('/documents/new')}
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-brand items-center justify-center shadow-lg"
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </Pressable>
     </View>
   );
 }

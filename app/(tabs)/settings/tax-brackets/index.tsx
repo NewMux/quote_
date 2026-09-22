@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../../../src/components/Button';
 import { EmptyState } from '../../../../src/components/EmptyState';
 import { formatRateBp } from '../../../../src/lib/money';
@@ -21,7 +20,7 @@ export default function TaxBracketsScreen() {
       <FlatList
         data={taxBrackets}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+        contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={<EmptyState title="No tax rates yet" subtitle="Add one to apply to your line items." />}
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`/settings/tax-brackets/${item.id}/edit`)}>
@@ -39,12 +38,6 @@ export default function TaxBracketsScreen() {
           </Pressable>
         )}
       />
-      <Pressable
-        onPress={() => router.push('/settings/tax-brackets/new')}
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-brand items-center justify-center shadow-lg"
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </Pressable>
     </View>
   );
 }
