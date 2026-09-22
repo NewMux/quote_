@@ -46,6 +46,7 @@ const ROWS: { label: string; subtitle: string; href: string; icon: keyof typeof 
 export default function SettingsScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
   const signOut = useAuthStore((s) => s.signOut);
+  const email = useAuthStore((s) => s.session?.user.email);
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [isTogglingReminders, setIsTogglingReminders] = useState(false);
 
@@ -107,6 +108,18 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-surface">
       <ScreenHeader title="Settings" />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+        {email ? (
+          <View className="bg-white rounded-2xl p-4 mb-4 flex-row items-center gap-3 border border-gray-100">
+            <Ionicons name="person-circle-outline" size={32} color={BRAND.default} />
+            <View className="flex-1">
+              <Text className="text-xs text-gray-500">Signed in as</Text>
+              <Text className="text-base text-gray-900" numberOfLines={1}>
+                {email}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
         <Card className="p-0 overflow-hidden">
           {ROWS.map((row, index) => (
             <Pressable key={row.href} onPress={() => router.push(row.href as never)}>
