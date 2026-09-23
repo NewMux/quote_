@@ -1,4 +1,4 @@
-# Quote — Mobile Invoice & Estimate Generator
+# Invoice Them — Mobile Invoice & Estimate Generator
 
 A multi-tenant Expo app for creating estimates and invoices, capturing
 signatures, generating PDFs, and tracking payments. Backed by Supabase
@@ -30,7 +30,11 @@ Scan the QR code with the **Expo Go** app on your phone (iOS or Android), or
 press `i` / `a` in the terminal to launch an iOS Simulator / Android
 emulator.
 
-### Subscriptions (Quote Pro)
+### Subscriptions (Invoice Them Pro)
+
+- Bundle ID / Android package: `com.newmux.invoicethem`
+- App Store subscription group "Invoice Them Pro": `quote_pro_monthly` ($9.99)
+  and `quote_pro_annual` ($79.99), each with a 1-week free trial
 
 The app is gated behind an auto-renewing App Store subscription, handled by
 [RevenueCat](https://www.revenuecat.com) (`react-native-purchases`). With

@@ -4,7 +4,7 @@ import { supabase } from './supabase';
 import { requireOwnerId } from '../db/ownerId';
 
 function sanitizeFileNamePart(value: string): string {
-  return value.trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'Quote';
+  return value.trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'InvoiceThem';
 }
 
 const OWNER_SCOPED_TABLES = [
@@ -47,7 +47,7 @@ export async function exportBackup(businessName: string | null): Promise<void> {
   }
 
   const dateStamp = new Date().toISOString().slice(0, 10);
-  const fileName = `${sanitizeFileNamePart(businessName ?? 'Quote')}-Backup-${dateStamp}.json`;
+  const fileName = `${sanitizeFileNamePart(businessName ?? 'InvoiceThem')}-Backup-${dateStamp}.json`;
   const dest = new File(Paths.cache, fileName);
   dest.write(JSON.stringify(backup, null, 2));
 

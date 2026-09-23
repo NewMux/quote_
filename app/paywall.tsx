@@ -154,7 +154,7 @@ export default function PaywallScreen() {
             <View className="w-14 h-14 rounded-2xl bg-white/15 items-center justify-center mb-1">
               <Ionicons name="receipt" size={28} color="white" />
             </View>
-            <Text className="text-2xl font-bold text-white text-center">Quote Pro</Text>
+            <Text className="text-2xl font-bold text-white text-center">Invoice Them Pro</Text>
             <Text className="text-sm text-white/80 text-center">
               Everything you need to quote, invoice, and get paid.
             </Text>

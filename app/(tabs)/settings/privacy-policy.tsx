@@ -33,7 +33,7 @@ export default function PrivacyPolicyScreen() {
         sheet or mail app.
       </Section>
       <Section title="Subscriptions">
-        Quote Pro is billed by Apple through your Apple ID — this app never sees your payment
+        Invoice Them Pro is billed by Apple through your Apple ID — this app never sees your payment
         details. Subscription status is handled by RevenueCat, which receives an anonymous account
         identifier and your App Store purchase records so your subscription works on every device
         you sign in on. It receives none of your clients, invoices, or business data.

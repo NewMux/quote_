@@ -13,7 +13,7 @@ import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileS
 const ROWS: { label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   {
     label: 'Subscription',
-    subtitle: 'Your Quote Pro plan, renewal, and restore purchases',
+    subtitle: 'Your Invoice Them Pro plan, renewal, and restore purchases',
     href: '/settings/subscription',
     icon: 'star-outline',
   },

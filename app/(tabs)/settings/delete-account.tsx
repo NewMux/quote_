@@ -48,7 +48,7 @@ export default function DeleteAccountScreen() {
 
       <View className="bg-white rounded-xl p-4 border border-gray-200">
         <Text className="text-sm text-gray-700 leading-5">
-          Deleting your account doesn&apos;t cancel a Quote Pro subscription — Apple bills it
+          Deleting your account doesn&apos;t cancel a Invoice Them Pro subscription — Apple bills it
           separately. Cancel it first so you aren&apos;t charged again.
         </Text>
         <Pressable onPress={() => Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL)} hitSlop={8}>

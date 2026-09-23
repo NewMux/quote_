@@ -10,7 +10,7 @@ import { useSubscriptionStore } from '../../../src/stores/useSubscriptionStore';
 function planName(productId: string): string {
   if (/annual|year/i.test(productId)) return 'Yearly';
   if (/month/i.test(productId)) return 'Monthly';
-  return 'Quote Pro';
+  return 'Invoice Them Pro';
 }
 
 export default function SubscriptionScreen() {
@@ -66,7 +66,7 @@ export default function SubscriptionScreen() {
         ) : entitlement ? (
           <>
             <Text className="text-base font-semibold text-gray-900">
-              Quote Pro · {planName(entitlement.productIdentifier)}
+              Invoice Them Pro · {planName(entitlement.productIdentifier)}
             </Text>
             <Text className="text-sm text-gray-500">
               {entitlement.periodType === 'TRIAL' ? 'Free trial' : 'Active'}
@@ -92,7 +92,7 @@ export default function SubscriptionScreen() {
 
       <Text className="text-xs text-gray-500 leading-4">
         Your subscription is billed through your Apple ID. To change plans or cancel, use Manage
-        Subscription — cancelling keeps Quote Pro active until the end of the current period.
+        Subscription — cancelling keeps Invoice Them Pro active until the end of the current period.
       </Text>
     </ScrollView>
   );

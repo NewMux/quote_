@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Quote",
+    "name": "Invoice Them",
     "slug": "quote-app",
     "version": "1.0.0",
     "scheme": "quoteapp",
@@ -10,10 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.quoteapp.mobile"
+      "bundleIdentifier": "com.newmux.invoicethem"
     },
     "android": {
-      "package": "com.quoteapp.mobile",
+      "package": "com.newmux.invoicethem",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -32,7 +32,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Quote to access your photos to attach a receipt or set your business logo."
+          "photosPermission": "Allow Invoice Them to access your photos to attach a receipt or set your business logo."
         }
       ]
     ],
