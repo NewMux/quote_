@@ -52,6 +52,11 @@ eas build --profile development --platform ios  # install it on your phone from 
 npx expo start --dev-client
 ```
 
+The public iOS key is committed in `eas.json` for cloud-bundled builds
+(preview/production). A development build loads its JavaScript from your
+local Metro server, so it also needs the key in your own `.env`; leave it out
+of `.env` to keep using Expo Go without the paywall.
+
 The RevenueCat project needs an entitlement named `pro` and a `default`
 offering with Monthly and Annual packages attached to the App Store
 products.
