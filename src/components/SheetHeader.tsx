@@ -81,7 +81,9 @@ export function SheetHeader({
   // A custom leading action (like "Reset") has no standard symbol, so it stays a text button.
   const useRoundClose = IS_IOS_26 && closeLabel === 'Cancel';
   return (
-    <SafeAreaView edges={['top']} className="bg-grouped">
+    // Not collapsable, so a formSheet sees exactly header + ScrollView (react-native-screens needs
+    // that to size the sheet's scroll content).
+    <SafeAreaView edges={['top']} className="bg-grouped" collapsable={false}>
       <View className="flex-row items-center px-4 pt-3 pb-1.5 min-h-[60px]">
         <View className="flex-1 items-start">
           {useRoundClose ? (

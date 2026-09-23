@@ -39,9 +39,7 @@ export function DateField({ label, value, onChange, emptyLabel = 'Add Date', sho
       display="compact"
       accentColor={colors.tint}
       accessibilityLabel={label}
-      onChange={(_event, date) => {
-        if (date) onChange(toStoredDate(date));
-      }}
+      onValueChange={(_event, date) => onChange(toStoredDate(date))}
     />
   ) : (
     <Pressable
@@ -66,10 +64,11 @@ export function DateField({ label, value, onChange, emptyLabel = 'Add Date', sho
           value={parseISO(value)}
           mode="date"
           display="calendar"
-          onChange={(_event, date) => {
+          onValueChange={(_event, date) => {
             setShowAndroidDialog(false);
-            if (date) onChange(toStoredDate(date));
+            onChange(toStoredDate(date));
           }}
+          onDismiss={() => setShowAndroidDialog(false)}
         />
       ) : null}
     </View>
