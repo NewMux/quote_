@@ -7,6 +7,7 @@ import { FormScrollView } from '../../src/components/form/FormScrollView';
 import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { getScheduleForDocument, saveSchedule, stopSchedule } from '../../src/db/repositories/recurring.repo';
 import { toStoredDate } from '../../src/lib/format';
 import { FREQUENCY_OPTIONS } from '../../src/lib/recurrence';
@@ -69,13 +70,16 @@ export default function RecurringModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader
-        title={hasSchedule ? 'Edit Recurring' : 'Make Recurring'}
-        actionLabel={hasSchedule ? 'Save' : 'Start'}
-        onAction={handleSave}
-        actionDisabled={isLoading || isSaving}
-      />
+    <SheetScreen
+      header={
+        <SheetHeader
+          title={hasSchedule ? 'Edit Recurring' : 'Make Recurring'}
+          actionLabel={hasSchedule ? 'Save' : 'Start'}
+          onAction={handleSave}
+          actionDisabled={isLoading || isSaving}
+        />
+      }
+    >
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator accessibilityLabel="Loading" />
@@ -106,6 +110,6 @@ export default function RecurringModal() {
           ) : null}
         </FormScrollView>
       )}
-    </View>
+    </SheetScreen>
   );
 }

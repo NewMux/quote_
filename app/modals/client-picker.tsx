@@ -7,6 +7,7 @@ import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SearchField } from '../../src/components/SearchField';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
@@ -60,8 +61,7 @@ export default function ClientPickerModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader title={isFilterMode ? 'Filter by Client' : 'Choose Client'} />
+    <SheetScreen header={<SheetHeader title={isFilterMode ? 'Filter by Client' : 'Choose Client'} />}>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
@@ -116,6 +116,6 @@ export default function ClientPickerModal() {
           </GroupedRow>
         )}
       />
-    </View>
+    </SheetScreen>
   );
 }

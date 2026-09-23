@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { DateField } from '../../src/components/DateField';
 import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { getClient } from '../../src/db/repositories/clients.repo';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
 import type { DocStatus } from '../../src/types/models';
@@ -41,15 +42,18 @@ export default function DocumentFilterModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader
-        title="Filter Documents"
-        closeLabel="Reset"
-        onClose={reset}
-        actionLabel="Done"
-        onAction={() => router.back()}
-      />
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <SheetScreen
+      header={
+        <SheetHeader
+          title="Filter Documents"
+          closeLabel="Reset"
+          onClose={reset}
+          actionLabel="Done"
+          onAction={() => router.back()}
+        />
+      }
+    >
+      <ScrollView contentInsetAdjustmentBehavior="never" contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
         <ListSection header="Status">
           {STATUS_OPTIONS.map((opt) => (
             <ListRow
@@ -85,6 +89,6 @@ export default function DocumentFilterModal() {
           />
         </ListSection>
       </ScrollView>
-    </View>
+    </SheetScreen>
   );
 }

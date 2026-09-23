@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ClientForm } from '../../src/components/ClientForm';
 import type { FormState } from '../../src/components/form/useFormState';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { useUnsavedChangesGuard } from '../../src/lib/useUnsavedChangesGuard';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import type { ClientInput } from '../../src/db/repositories/clients.repo';
@@ -27,14 +28,17 @@ export default function NewClientScreen() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader
-        title="New Client"
-        actionLabel="Add"
-        onAction={handleAdd}
-        actionDisabled={!form?.canSubmit || isSaving}
-      />
+    <SheetScreen
+      header={
+        <SheetHeader
+          title="New Client"
+          actionLabel="Add"
+          onAction={handleAdd}
+          actionDisabled={!form?.canSubmit || isSaving}
+        />
+      }
+    >
       <ClientForm onStateChange={setForm} />
-    </View>
+    </SheetScreen>
   );
 }

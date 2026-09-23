@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
-import { Alert, TextInput, View } from 'react-native';
+import { Alert, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { FormRow } from '../../../src/components/form/FormRow';
 import { ListSection } from '../../../src/components/list/ListSection';
 import { FormScrollView } from '../../../src/components/form/FormScrollView';
 import { SheetHeader } from '../../../src/components/SheetHeader';
+import { SheetScreen } from '../../../src/components/SheetScreen';
 import { parseRateBp } from '../../../src/lib/money';
 import { useUnsavedChangesGuard } from '../../../src/lib/useUnsavedChangesGuard';
 import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
@@ -31,8 +32,9 @@ export default function NewTaxBracketScreen() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader title="New Tax Rate" actionLabel="Add" onAction={handleAdd} actionDisabled={!canAdd} />
+    <SheetScreen
+      header={<SheetHeader title="New Tax Rate" actionLabel="Add" onAction={handleAdd} actionDisabled={!canAdd} />}
+    >
       <FormScrollView>
         <ListSection footer="Use the name your customers know, such as Sales Tax or VAT; it prints on documents.">
           <FormRow
@@ -56,6 +58,6 @@ export default function NewTaxBracketScreen() {
           />
         </ListSection>
       </FormScrollView>
-    </View>
+    </SheetScreen>
   );
 }

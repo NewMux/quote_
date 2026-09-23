@@ -6,6 +6,7 @@ import { GroupedRow } from '../../src/components/list/GroupedRow';
 import { ListRow } from '../../src/components/list/ListRow';
 import { SearchField } from '../../src/components/SearchField';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { CURRENCIES } from '../../src/lib/currencies';
 import { getCurrencySymbol } from '../../src/lib/money';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
@@ -27,8 +28,7 @@ export default function CurrencyPickerModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader title="Currency" />
+    <SheetScreen header={<SheetHeader title="Currency" />}>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
@@ -59,6 +59,6 @@ export default function CurrencyPickerModal() {
           </GroupedRow>
         )}
       />
-    </View>
+    </SheetScreen>
   );
 }

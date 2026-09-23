@@ -7,6 +7,7 @@ import { ListRow } from '../../../src/components/list/ListRow';
 import { ListSection } from '../../../src/components/list/ListSection';
 import { SettlementForm, type SettlementFormValue } from '../../../src/components/SettlementForm';
 import { SheetHeader } from '../../../src/components/SheetHeader';
+import { SheetScreen } from '../../../src/components/SheetScreen';
 import { getDocument } from '../../../src/db/repositories/documents.repo';
 import {
   createSettlement,
@@ -72,13 +73,16 @@ export default function SettlementFormScreen() {
   const isLoading = !document || settlement === undefined;
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader
-        title={title}
-        actionLabel={settlementId ? 'Save' : 'Add'}
-        onAction={handleSave}
-        actionDisabled={isLoading || !form?.canSubmit || isSubmitting}
-      />
+    <SheetScreen
+      header={
+        <SheetHeader
+          title={title}
+          actionLabel={settlementId ? 'Save' : 'Add'}
+          onAction={handleSave}
+          actionDisabled={isLoading || !form?.canSubmit || isSubmitting}
+        />
+      }
+    >
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator accessibilityLabel="Loading" />
@@ -98,6 +102,6 @@ export default function SettlementFormScreen() {
           ) : null}
         </FormScrollView>
       )}
-    </View>
+    </SheetScreen>
   );
 }

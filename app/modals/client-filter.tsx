@@ -1,8 +1,9 @@
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 
 const SORT_OPTIONS: { label: string; value: 'name' | 'recent' }[] = [
@@ -21,15 +22,18 @@ export default function ClientFilterModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader
-        title="Filter Clients"
-        closeLabel="Reset"
-        onClose={reset}
-        actionLabel="Done"
-        onAction={() => router.back()}
-      />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
+    <SheetScreen
+      header={
+        <SheetHeader
+          title="Filter Clients"
+          closeLabel="Reset"
+          onClose={reset}
+          actionLabel="Done"
+          onAction={() => router.back()}
+        />
+      }
+    >
+      <ScrollView contentInsetAdjustmentBehavior="never" contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
         <ListSection header="Sort By">
           {SORT_OPTIONS.map((option) => (
             <ListRow
@@ -44,6 +48,6 @@ export default function ClientFilterModal() {
           <ListRow title="Outstanding Balance Only" switchValue={hasBalanceOnly} onSwitchChange={setHasBalanceOnly} />
         </ListSection>
       </ScrollView>
-    </View>
+    </SheetScreen>
   );
 }

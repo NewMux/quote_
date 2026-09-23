@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { File, Paths } from 'expo-file-system';
 import type { SignatureViewRef } from 'react-native-signature-canvas';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { SignaturePad } from '../../src/components/SignaturePad';
 import { logActivity } from '../../src/db/repositories/activityLog.repo';
 import { upsertSignature } from '../../src/db/repositories/signatures.repo';
@@ -34,13 +35,16 @@ export default function SignModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader
-        title={role === 'merchant' ? 'Your Signature' : "Client's Signature"}
-        actionLabel="Done"
-        onAction={() => padRef.current?.readSignature()}
-        actionDisabled={isSaving}
-      />
+    <SheetScreen
+      header={
+        <SheetHeader
+          title={role === 'merchant' ? 'Your Signature' : "Client's Signature"}
+          actionLabel="Done"
+          onAction={() => padRef.current?.readSignature()}
+          actionDisabled={isSaving}
+        />
+      }
+    >
       <View className="flex-1 p-4 pb-8">
         <SignaturePad
           ref={padRef}
@@ -48,6 +52,6 @@ export default function SignModal() {
           onEmpty={() => Alert.alert('Nothing to Save', 'Draw a signature in the box first.')}
         />
       </View>
-    </View>
+    </SheetScreen>
   );
 }

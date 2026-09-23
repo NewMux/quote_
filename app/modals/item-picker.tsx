@@ -7,6 +7,7 @@ import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SearchField } from '../../src/components/SearchField';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { formatMinor } from '../../src/lib/money';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
@@ -35,8 +36,7 @@ export default function ItemPickerModal() {
   }, [items, query]);
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader title="Add Item" />
+    <SheetScreen header={<SheetHeader title="Add Item" />}>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
@@ -98,6 +98,6 @@ export default function ItemPickerModal() {
           </GroupedRow>
         )}
       />
-    </View>
+    </SheetScreen>
   );
 }

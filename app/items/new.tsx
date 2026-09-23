@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import type { FormState } from '../../src/components/form/useFormState';
 import { ItemForm } from '../../src/components/ItemForm';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { useUnsavedChangesGuard } from '../../src/lib/useUnsavedChangesGuard';
 import { useItemCatalogStore } from '../../src/stores/useItemCatalogStore';
 import type { ItemInput } from '../../src/db/repositories/itemCatalog.repo';
@@ -27,9 +28,10 @@ export default function NewItemScreen() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader title="New Item" actionLabel="Add" onAction={handleAdd} actionDisabled={!form?.canSubmit || isSaving} />
+    <SheetScreen
+      header={<SheetHeader title="New Item" actionLabel="Add" onAction={handleAdd} actionDisabled={!form?.canSubmit || isSaving} />}
+    >
       <ItemForm onStateChange={setForm} />
-    </View>
+    </SheetScreen>
   );
 }

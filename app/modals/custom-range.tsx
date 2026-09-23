@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
 import { router } from 'expo-router';
 import { DateField } from '../../src/components/DateField';
 import { FormScrollView } from '../../src/components/form/FormScrollView';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { SheetScreen } from '../../src/components/SheetScreen';
 import { toStoredDate } from '../../src/lib/format';
 import { useReportsStore } from '../../src/stores/useReportsStore';
 
@@ -33,8 +34,9 @@ export default function CustomRangeModal() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <SheetHeader title="Custom Range" actionLabel="Apply" onAction={apply} actionDisabled={!canApply} />
+    <SheetScreen
+      header={<SheetHeader title="Custom Range" actionLabel="Apply" onAction={apply} actionDisabled={!canApply} />}
+    >
       <FormScrollView>
         <ListSection footer={isBackwards ? undefined : 'The summary covers every day from the start date through the end date.'}>
           <DateField label="Start Date" value={startDate} onChange={setStartDate} />
@@ -46,6 +48,6 @@ export default function CustomRangeModal() {
           </Text>
         ) : null}
       </FormScrollView>
-    </View>
+    </SheetScreen>
   );
 }
