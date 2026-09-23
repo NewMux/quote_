@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
+import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
 import { refreshAllReminders } from '../src/lib/notifications';
 import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
 
@@ -12,6 +13,7 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const loadProfile = useBusinessProfileStore((s) => s.load);
   const initializeAuth = useAuthStore((s) => s.initialize);
+  const configureSubscription = useSubscriptionStore((s) => s.configure);
   const session = useAuthStore((s) => s.session);
   const isAuthLoading = useAuthStore((s) => s.isLoading);
 
@@ -26,7 +28,7 @@ export default function RootLayout() {
       return;
     }
     (async () => {
-      await loadProfile();
+      await Promise.all([loadProfile(), configureSubscription(session.user.id)]);
       setReady(true);
       // A document's status can change from a different device while this one was closed, so
       // this resyncs every scheduled reminder against the current data on each sign-in/launch.
@@ -36,7 +38,7 @@ export default function RootLayout() {
       // without waiting for that job. Also non-critical.
       generateDueRecurringInvoices().catch(() => {});
     })();
-  }, [isAuthLoading, session, loadProfile]);
+  }, [isAuthLoading, session, loadProfile, configureSubscription]);
 
   if (!ready || isAuthLoading) {
     return (
@@ -52,6 +54,8 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="paywall" options={{ headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy', presentation: 'modal' }} />
         <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
         <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />
         <Stack.Screen

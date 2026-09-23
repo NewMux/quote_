@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { createDraftDocument } from '../../src/db/repositories/documents.repo';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
+import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
 import type { DocType } from '../../src/types/models';
 
 export default function NewDocumentScreen() {
   const { type } = useLocalSearchParams<{ type?: DocType }>();
   const profile = useBusinessProfileStore((s) => s.profile);
+  // Reachable straight from onboarding, outside the tabs' subscription gate.
+  const isPro = useSubscriptionStore((s) => s.isPro);
   const [isCreating, setIsCreating] = useState(false);
   const hasAutoTriggered = useRef(false);
 
@@ -20,12 +23,16 @@ export default function NewDocumentScreen() {
   }
 
   useEffect(() => {
-    if (type && profile && !hasAutoTriggered.current) {
+    if (isPro && type && profile && !hasAutoTriggered.current) {
       hasAutoTriggered.current = true;
       handleChoose(type);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, profile]);
+  }, [isPro, type, profile]);
+
+  if (!isPro) {
+    return <Redirect href="/paywall" />;
+  }
 
   if (isCreating || !profile || type) {
     return (

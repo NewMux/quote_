@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, Text, View, type GestureResponderEvent } from 'react-native';
-import { Tabs, router } from 'expo-router';
+import { ActivityIndicator, Animated, Pressable, Text, View, type GestureResponderEvent } from 'react-native';
+import { Redirect, Tabs, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FabSpeedDial, type FabAction } from '../../src/components/FabSpeedDial';
 import { BRAND } from '../../src/lib/theme';
+import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
 
 interface RaisedCenterButtonProps {
   onPress?: (e: GestureResponderEvent) => void;
@@ -48,6 +49,8 @@ function RaisedCenterButton({ onPress, isOpen }: RaisedCenterButtonProps) {
 
 export default function TabsLayout() {
   const [isFabOpen, setIsFabOpen] = useState(false);
+  const isSubscriptionReady = useSubscriptionStore((s) => s.isReady);
+  const isPro = useSubscriptionStore((s) => s.isPro);
 
   const fabActions: FabAction[] = [
     {
@@ -68,6 +71,19 @@ export default function TabsLayout() {
       onPress: () => router.push('/settings/tax-brackets/new'),
     },
   ];
+
+  // Every route into the app (launch, sign-in, email links, onboarding) lands here, so this one
+  // check gates the whole app behind the subscription.
+  if (!isSubscriptionReady) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+  if (!isPro) {
+    return <Redirect href="/paywall" />;
+  }
 
   return (
     <View style={{ flex: 1 }}>

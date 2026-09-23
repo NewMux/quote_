@@ -25,11 +25,18 @@ export default function PrivacyPolicyScreen() {
         at the database level, not just hidden in the app&apos;s interface.
       </Section>
       <Section title="What this app does and doesn't do">
-        This app connects to the internet to save and sync your data. It doesn&apos;t run ads,
-        sell your data, or share it with third parties, and it doesn&apos;t use analytics or
+        This app connects to the internet to save and sync your data. It doesn&apos;t run ads or
+        sell your data, it shares nothing beyond what&apos;s described under Subscriptions below,
+        and it doesn&apos;t use analytics or
         tracking beyond what&apos;s needed to keep the app itself working correctly. Sharing a PDF
         or emailing an invoice is something you choose to do, using your own device&apos;s share
         sheet or mail app.
+      </Section>
+      <Section title="Subscriptions">
+        Quote Pro is billed by Apple through your Apple ID — this app never sees your payment
+        details. Subscription status is handled by RevenueCat, which receives an anonymous account
+        identifier and your App Store purchase records so your subscription works on every device
+        you sign in on. It receives none of your clients, invoices, or business data.
       </Section>
       <Section title="Deleting your data">
         Settings → Delete All Data permanently erases every client, document, item, tax rate,

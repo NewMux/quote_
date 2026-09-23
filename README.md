@@ -30,14 +30,27 @@ Scan the QR code with the **Expo Go** app on your phone (iOS or Android), or
 press `i` / `a` in the terminal to launch an iOS Simulator / Android
 emulator.
 
-If any native module fails to load inside Expo Go (uncommon, but possible
-depending on the exact Expo Go client version on your device), build a
-custom dev client instead:
+### Subscriptions (Quote Pro)
+
+The app is gated behind an auto-renewing App Store subscription, handled by
+[RevenueCat](https://www.revenuecat.com) (`react-native-purchases`). With
+`EXPO_PUBLIC_REVENUECAT_IOS_KEY` left blank, development builds and Expo Go
+skip the paywall entirely, so everyday development doesn't need RevenueCat.
+
+Real purchases need a native dev build (Expo Go can't buy anything) and a
+Sandbox tester account:
 
 ```bash
-npx expo install expo-dev-client
-npx expo run:android   # or: npx expo run:ios
+npm install -g eas-cli
+eas login
+eas init                                        # links the project, writes its id into app.json
+eas build --profile development --platform ios  # install it on your phone from the link it prints
+npx expo start --dev-client
 ```
+
+The RevenueCat project needs an entitlement named `pro` and a `default`
+offering with Monthly and Annual packages attached to the App Store
+products.
 
 ## What's implemented
 

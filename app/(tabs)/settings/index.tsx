@@ -12,6 +12,12 @@ import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileS
 
 const ROWS: { label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   {
+    label: 'Subscription',
+    subtitle: 'Your Quote Pro plan, renewal, and restore purchases',
+    href: '/settings/subscription',
+    icon: 'star-outline',
+  },
+  {
     label: 'Business Profile',
     subtitle: 'Your business name, logo, and contact info',
     href: '/settings/business-profile',
