@@ -10,16 +10,21 @@ interface SwipeActionProps {
   onPress: () => void;
 }
 
+/** One revealed swipe button. Rows that use these also expose the same actions to VoiceOver via
+ * `accessibilityActions`, since swipe gestures aren't reachable with a screen reader. */
 export function SwipeAction({ label, icon, color, onPress }: SwipeActionProps) {
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
       accessibilityLabel={label}
       style={{ width: SWIPE_ACTION_WIDTH, backgroundColor: color }}
       className="items-center justify-center gap-1"
     >
       <Ionicons name={icon} size={20} color="white" />
-      <Text className="text-white text-xs font-medium">{label}</Text>
+      <Text className="text-white text-xs font-semibold" numberOfLines={1}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

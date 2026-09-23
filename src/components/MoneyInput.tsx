@@ -1,35 +1,33 @@
 import { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { FormField } from './form/FormField';
 import { getCurrencySymbol, minorToDecimalString, parseToMinor } from '../lib/money';
 
 interface MoneyInputProps {
   valueMinor: number;
   onChangeMinor: (minor: number) => void;
   currencyCode: string;
-  label?: string;
+  label: string;
+  hint?: string;
 }
 
-export function MoneyInput({ valueMinor, onChangeMinor, currencyCode, label }: MoneyInputProps) {
+/** Amount entry. Reports the parsed value on every keystroke (so a Save tapped mid-edit uses what's
+ * on screen) and tidies the formatting when editing ends. */
+export function MoneyInput({ valueMinor, onChangeMinor, currencyCode, label, hint }: MoneyInputProps) {
   const [text, setText] = useState(minorToDecimalString(valueMinor, currencyCode));
 
   return (
-    <View>
-      {label ? <Text className="text-xs text-secondary mb-1">{label}</Text> : null}
-      <View className="flex-row items-center border border-field rounded-lg px-3 py-2 bg-card">
-        <Text className="text-secondary mr-1">{getCurrencySymbol(currencyCode)}</Text>
-        <TextInput
-          className="flex-1 text-base text-label"
-          keyboardType="decimal-pad"
-          value={text}
-          onChangeText={setText}
-          onEndEditing={() => {
-            const minor = parseToMinor(text, currencyCode);
-            setText(minorToDecimalString(minor, currencyCode));
-            onChangeMinor(minor);
-          }}
-          placeholder={minorToDecimalString(0, currencyCode)}
-        />
-      </View>
-    </View>
+    <FormField
+      label={label}
+      hint={hint}
+      prefix={getCurrencySymbol(currencyCode)}
+      keyboardType="decimal-pad"
+      value={text}
+      onChangeText={(next) => {
+        setText(next);
+        onChangeMinor(parseToMinor(next, currencyCode));
+      }}
+      onEndEditing={() => setText(minorToDecimalString(parseToMinor(text, currencyCode), currencyCode))}
+      placeholder={minorToDecimalString(0, currencyCode)}
+    />
   );
 }

@@ -1,19 +1,23 @@
 import { useEffect } from 'react';
-import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { ActivityIndicator, Switch, Text, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { Button } from '../../../../src/components/Button';
 import { DateField } from '../../../../src/components/DateField';
+import { FormField } from '../../../../src/components/form/FormField';
+import { FormScrollView } from '../../../../src/components/form/FormScrollView';
+import { ListRow } from '../../../../src/components/list/ListRow';
+import { ListSection } from '../../../../src/components/list/ListSection';
 import { LineItemEditor } from '../../../../src/components/LineItemEditor';
 import { computeDocumentTotals, getTaxLabel } from '../../../../src/lib/documentCalculations';
 import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../../src/lib/money';
 import { BRAND } from '../../../../src/lib/theme';
+import { useSaveHeader } from '../../../../src/lib/useSaveHeader';
 import { useDocumentEditorStore } from '../../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
 
 export default function EditDocumentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const navigation = useNavigation();
   const editor = useDocumentEditorStore();
   const { taxBrackets, load: loadTaxBrackets } = useTaxBracketsStore();
 
@@ -39,124 +43,104 @@ export default function EditDocumentScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor.isDirty, editor.lines, editor.discountType, editor.discountValue, editor.notes, editor.termsOverride, editor.issueDate, editor.dueDate, editor.expiryDate, editor.clientId]);
 
-  useEffect(() => {
-    if (editor.docNumber) navigation.setOptions({ title: `Edit ${editor.docNumber}` });
-  }, [navigation, editor.docNumber]);
+  // Edits save automatically (above), so "Done" only closes the editor — after flushing any
+  // change still inside the autosave delay.
+  async function handleDone() {
+    if (useDocumentEditorStore.getState().isDirty) {
+      await useDocumentEditorStore.getState().save();
+    }
+    router.back();
+  }
+
+  useSaveHeader({ title: editor.docNumber ? `Edit ${editor.docNumber}` : undefined, label: 'Done', onSave: handleDone });
 
   if (editor.isLoading || !editor.documentId) {
-    return <View className="flex-1 bg-card" />;
+    return (
+      <View className="flex-1 items-center justify-center bg-grouped">
+        <ActivityIndicator accessibilityLabel="Loading" />
+      </View>
+    );
   }
 
   const totals = computeDocumentTotals(editor.lines, editor.discountType, editor.discountValue);
 
-  async function handleDone() {
-    if (editor.isDirty) {
-      await editor.save();
-    }
-    router.replace(`/documents/${id}`);
-  }
-
   return (
-    <View className="flex-1 bg-grouped">
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}>
-        <View className="bg-card rounded-xl p-4 border border-separator">
-          <Text className="text-xs text-secondary mb-1">Client</Text>
-          <Pressable
+    <FormScrollView>
+      <Text className="text-sm text-secondary text-center">Changes save automatically.</Text>
+
+      <View>
+        <ListSection header="Client">
+          <ListRow
+            title={editor.clientNameSnapshot ?? 'Choose Client'}
             onPress={() => router.push('/modals/client-picker')}
-            className="border border-field rounded-lg px-3 py-2"
-          >
-            <Text className={editor.clientNameSnapshot ? 'text-label' : 'text-secondary'}>
-              {editor.clientNameSnapshot ?? 'Select a client'}
-            </Text>
-          </Pressable>
-        </View>
-
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <DateField label="Issue Date" value={editor.issueDate} onChange={editor.setIssueDate} />
-          </View>
-          <View className="flex-1">
-            {editor.docType === 'invoice' ? (
-              <DateField label="Due Date" value={editor.dueDate} onChange={editor.setDueDate} />
-            ) : (
-              <DateField label="Valid Until" value={editor.expiryDate} onChange={editor.setExpiryDate} />
-            )}
-          </View>
-        </View>
-
-        <View>
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-sm font-semibold text-label">Line Items</Text>
-            <Button label="+ Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
-          </View>
-          {editor.lines.length === 0 ? (
-            <Text className="text-sm text-secondary py-4 text-center">No line items yet.</Text>
-          ) : null}
-          {editor.lines.map((line) => (
-            <LineItemEditor
-              key={line.id}
-              line={line}
-              taxBrackets={taxBrackets}
-              currencyCode={editor.currencyCode}
-              onChange={(patch) => editor.updateLineItem(line.id, patch)}
-              onRemove={() => editor.removeLineItem(line.id)}
-            />
-          ))}
-        </View>
-
-        <DocumentDiscountEditor
-          discountType={editor.discountType}
-          discountValue={editor.discountValue}
-          currencyCode={editor.currencyCode}
-          onChange={editor.setDocumentDiscount}
-        />
-
-        <View className="bg-card rounded-xl p-4 border border-separator">
-          <TotalsRow label="Subtotal" valueMinor={totals.subtotalMinor} currencyCode={editor.currencyCode} />
-          {totals.discountAmountMinor > 0 ? (
-            <TotalsRow
-              label="Discount"
-              valueMinor={-totals.discountAmountMinor}
-              currencyCode={editor.currencyCode}
-            />
-          ) : null}
-          <TotalsRow
-            label={getTaxLabel(editor.lines.map((l) => ({ isTaxable: l.isTaxable, taxName: l.taxBracketNameSnapshot })))}
-            valueMinor={totals.taxTotalMinor}
-            currencyCode={editor.currencyCode}
+            accessibilityHint="Opens your client list"
           />
-          <View className="border-t border-separator mt-2 pt-2">
-            <TotalsRow label="Total" valueMinor={totals.totalMinor} currencyCode={editor.currencyCode} bold />
-          </View>
-        </View>
-
-        <View>
-          <Text className="text-xs text-secondary mb-1">Notes (optional)</Text>
-          <TextInput
-            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-            value={editor.notes}
-            onChangeText={editor.setNotes}
-            multiline
-          />
-        </View>
-
-        <View>
-          <Text className="text-xs text-secondary mb-1">Custom Terms for This Document (optional)</Text>
-          <TextInput
-            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-            value={editor.termsOverride}
-            onChangeText={editor.setTermsOverride}
-            multiline
-            placeholder="Leave blank to use your default terms from Business Profile"
-          />
-        </View>
-      </ScrollView>
-
-      <View className="p-4 bg-card border-t border-separator gap-2">
-        <Text className="text-xs text-secondary text-center">Changes save automatically as you go</Text>
-        <Button label="Done" variant="filled" size="large" onPress={handleDone} />
+        </ListSection>
       </View>
-    </View>
+
+      <View className="gap-3">
+        <DateField label="Issue Date" value={editor.issueDate} onChange={editor.setIssueDate} />
+        {editor.docType === 'invoice' ? (
+          <DateField label="Due Date" value={editor.dueDate} onChange={editor.setDueDate} />
+        ) : (
+          <DateField label="Valid Until" value={editor.expiryDate} onChange={editor.setExpiryDate} />
+        )}
+      </View>
+
+      <View>
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="text-lg font-semibold text-label" accessibilityRole="header">
+            Line Items
+          </Text>
+          <Button label="Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
+        </View>
+        {editor.lines.length === 0 ? (
+          <Text className="text-base text-secondary py-4 text-center">No line items yet.</Text>
+        ) : null}
+        {editor.lines.map((line) => (
+          <LineItemEditor
+            key={line.id}
+            line={line}
+            taxBrackets={taxBrackets}
+            currencyCode={editor.currencyCode}
+            onChange={(patch) => editor.updateLineItem(line.id, patch)}
+            onRemove={() => editor.removeLineItem(line.id)}
+          />
+        ))}
+      </View>
+
+      <DocumentDiscountEditor
+        discountType={editor.discountType}
+        discountValue={editor.discountValue}
+        currencyCode={editor.currencyCode}
+        onChange={editor.setDocumentDiscount}
+      />
+
+      <View className="bg-card rounded-2xl p-4">
+        <TotalsRow label="Subtotal" valueMinor={totals.subtotalMinor} currencyCode={editor.currencyCode} />
+        {totals.discountAmountMinor > 0 ? (
+          <TotalsRow label="Discount" valueMinor={-totals.discountAmountMinor} currencyCode={editor.currencyCode} />
+        ) : null}
+        <TotalsRow
+          label={getTaxLabel(editor.lines.map((l) => ({ isTaxable: l.isTaxable, taxName: l.taxBracketNameSnapshot })))}
+          valueMinor={totals.taxTotalMinor}
+          currencyCode={editor.currencyCode}
+        />
+        <View className="border-t border-separator mt-2 pt-2">
+          <TotalsRow label="Total" valueMinor={totals.totalMinor} currencyCode={editor.currencyCode} bold />
+        </View>
+      </View>
+
+      <FormField label="Notes" hint="Optional. Shown on the document." value={editor.notes} onChangeText={editor.setNotes} multiline />
+
+      <FormField
+        label="Terms for This Document"
+        hint="Optional. Leave blank to use the default terms from Business Profile."
+        value={editor.termsOverride}
+        onChangeText={editor.setTermsOverride}
+        multiline
+      />
+    </FormScrollView>
   );
 }
 
@@ -194,45 +178,44 @@ function DocumentDiscountEditor({
 }) {
   const enabled = discountType !== null;
   return (
-    <View className="bg-card rounded-xl p-4 border border-separator">
-      <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-sm font-semibold text-label">Document Discount</Text>
+    <View className="bg-card rounded-2xl p-4 gap-3">
+      <View className="flex-row justify-between items-center min-h-[44px]">
+        <Text className="text-[17px] text-label">Discount</Text>
         <Switch
           value={enabled}
+          accessibilityLabel="Discount"
+          trackColor={{ true: BRAND.default }}
           onValueChange={(value) => onChange(value ? 'fixed' : null, value ? 0 : null)}
         />
       </View>
       {enabled ? (
-        <View className="gap-2">
-          <Text className="text-xs text-secondary">Discount Type</Text>
-          <View className="flex-row gap-2 items-center">
-            <View style={{ width: 90 }}>
-              <SegmentedControl
-                values={['%', getCurrencySymbol(currencyCode)]}
-                selectedIndex={discountType === 'percent' ? 0 : 1}
-                tintColor={BRAND.default}
-                activeFontStyle={{ color: '#FFFFFF' }}
-                onChange={(e) => onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', 0)}
-              />
-            </View>
-            <TextInput
-              className="flex-1 border border-field rounded-lg px-3 py-2 text-base text-label"
-              keyboardType="decimal-pad"
-              value={
-                discountType === 'percent'
-                  ? String((discountValue ?? 0) / 100)
-                  : minorToDecimalString(discountValue ?? 0, currencyCode)
-              }
-              onChangeText={(text) => {
-                const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-                const minorOrBp =
-                  discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
-                onChange(discountType, minorOrBp);
-              }}
-            />
-          </View>
+        <View className="gap-3">
+          <SegmentedControl
+            values={['Percent', `Amount (${getCurrencySymbol(currencyCode)})`]}
+            selectedIndex={discountType === 'percent' ? 0 : 1}
+            tintColor={BRAND.default}
+            activeFontStyle={{ color: '#FFFFFF' }}
+            onChange={(e) => onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', 0)}
+          />
+          <FormField
+            label={discountType === 'percent' ? 'Discount (%)' : 'Discount Amount'}
+            prefix={discountType === 'percent' ? undefined : getCurrencySymbol(currencyCode)}
+            keyboardType="decimal-pad"
+            value={
+              discountType === 'percent'
+                ? String((discountValue ?? 0) / 100)
+                : minorToDecimalString(discountValue ?? 0, currencyCode)
+            }
+            onChangeText={(text) => {
+              const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
+              const minorOrBp =
+                discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
+              onChange(discountType, minorOrBp);
+            }}
+          />
         </View>
       ) : null}
     </View>
   );
 }
+

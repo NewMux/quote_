@@ -1,26 +1,35 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { router } from 'expo-router';
+import type { FormState } from '../../src/components/form/useFormState';
 import { ItemForm } from '../../src/components/ItemForm';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { useUnsavedChangesGuard } from '../../src/lib/useUnsavedChangesGuard';
 import { useItemCatalogStore } from '../../src/stores/useItemCatalogStore';
 import type { ItemInput } from '../../src/db/repositories/itemCatalog.repo';
 
 export default function NewItemScreen() {
   const create = useItemCatalogStore((s) => s.create);
+  const [form, setForm] = useState<FormState<ItemInput> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const leave = useUnsavedChangesGuard(!!form?.isDirty && !isSaving);
 
-  async function handleSubmit(input: ItemInput) {
+  async function handleAdd() {
+    if (!form?.canSubmit) return;
     setIsSaving(true);
-    await create(input);
-    setIsSaving(false);
-    router.back();
+    try {
+      await create(form.value);
+      leave(() => router.back());
+    } catch (err) {
+      setIsSaving(false);
+      Alert.alert('Could Not Add Item', err instanceof Error ? err.message : 'Something went wrong.');
+    }
   }
 
   return (
     <View className="flex-1 bg-grouped">
-      <SheetHeader title="New Item" />
-      <ItemForm onSubmit={handleSubmit} isSaving={isSaving} />
+      <SheetHeader title="New Item" actionLabel="Add" onAction={handleAdd} actionDisabled={!form?.canSubmit || isSaving} />
+      <ItemForm onStateChange={setForm} />
     </View>
   );
 }

@@ -103,6 +103,17 @@ export function useStatusColors() {
   return useColorScheme() === 'dark' ? STATUS_DARK : STATUS_LIGHT;
 }
 
+/** Swipe-action backgrounds. Fixed in both appearances (like iOS's own swipe actions); each keeps
+ * its white semibold label at 4.5:1 or better. */
+export const SWIPE_COLORS = {
+  share: '#1D6FD8',
+  convert: '#157A63',
+  payment: '#17784A',
+  edit: '#5F6368',
+  archive: '#B45309',
+  delete: '#D70015',
+} as const;
+
 /** A small fixed palette to deterministically color initials avatars. Each keeps white initials
  * at 4.5:1 or better, and reads on both light and dark backgrounds. */
 export const AVATAR_PALETTE = [

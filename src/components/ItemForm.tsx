@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
-import { Button } from './Button';
+import { useEffect, useState, type ReactNode } from 'react';
+import { View } from 'react-native';
+import { FormField } from './form/FormField';
+import { FormScrollView } from './form/FormScrollView';
+import { useReportFormState, type FormState } from './form/useFormState';
+import { ListRow } from './list/ListRow';
+import { ListSection } from './list/ListSection';
 import { MoneyInput } from './MoneyInput';
+import { formatRateBp } from '../lib/money';
 import { useBusinessProfileStore } from '../stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../stores/useTaxBracketsStore';
 import type { ItemInput } from '../db/repositories/itemCatalog.repo';
@@ -9,11 +14,12 @@ import type { ItemCatalogEntry } from '../types/models';
 
 interface ItemFormProps {
   initial?: ItemCatalogEntry;
-  onSubmit: (input: ItemInput) => void;
-  isSaving: boolean;
+  /** Receives the current input, validity, and dirtiness; the hosting screen owns the Save action. */
+  onStateChange: (state: FormState<ItemInput>) => void;
+  footer?: ReactNode;
 }
 
-export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
+export function ItemForm({ initial, onStateChange, footer }: ItemFormProps) {
   const { taxBrackets, load } = useTaxBracketsStore();
   const currencyCode = useBusinessProfileStore((s) => s.profile?.default_currency_code ?? 'USD');
   const [name, setName] = useState(initial?.name ?? '');
@@ -27,90 +33,77 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
     load();
   }, [load]);
 
+  useReportFormState<ItemInput>(
+    {
+      name: name.trim(),
+      description: description.trim() || null,
+      default_unit_price_minor: priceMinor,
+      unit_label: unitLabel.trim() || 'unit',
+      is_taxable: isTaxable,
+      default_tax_bracket_id: isTaxable ? taxBracketId : null,
+    },
+    !!name.trim(),
+    onStateChange
+  );
+
   return (
-    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View>
-        <Text className="text-xs text-secondary mb-1">Name</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-          value={name}
-          onChangeText={setName}
-          maxLength={100}
-        />
-      </View>
-
-      <View>
-        <Text className="text-xs text-secondary mb-1">Description (optional)</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          maxLength={200}
-        />
-      </View>
-
-      <View className="flex-row gap-2">
+    <FormScrollView>
+      <FormField
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        placeholder="e.g. Consultation"
+        autoCapitalize="words"
+        maxLength={100}
+      />
+      <FormField
+        label="Description"
+        hint="Optional. Appears under the item on invoices."
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        maxLength={200}
+      />
+      <View className="flex-row gap-3">
         <View className="flex-1">
           <MoneyInput
-            label="Default Rate"
+            label="Default Price"
             valueMinor={priceMinor}
             currencyCode={currencyCode}
             onChangeMinor={setPriceMinor}
           />
         </View>
-        <View className="w-24">
-          <Text className="text-xs text-secondary mb-1">Per (hr, item)</Text>
-          <TextInput
-            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
+        <View className="flex-1">
+          <FormField
+            label="Unit"
             value={unitLabel}
             onChangeText={setUnitLabel}
+            placeholder="hour, item"
+            autoCapitalize="none"
             maxLength={20}
           />
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between bg-card rounded-lg border border-field px-3 py-3">
-        <Text className="text-base text-label">Taxable</Text>
-        <Switch value={isTaxable} onValueChange={setIsTaxable} />
-      </View>
-
-      {isTaxable ? (
-        <View>
-          <Text className="text-xs text-secondary mb-2">Default Tax Rate</Text>
-          <View className="flex-row flex-wrap gap-2">
-            {taxBrackets.map((bracket) => {
-              const selected = bracket.id === taxBracketId;
-              return (
-                <Pressable
+      <View>
+        <ListSection
+          footer={isTaxable ? 'Choose the tax rate applied when you add this item to a document.' : undefined}
+        >
+          <ListRow title="Taxable" switchValue={isTaxable} onSwitchChange={setIsTaxable} />
+          {isTaxable
+            ? taxBrackets.map((bracket) => (
+                <ListRow
                   key={bracket.id}
+                  title={bracket.name}
+                  value={formatRateBp(bracket.rate_bp)}
                   onPress={() => setTaxBracketId(bracket.id)}
-                  className={`px-3 py-2 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-field'}`}
-                >
-                  <Text className={selected ? 'text-white text-sm' : 'text-label text-sm'}>{bracket.name}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-      ) : null}
-
-      <Button
-        label={isSaving ? 'Saving…' : 'Save Item'}
-        variant="filled"
-        size="large"
-        disabled={isSaving || !name.trim()}
-        onPress={() =>
-          onSubmit({
-            name: name.trim(),
-            description: description || null,
-            default_unit_price_minor: priceMinor,
-            unit_label: unitLabel || 'unit',
-            is_taxable: isTaxable,
-            default_tax_bracket_id: isTaxable ? taxBracketId : null,
-          })
-        }
-      />
-    </ScrollView>
+                  accessory={bracket.id === taxBracketId ? 'checkmark' : 'none'}
+                />
+              ))
+            : null}
+        </ListSection>
+      </View>
+      {footer}
+    </FormScrollView>
   );
 }

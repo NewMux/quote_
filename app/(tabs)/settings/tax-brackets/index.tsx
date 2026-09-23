@@ -1,13 +1,29 @@
-import { useCallback } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
-import { Button } from '../../../../src/components/Button';
+import { useCallback, useLayoutEffect } from 'react';
+import { Platform, ScrollView } from 'react-native';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { EmptyState } from '../../../../src/components/EmptyState';
+import { HeaderButton } from '../../../../src/components/HeaderButton';
+import { ListRow } from '../../../../src/components/list/ListRow';
+import { ListSection } from '../../../../src/components/list/ListSection';
+import { addButtonItem } from '../../../../src/lib/headerItems';
 import { formatRateBp } from '../../../../src/lib/money';
 import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
 
+function addTaxRate() {
+  router.push('/settings/tax-brackets/new');
+}
+
 export default function TaxBracketsScreen() {
-  const { taxBrackets, load, setDefault } = useTaxBracketsStore();
+  const navigation = useNavigation();
+  const { taxBrackets, load } = useTaxBracketsStore();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      unstable_headerRightItems: () => [addButtonItem('Add Tax Rate', addTaxRate)],
+      headerRight:
+        Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="add" label="Add Tax Rate" onPress={addTaxRate} />,
+    });
+  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -16,28 +32,32 @@ export default function TaxBracketsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-grouped">
-      <FlatList
-        data={taxBrackets}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        ListEmptyComponent={<EmptyState title="No tax rates yet" subtitle="Add one to apply to your line items." />}
-        renderItem={({ item }) => (
-          <Pressable onPress={() => router.push(`/settings/tax-brackets/${item.id}/edit`)}>
-            <View className="bg-card rounded-xl p-4 mb-3 border border-separator flex-row justify-between items-center">
-              <View>
-                <Text className="text-base font-semibold text-label">{item.name}</Text>
-                <Text className="text-sm text-secondary">{formatRateBp(item.rate_bp)}</Text>
-              </View>
-              {item.is_default ? (
-                <Text className="text-xs text-tint font-semibold">Default</Text>
-              ) : (
-                <Button label="Set default" variant="plain" size="small" onPress={() => setDefault(item.id)} />
-              )}
-            </View>
-          </Pressable>
-        )}
-      />
-    </View>
+    <ScrollView
+      className="flex-1 bg-grouped"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+    >
+      {taxBrackets.length === 0 ? (
+        <EmptyState
+          icon="calculator-outline"
+          title="No Tax Rates Yet"
+          subtitle="Add the sales tax or VAT rates you charge."
+          actionLabel="Add Tax Rate"
+          onAction={addTaxRate}
+        />
+      ) : (
+        <ListSection footer="The default rate is applied to new taxable items. Tap a rate to edit it or make it the default.">
+          {taxBrackets.map((item) => (
+            <ListRow
+              key={item.id}
+              title={item.name}
+              subtitle={item.is_default ? 'Default' : undefined}
+              value={formatRateBp(item.rate_bp)}
+              onPress={() => router.push(`/settings/tax-brackets/${item.id}/edit`)}
+            />
+          ))}
+        </ListSection>
+      )}
+    </ScrollView>
   );
 }

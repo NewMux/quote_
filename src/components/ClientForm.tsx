@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
+import { useRef, useState, type ReactNode } from 'react';
+import { Alert, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
+import { FormField } from './form/FormField';
+import { FormScrollView } from './form/FormScrollView';
+import { useReportFormState, type FormState } from './form/useFormState';
 import { persistPickedFile } from '../lib/fileStorage';
 import { newId } from '../lib/id';
 import type { ClientInput } from '../db/repositories/clients.repo';
@@ -10,11 +13,13 @@ import type { Client } from '../types/models';
 
 interface ClientFormProps {
   initial?: Client;
-  onSubmit: (input: ClientInput) => void;
-  isSaving: boolean;
+  /** Receives the current input, validity, and dirtiness; the hosting screen owns the Save action. */
+  onStateChange: (state: FormState<ClientInput>) => void;
+  /** Extra rows rendered at the end of the form (e.g. destructive actions). */
+  footer?: ReactNode;
 }
 
-export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
+export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) {
   const [displayName, setDisplayName] = useState(initial?.display_name ?? '');
   const [contactName, setContactName] = useState(initial?.contact_name ?? '');
   const [email, setEmail] = useState(initial?.email ?? '');
@@ -23,11 +28,29 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
   const [taxRegNumber, setTaxRegNumber] = useState(initial?.tax_registration_number ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [photoUri, setPhotoUri] = useState<string | null>(initial?.photo_uri ?? null);
+  const contactRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+
+  useReportFormState<ClientInput>(
+    {
+      display_name: displayName.trim(),
+      contact_name: contactName.trim() || null,
+      email: email.trim() || null,
+      phone: phone.trim() || null,
+      address: address.trim() || null,
+      tax_registration_number: taxRegNumber.trim() || null,
+      notes: notes.trim() || null,
+      photo_uri: photoUri,
+    },
+    !!displayName.trim(),
+    onStateChange
+  );
 
   async function pickPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Photo library access is required to set a client photo.');
+      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to add a client photo.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
@@ -37,74 +60,83 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
   }
 
   return (
-    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View className="items-center gap-2">
-        <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={72} />
-        <Button label={photoUri ? 'Change photo' : 'Add photo'} variant="plain" onPress={pickPhoto} />
+    <FormScrollView>
+      <View className="items-center gap-1">
+        <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={80} />
+        <Button label={photoUri ? 'Change Photo' : 'Add Photo'} variant="plain" onPress={pickPhoto} />
       </View>
 
-      <Field label="Name" value={displayName} onChangeText={setDisplayName} maxLength={100} />
-      <Field label="Contact Name (optional)" value={contactName} onChangeText={setContactName} maxLength={100} />
-      <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" maxLength={150} />
-      <Field label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" maxLength={30} />
-      <Field label="Address" value={address} onChangeText={setAddress} multiline maxLength={500} />
-      <Field
+      <FormField
+        label="Name"
+        value={displayName}
+        onChangeText={setDisplayName}
+        placeholder="Business or person"
+        maxLength={100}
+        textContentType="organizationName"
+        autoCapitalize="words"
+        returnKeyType="next"
+        onSubmitEditing={() => contactRef.current?.focus()}
+        submitBehavior="submit"
+      />
+      <FormField
+        ref={contactRef}
+        label="Contact Name"
+        hint="Optional"
+        value={contactName}
+        onChangeText={setContactName}
+        maxLength={100}
+        textContentType="name"
+        autoComplete="name"
+        autoCapitalize="words"
+        returnKeyType="next"
+        onSubmitEditing={() => emailRef.current?.focus()}
+        submitBehavior="submit"
+      />
+      <FormField
+        ref={emailRef}
+        label="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        textContentType="emailAddress"
+        autoComplete="email"
+        autoCapitalize="none"
+        autoCorrect={false}
+        maxLength={150}
+        returnKeyType="next"
+        onSubmitEditing={() => phoneRef.current?.focus()}
+        submitBehavior="submit"
+      />
+      <FormField
+        ref={phoneRef}
+        label="Phone"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        textContentType="telephoneNumber"
+        autoComplete="tel"
+        maxLength={30}
+      />
+      <FormField
+        label="Address"
+        value={address}
+        onChangeText={setAddress}
+        multiline
+        textContentType="fullStreetAddress"
+        autoComplete="street-address"
+        maxLength={500}
+      />
+      <FormField
         label="Tax / VAT Registration Number"
+        hint="Optional"
         value={taxRegNumber}
         onChangeText={setTaxRegNumber}
+        autoCapitalize="characters"
+        autoCorrect={false}
         maxLength={50}
       />
-      <Field label="Notes" value={notes} onChangeText={setNotes} multiline maxLength={500} />
-
-      <Button
-        label={isSaving ? 'Saving…' : 'Save Client'}
-        variant="filled"
-        size="large"
-        disabled={isSaving || !displayName.trim()}
-        onPress={() =>
-          onSubmit({
-            display_name: displayName.trim(),
-            contact_name: contactName || null,
-            email: email || null,
-            phone: phone || null,
-            address: address || null,
-            tax_registration_number: taxRegNumber || null,
-            notes: notes || null,
-            photo_uri: photoUri,
-          })
-        }
-      />
-    </ScrollView>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChangeText,
-  multiline,
-  keyboardType,
-  maxLength,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  multiline?: boolean;
-  keyboardType?: 'email-address' | 'phone-pad';
-  maxLength?: number;
-}) {
-  return (
-    <View>
-      <Text className="text-xs text-secondary mb-1">{label}</Text>
-      <TextInput
-        className="border border-field rounded-2xl px-3 py-2 bg-card text-base text-label"
-        value={value}
-        onChangeText={onChangeText}
-        multiline={multiline}
-        keyboardType={keyboardType}
-        maxLength={maxLength}
-        autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
-      />
-    </View>
+      <FormField label="Notes" hint="Only you see these." value={notes} onChangeText={setNotes} multiline maxLength={500} />
+      {footer}
+    </FormScrollView>
   );
 }

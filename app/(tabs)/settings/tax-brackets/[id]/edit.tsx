@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, Text, TextInput, View } from 'react-native';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { Button } from '../../../../../src/components/Button';
-import { formatRateBp, parseRateBp } from '../../../../../src/lib/money';
+import { ActivityIndicator, Alert, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { FormField } from '../../../../../src/components/form/FormField';
+import { FormScrollView } from '../../../../../src/components/form/FormScrollView';
+import { ListRow } from '../../../../../src/components/list/ListRow';
+import { ListSection } from '../../../../../src/components/list/ListSection';
+import { parseRateBp } from '../../../../../src/lib/money';
+import { useSaveHeader } from '../../../../../src/lib/useSaveHeader';
+import { useUnsavedChangesGuard } from '../../../../../src/lib/useUnsavedChangesGuard';
 import { useTaxBracketsStore } from '../../../../../src/stores/useTaxBracketsStore';
 import type { TaxBracket } from '../../../../../src/types/models';
 
 export default function EditTaxBracketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const navigation = useNavigation();
-  const { taxBrackets, update, archive } = useTaxBracketsStore();
+  const { taxBrackets, update, archive, setDefault } = useTaxBracketsStore();
   const [bracket, setBracket] = useState<TaxBracket | null>(null);
   const [name, setName] = useState('');
   const [rate, setRate] = useState('');
@@ -24,75 +28,64 @@ export default function EditTaxBracketScreen() {
     }
   }, [id, taxBrackets]);
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: bracket ? `Edit ${bracket.name}` : 'Edit Tax Rate',
-      headerRight: () => (
-        <Pressable onPress={confirmArchive}>
-          <Text className="text-destructive">Archive</Text>
-        </Pressable>
-      ),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, id, bracket]);
+  const isDirty = !!bracket && (name.trim() !== bracket.name || parseRateBp(rate) !== bracket.rate_bp);
+  const leave = useUnsavedChangesGuard(isDirty && !isSaving);
+
+  async function handleSave() {
+    if (!name.trim()) return;
+    setIsSaving(true);
+    try {
+      await update(id, { name: name.trim(), rate_bp: parseRateBp(rate) });
+      leave(() => router.back());
+    } catch (err) {
+      setIsSaving(false);
+      Alert.alert('Could Not Save Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
+    }
+  }
+
+  useSaveHeader({ onSave: handleSave, disabled: !name.trim() || !isDirty || isSaving });
 
   function confirmArchive() {
-    Alert.alert('Archive tax rate?', `"${bracket?.name}" will no longer appear when adding new line items.`, [
+    Alert.alert(`Archive ${bracket?.name ?? 'Tax Rate'}?`, "It won't be offered when you add new line items.", [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Archive',
         style: 'destructive',
         onPress: async () => {
           await archive(id, true);
-          router.back();
+          leave(() => router.back());
         },
       },
     ]);
   }
 
-  async function handleSubmit() {
-    if (!name.trim()) return;
-    setIsSaving(true);
-    await update(id, { name: name.trim(), rate_bp: parseRateBp(rate) });
-    setIsSaving(false);
-    router.back();
-  }
-
   if (!bracket) {
     return (
-      <View className="flex-1 items-center justify-center bg-card">
-        <ActivityIndicator />
+      <View className="flex-1 items-center justify-center bg-grouped">
+        <ActivityIndicator accessibilityLabel="Loading" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-grouped p-4 gap-4">
+    <FormScrollView>
+      <FormField label="Name" value={name} onChangeText={setName} autoCapitalize="words" maxLength={50} />
+      <FormField label="Rate (%)" keyboardType="decimal-pad" value={rate} onChangeText={setRate} />
       <View>
-        <Text className="text-xs text-secondary mb-1">Name</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-          value={name}
-          onChangeText={setName}
-        />
+        <ListSection footer="The default rate is applied to new taxable line items.">
+          <ListRow
+            title="Default Rate"
+            switchValue={bracket.is_default === 1}
+            switchDisabled={bracket.is_default === 1}
+            onSwitchChange={(value) => {
+              if (value) setDefault(id);
+            }}
+          />
+        </ListSection>
+        <ListSection>
+          <ListRow title="Archive Tax Rate" onPress={confirmArchive} destructive centered />
+        </ListSection>
       </View>
-      <View>
-        <Text className="text-xs text-secondary mb-1">Rate %</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-          keyboardType="decimal-pad"
-          value={rate}
-          onChangeText={setRate}
-        />
-        <Text className="text-xs text-secondary mt-1">Currently {formatRateBp(bracket.rate_bp)}</Text>
-      </View>
-      <Button
-        label={isSaving ? 'Saving…' : 'Save'}
-        variant="filled"
-        size="large"
-        disabled={isSaving || !name.trim()}
-        onPress={handleSubmit}
-      />
-    </View>
+    </FormScrollView>
   );
 }

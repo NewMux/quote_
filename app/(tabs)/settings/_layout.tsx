@@ -1,9 +1,10 @@
 import { Stack } from 'expo-router';
+import { LARGE_TITLE_OPTIONS } from '../../../src/lib/navigationOptions';
 
 export default function SettingsStackLayout() {
   return (
     <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="index" options={{ title: 'Settings', ...LARGE_TITLE_OPTIONS }} />
       <Stack.Screen name="business-profile" options={{ title: 'Business Profile' }} />
       <Stack.Screen name="items/index" options={{ title: 'Item Catalog' }} />
       <Stack.Screen name="items/[id]/edit" options={{ title: 'Edit Item' }} />

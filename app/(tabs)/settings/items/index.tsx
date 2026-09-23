@@ -1,15 +1,30 @@
-import { useCallback } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
-import { Card } from '../../../../src/components/Card';
+import { useCallback, useLayoutEffect } from 'react';
+import { Platform, ScrollView } from 'react-native';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { EmptyState } from '../../../../src/components/EmptyState';
+import { HeaderButton } from '../../../../src/components/HeaderButton';
+import { ListRow } from '../../../../src/components/list/ListRow';
+import { ListSection } from '../../../../src/components/list/ListSection';
+import { addButtonItem } from '../../../../src/lib/headerItems';
 import { formatMinor } from '../../../../src/lib/money';
 import { useBusinessProfileStore } from '../../../../src/stores/useBusinessProfileStore';
 import { useItemCatalogStore } from '../../../../src/stores/useItemCatalogStore';
 
+function addItem() {
+  router.push('/items/new');
+}
+
 export default function ItemsScreen() {
+  const navigation = useNavigation();
   const { items, load } = useItemCatalogStore();
   const currencyCode = useBusinessProfileStore((s) => s.profile?.default_currency_code ?? 'USD');
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      unstable_headerRightItems: () => [addButtonItem('Add Item', addItem)],
+      headerRight: Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="add" label="Add Item" onPress={addItem} />,
+    });
+  }, [navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -18,34 +33,32 @@ export default function ItemsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-grouped">
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        ListEmptyComponent={
-          <EmptyState title="No items yet" subtitle="Save items or services you bill often for one-tap insertion." />
-        }
-        renderItem={({ item }) => (
-          <Pressable onPress={() => router.push(`/items/${item.id}/edit`)}>
-            <Card className="mb-3 p-4 flex-row justify-between items-center">
-              <View className="flex-1 pr-3">
-                <Text className="text-base font-semibold text-label" numberOfLines={1}>
-                  {item.name}
-                </Text>
-                {item.description ? (
-                  <Text className="text-sm text-secondary" numberOfLines={1}>
-                    {item.description}
-                  </Text>
-                ) : null}
-              </View>
-              <Text className="text-base font-medium text-label" numberOfLines={1}>
-                {formatMinor(item.default_unit_price_minor, currencyCode)}
-              </Text>
-            </Card>
-          </Pressable>
-        )}
-      />
-    </View>
+    <ScrollView
+      className="flex-1 bg-grouped"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+    >
+      {items.length === 0 ? (
+        <EmptyState
+          icon="pricetags-outline"
+          title="No Items Yet"
+          subtitle="Save the items and services you bill often, then add them to a document in one tap."
+          actionLabel="Add Item"
+          onAction={addItem}
+        />
+      ) : (
+        <ListSection footer="Tap an item to edit it.">
+          {items.map((item) => (
+            <ListRow
+              key={item.id}
+              title={item.name}
+              subtitle={item.description || undefined}
+              value={formatMinor(item.default_unit_price_minor, currencyCode)}
+              onPress={() => router.push(`/settings/items/${item.id}/edit`)}
+            />
+          ))}
+        </ListSection>
+      )}
+    </ScrollView>
   );
 }

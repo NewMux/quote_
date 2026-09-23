@@ -1,59 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { Alert, Linking, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Card } from '../../../src/components/Card';
-import { ScreenHeader } from '../../../src/components/ScreenHeader';
+import { ListRow } from '../../../src/components/list/ListRow';
+import { ListSection } from '../../../src/components/list/ListSection';
 import { exportBackup } from '../../../src/lib/backup';
 import { disableReminders, enableReminders, isRemindersEnabled } from '../../../src/lib/notifications';
-import { BRAND } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
-const ROWS: { label: string; subtitle: string; href: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  {
-    label: 'Subscription',
-    subtitle: 'Your Invoice Them Pro plan, renewal, and restore purchases',
-    href: '/settings/subscription',
-    icon: 'star-outline',
-  },
-  {
-    label: 'Business Profile',
-    subtitle: 'Your business name, logo, and contact info',
-    href: '/settings/business-profile',
-    icon: 'business-outline',
-  },
-  {
-    label: 'Item Catalog',
-    subtitle: 'Save items or services you bill often',
-    href: '/settings/items',
-    icon: 'pricetags-outline',
-  },
-  {
-    label: 'Tax Rates',
-    subtitle: 'Sales tax or VAT rates you can add to items',
-    href: '/settings/tax-brackets',
-    icon: 'calculator-outline',
-  },
-  {
-    label: 'Invoice & Estimate Numbers',
-    subtitle: 'How your invoice and estimate numbers are formatted',
-    href: '/settings/numbering',
-    icon: 'list-outline',
-  },
-  {
-    label: 'Recurring Invoices',
-    subtitle: 'Invoices that repeat on a schedule',
-    href: '/settings/recurring',
-    icon: 'repeat-outline',
-  },
-  {
-    label: 'Privacy Policy',
-    subtitle: 'What this app stores and how it uses it',
-    href: '/settings/privacy-policy',
-    icon: 'shield-checkmark-outline',
-  },
-];
+/** iOS Settings-style icon backgrounds (white glyphs on system colors). */
+const ICON_COLORS = {
+  account: '#8E8E93',
+  subscription: '#FF9500',
+  business: '#007AFF',
+  catalog: '#34C759',
+  tax: '#5856D6',
+  numbers: '#FF2D55',
+  recurring: '#157A63',
+  reminders: '#FF3B30',
+  export: '#0A84FF',
+  privacy: '#8E8E93',
+} as const;
 
 export default function SettingsScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
@@ -74,9 +41,9 @@ export default function SettingsScreen() {
         setRemindersEnabled(granted);
         if (!granted) {
           Alert.alert(
-            'Notifications are off',
-            'Enable notifications for this app in your device Settings, then try again.',
-            [{ text: 'OK' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }]
+            'Notifications Are Off',
+            'Turn on notifications for Invoice Them in the Settings app, then try again.',
+            [{ text: 'Not Now', style: 'cancel' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }]
           );
         }
       } else {
@@ -84,7 +51,7 @@ export default function SettingsScreen() {
         setRemindersEnabled(false);
       }
     } catch (err) {
-      Alert.alert('Could not update reminders', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Could Not Update Reminders', err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setIsTogglingReminders(false);
     }
@@ -94,12 +61,12 @@ export default function SettingsScreen() {
     try {
       await exportBackup(profile?.business_name ?? null);
     } catch (err) {
-      Alert.alert('Could not export data', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Could Not Export Data', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 
   function handleSignOut() {
-    Alert.alert('Sign out?', 'You can sign back in anytime with your email and password.', [
+    Alert.alert('Sign Out?', 'You can sign back in anytime with your email and password.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',
@@ -109,7 +76,7 @@ export default function SettingsScreen() {
             await signOut();
             router.replace('/(auth)/sign-in');
           } catch (err) {
-            Alert.alert('Could not sign out', err instanceof Error ? err.message : 'Something went wrong.');
+            Alert.alert('Could Not Sign Out', err instanceof Error ? err.message : 'Something went wrong.');
           }
         },
       },
@@ -117,116 +84,101 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-grouped">
-      <ScreenHeader title="Settings" />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+    <ScrollView
+      className="flex-1 bg-grouped"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+    >
+      <ListSection header="Account">
         {email ? (
-          <View className="bg-card rounded-2xl p-4 mb-4 flex-row items-center gap-3 border border-separator">
-            <Ionicons name="person-circle-outline" size={32} color={BRAND.default} />
-            <View className="flex-1">
-              <Text className="text-xs text-secondary">Signed in as</Text>
-              <Text className="text-base text-label" numberOfLines={1}>
-                {email}
-              </Text>
-            </View>
-          </View>
+          <ListRow icon="person" iconBackground={ICON_COLORS.account} title={email} subtitle="Signed In" />
         ) : null}
+        <ListRow
+          icon="star"
+          iconBackground={ICON_COLORS.subscription}
+          title="Subscription"
+          onPress={() => router.push('/settings/subscription')}
+        />
+      </ListSection>
 
-        <Card className="p-0 overflow-hidden">
-          {ROWS.map((row, index) => (
-            <Pressable key={row.href} onPress={() => router.push(row.href as never)}>
-              <View
-                className={`flex-row items-center justify-between p-4 ${
-                  index < ROWS.length - 1 ? 'border-b border-separator' : ''
-                }`}
-              >
-                <View className="flex-row items-center gap-3 flex-1">
-                  <Ionicons name={row.icon} size={20} color="#374151" />
-                  <View className="flex-1">
-                    <Text className="text-base text-label">{row.label}</Text>
-                    <Text className="text-xs text-secondary" numberOfLines={1}>
-                      {row.subtitle}
-                    </Text>
-                  </View>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-              </View>
-            </Pressable>
-          ))}
-        </Card>
+      <ListSection header="Business">
+        <ListRow
+          icon="business"
+          iconBackground={ICON_COLORS.business}
+          title="Business Profile"
+          value={profile?.business_name || undefined}
+          onPress={() => router.push('/settings/business-profile')}
+        />
+        <ListRow
+          icon="pricetags"
+          iconBackground={ICON_COLORS.catalog}
+          title="Item Catalog"
+          onPress={() => router.push('/settings/items')}
+        />
+        <ListRow
+          icon="calculator"
+          iconBackground={ICON_COLORS.tax}
+          title="Tax Rates"
+          onPress={() => router.push('/settings/tax-brackets')}
+        />
+        <ListRow
+          icon="list"
+          iconBackground={ICON_COLORS.numbers}
+          title="Invoice & Estimate Numbers"
+          onPress={() => router.push('/settings/numbering')}
+        />
+        <ListRow
+          icon="repeat"
+          iconBackground={ICON_COLORS.recurring}
+          title="Recurring Invoices"
+          onPress={() => router.push('/settings/recurring')}
+        />
+      </ListSection>
 
-        <Pressable onPress={handleExport}>
-          <View className="bg-card rounded-2xl p-4 mt-4 flex-row items-center justify-between border border-separator">
-            <View className="flex-row items-center gap-3 flex-1">
-              <Ionicons name="share-outline" size={20} color="#374151" />
-              <View className="flex-1">
-                <Text className="text-base text-label">Export Data</Text>
-                <Text className="text-xs text-secondary" numberOfLines={2}>
-                  Save a backup of your clients, invoices, and estimates to Files, email, or cloud
-                  storage
-                </Text>
-              </View>
-            </View>
-          </View>
-        </Pressable>
+      <ListSection
+        header="Notifications"
+        footer="Get a notification on this device when an invoice becomes overdue."
+      >
+        <ListRow
+          icon="notifications"
+          iconBackground={ICON_COLORS.reminders}
+          title="Overdue Reminders"
+          switchValue={remindersEnabled}
+          onSwitchChange={handleToggleReminders}
+          switchDisabled={isTogglingReminders}
+        />
+      </ListSection>
 
-        <View className="bg-card rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-separator">
-          <View className="flex-row items-center gap-3 flex-1">
-            <Ionicons name="notifications-outline" size={20} color="#374151" />
-            <View className="flex-1">
-              <Text className="text-base text-label">Overdue Invoice Reminders</Text>
-              <Text className="text-xs text-secondary" numberOfLines={2}>
-                Get notified on this device when an invoice becomes overdue
-              </Text>
-            </View>
-          </View>
-          <Switch
-            value={remindersEnabled}
-            onValueChange={handleToggleReminders}
-            disabled={isTogglingReminders}
-            trackColor={{ true: BRAND.default }}
-          />
-        </View>
+      <ListSection
+        header="Data"
+        footer="Save a copy of your clients, invoices, and estimates to Files, email, or cloud storage."
+      >
+        <ListRow
+          icon="share"
+          iconBackground={ICON_COLORS.export}
+          title="Export Data"
+          onPress={handleExport}
+          accessory="none"
+        />
+      </ListSection>
 
-        <Pressable onPress={() => router.push('/settings/delete-data')}>
-          <View className="bg-destructive/10 rounded-2xl p-4 mt-6 flex-row items-center justify-between border border-destructive/30">
-            <View className="flex-row items-center gap-3 flex-1">
-              <Ionicons name="trash-outline" size={20} color="#DC2626" />
-              <View className="flex-1">
-                <Text className="text-base text-destructive font-medium">Delete All Data</Text>
-                <Text className="text-xs text-destructive" numberOfLines={1}>
-                  Permanently erase everything in your account
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#F87171" />
-          </View>
-        </Pressable>
+      <ListSection header="About">
+        <ListRow
+          icon="shield-checkmark"
+          iconBackground={ICON_COLORS.privacy}
+          title="Privacy Policy"
+          onPress={() => router.push('/settings/privacy-policy')}
+        />
+      </ListSection>
 
-        <Pressable onPress={() => router.push('/settings/delete-account')}>
-          <View className="bg-destructive/10 rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-destructive/30">
-            <View className="flex-row items-center gap-3 flex-1">
-              <Ionicons name="person-remove-outline" size={20} color="#DC2626" />
-              <View className="flex-1">
-                <Text className="text-base text-destructive font-medium">Delete Account</Text>
-                <Text className="text-xs text-destructive" numberOfLines={2}>
-                  Permanently delete your account and everything in it
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#F87171" />
-          </View>
-        </Pressable>
+      <ListSection>
+        <ListRow title="Sign Out" onPress={handleSignOut} centered destructive />
+      </ListSection>
 
-        <Pressable onPress={handleSignOut}>
-          <View className="bg-card rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-separator">
-            <View className="flex-row items-center gap-3 flex-1">
-              <Ionicons name="log-out-outline" size={20} color="#374151" />
-              <Text className="text-base text-label">Sign Out</Text>
-            </View>
-          </View>
-        </Pressable>
-      </ScrollView>
-    </View>
+      <ListSection footer="Deleting can't be undone.">
+        <ListRow title="Delete All Data" onPress={() => router.push('/settings/delete-data')} destructive />
+        <ListRow title="Delete Account" onPress={() => router.push('/settings/delete-account')} destructive />
+      </ListSection>
+    </ScrollView>
   );
 }

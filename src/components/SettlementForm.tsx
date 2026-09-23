@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Alert, Image, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { Button } from './Button';
 import { DateField } from './DateField';
+import { FormField } from './form/FormField';
+import { useReportFormState, type FormState } from './form/useFormState';
 import { MoneyInput } from './MoneyInput';
 import { persistPickedFile } from '../lib/fileStorage';
+import { toStoredDate } from '../lib/format';
 import { useSignedUrl } from '../lib/useSignedUrl';
 import { newId } from '../lib/id';
 import { BRAND } from '../lib/theme';
@@ -31,46 +34,49 @@ interface SettlementFormProps {
   defaultAmountMinor: number;
   currencyCode: string;
   initial?: Settlement;
-  onSubmit: (value: SettlementFormValue) => void;
-  onDelete?: () => void;
-  isSubmitting: boolean;
+  /** Receives the current value, validity, and dirtiness; the hosting sheet owns the Save action. */
+  onStateChange: (state: FormState<SettlementFormValue>) => void;
 }
 
-export function SettlementForm({
-  defaultAmountMinor,
-  currencyCode,
-  initial,
-  onSubmit,
-  onDelete,
-  isSubmitting,
-}: SettlementFormProps) {
+/** Payment fields. Rendered inside a FormScrollView by the hosting sheet. */
+export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onStateChange }: SettlementFormProps) {
   const [method, setMethod] = useState<SettlementMethod>(initial?.method ?? 'cash');
   const [amountMinor, setAmountMinor] = useState(initial?.amount_minor ?? defaultAmountMinor);
-  const [settledDate, setSettledDate] = useState(initial?.settled_date ?? new Date().toISOString().slice(0, 10));
+  const [settledDate, setSettledDate] = useState(initial?.settled_date ?? toStoredDate(new Date()));
   const [referenceNumber, setReferenceNumber] = useState(initial?.reference_number ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [receiptUri, setReceiptUri] = useState<string | null>(initial?.receipt_photo_uri ?? null);
   const signedReceiptUrl = useSignedUrl(receiptUri);
 
+  useReportFormState<SettlementFormValue>(
+    {
+      method,
+      amountMinor,
+      settledDate,
+      referenceNumber: referenceNumber.trim() || null,
+      receiptPhotoUri: receiptUri,
+      notes: notes.trim() || null,
+    },
+    amountMinor > 0,
+    onStateChange
+  );
+
   async function pickReceiptPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Photo library access is required to attach a receipt.');
+      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to attach a receipt.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-    });
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (result.canceled || !result.assets[0]) return;
     const persistedUri = await persistPickedFile(result.assets[0].uri, 'receipts', `${newId()}.jpg`);
     setReceiptUri(persistedUri);
   }
 
   return (
-    <View className="gap-4">
+    <>
       <View>
-        <Text className="text-xs text-secondary mb-2">Method</Text>
+        <Text className="text-sm text-secondary mb-1.5">Method</Text>
         <SegmentedControl
           values={METHODS.map((m) => m.label)}
           selectedIndex={METHODS.findIndex((m) => m.value === method)}
@@ -80,56 +86,40 @@ export function SettlementForm({
         />
       </View>
 
-      <MoneyInput label="Amount" valueMinor={amountMinor} currencyCode={currencyCode} onChangeMinor={setAmountMinor} />
+      <MoneyInput
+        label="Amount"
+        valueMinor={amountMinor}
+        currencyCode={currencyCode}
+        onChangeMinor={setAmountMinor}
+        hint={amountMinor > 0 ? undefined : 'Enter an amount greater than zero.'}
+      />
 
       <DateField label="Date" value={settledDate} onChange={setSettledDate} />
 
-      <View>
-        <Text className="text-xs text-secondary mb-1">Reference Number (optional)</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-          value={referenceNumber}
-          onChangeText={setReferenceNumber}
-          placeholder="Check #, transaction ID, etc."
-        />
-      </View>
-
-      <View>
-        <Text className="text-xs text-secondary mb-1">Notes (optional)</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-          value={notes}
-          onChangeText={setNotes}
-          multiline
-        />
-      </View>
-
-      <View>
-        <Text className="text-xs text-secondary mb-2">Receipt Photo (optional)</Text>
-        {signedReceiptUrl ? (
-          <Image source={{ uri: signedReceiptUrl }} className="w-full h-40 rounded-lg mb-2" resizeMode="cover" />
-        ) : null}
-        <Button label={receiptUri ? 'Change photo' : 'Attach photo'} variant="tinted" onPress={pickReceiptPhoto} />
-      </View>
-
-      <Button
-        label={isSubmitting ? 'Saving…' : initial ? 'Save Changes' : 'Log Payment'}
-        variant="filled"
-        size="large"
-        disabled={isSubmitting || amountMinor <= 0}
-        onPress={() =>
-          onSubmit({
-            method,
-            amountMinor,
-            settledDate,
-            referenceNumber: referenceNumber || null,
-            receiptPhotoUri: receiptUri,
-            notes: notes || null,
-          })
-        }
+      <FormField
+        label="Reference Number"
+        hint="Optional, such as a check number or transaction ID."
+        value={referenceNumber}
+        onChangeText={setReferenceNumber}
+        autoCapitalize="characters"
+        autoCorrect={false}
+        maxLength={60}
       />
 
-      {onDelete ? <Button label="Delete Payment" variant="destructive" size="large" onPress={onDelete} /> : null}
-    </View>
+      <FormField label="Notes" hint="Optional" value={notes} onChangeText={setNotes} multiline maxLength={500} />
+
+      <View>
+        <Text className="text-sm text-secondary mb-1.5">Receipt Photo</Text>
+        {signedReceiptUrl ? (
+          <Image
+            source={{ uri: signedReceiptUrl }}
+            className="w-full h-40 rounded-xl mb-2"
+            resizeMode="cover"
+            accessibilityLabel="Receipt photo"
+          />
+        ) : null}
+        <Button label={receiptUri ? 'Change Photo' : 'Attach Photo'} variant="tinted" onPress={pickReceiptPhoto} />
+      </View>
+    </>
   );
 }

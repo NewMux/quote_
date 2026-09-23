@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
   Alert,
   Modal,
@@ -11,12 +10,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { router, useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useNavigation, type NativeStackHeaderItem } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import type { SFSymbol } from 'sf-symbols-typescript';
 import { ActivityLogList } from '../../../../src/components/ActivityLogList';
 import { Avatar } from '../../../../src/components/Avatar';
 import { Button } from '../../../../src/components/Button';
 import { Card } from '../../../../src/components/Card';
+import { HeaderButton } from '../../../../src/components/HeaderButton';
 import { DocumentStageIndicator } from '../../../../src/components/DocumentStageIndicator';
 import { LineItemRow } from '../../../../src/components/LineItemRow';
 import { StatusBadge } from '../../../../src/components/StatusBadge';
@@ -61,6 +63,13 @@ import type {
   SignatureRecord,
 } from '../../../../src/types/models';
 
+interface MenuAction {
+  label: string;
+  symbol: SFSymbol;
+  onPress: () => void;
+  destructive?: boolean;
+}
+
 export default function DocumentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
@@ -75,6 +84,10 @@ export default function DocumentDetailScreen() {
   const [busy, setBusy] = useState(false);
   const [voidPromptVisible, setVoidPromptVisible] = useState(false);
   const [voidReason, setVoidReason] = useState('');
+  // The header is configured in an effect, but its menu handlers are declared further down (after
+  // the loading early-return); refs hand the effect the latest versions without reordering them.
+  const menuActionsRef = useRef<() => MenuAction[]>(() => []);
+  const openActionsMenuRef = useRef<() => void>(() => {});
 
   const reload = useCallback(async () => {
     const doc = await getDocument(id);
@@ -97,28 +110,49 @@ export default function DocumentDetailScreen() {
   useEffect(() => {
     if (!document) return;
     const doc = document;
+    const openEditor = () => router.push(`/documents/${id}/edit`);
+    const buildHeaderItems = (): NativeStackHeaderItem[] => {
+      const items: NativeStackHeaderItem[] = [
+        {
+          type: 'menu',
+          label: 'More',
+          icon: { type: 'sfSymbol', name: 'ellipsis.circle' },
+          menu: {
+            items: menuActionsRef.current().map((action) => ({
+              type: 'action' as const,
+              label: action.label,
+              icon: { type: 'sfSymbol' as const, name: action.symbol },
+              destructive: action.destructive,
+              onPress: action.onPress,
+            })),
+          },
+        },
+      ];
+      if (canEdit(doc)) {
+        items.push({ type: 'button', label: 'Edit', icon: { type: 'sfSymbol', name: 'pencil' }, onPress: openEditor });
+      }
+      return items;
+    };
     navigation.setOptions({
       title: doc.doc_number,
-      headerRight: () => (
-        <View className="flex-row items-center gap-4">
-          {canEdit(doc) ? (
-            <Pressable onPress={() => router.push(`/documents/${id}/edit`)} hitSlop={8} accessibilityLabel="Edit">
-              <Ionicons name="create-outline" size={22} color={BRAND.default} />
-            </Pressable>
-          ) : null}
-          <Pressable onPress={openActionsMenu} hitSlop={8} accessibilityLabel="More actions">
-            <Ionicons name="ellipsis-horizontal-circle-outline" size={22} color={BRAND.default} />
-          </Pressable>
-        </View>
-      ),
+      unstable_headerRightItems: buildHeaderItems,
+      headerRight:
+        Platform.OS === 'ios'
+          ? undefined
+          : () => (
+              <View className="flex-row">
+                {canEdit(doc) ? <HeaderButton icon="create-outline" label="Edit" onPress={openEditor} /> : null}
+                <HeaderButton icon="ellipsis-horizontal-circle-outline" label="More" onPress={() => openActionsMenuRef.current()} />
+              </View>
+            ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, document, schedule]);
 
   if (!document) {
     return (
-      <View className="flex-1 items-center justify-center bg-card">
-        <ActivityIndicator />
+      <View className="flex-1 items-center justify-center bg-grouped">
+        <ActivityIndicator accessibilityLabel="Loading" />
       </View>
     );
   }
@@ -142,29 +176,47 @@ export default function DocumentDetailScreen() {
   async function handleIssue() {
     const problem = checkReadyToSend();
     if (problem) {
-      Alert.alert('Almost there', problem);
+      Alert.alert('Not Ready to Send', problem);
       return;
     }
     await withBusy(() => issueDocument(id));
   }
 
   async function handleMarkViewed() {
+    // The new "Viewed" entry in the Activity section is the confirmation; no dialog needed.
     await withBusy(() => markViewed(id));
-    Alert.alert(
-      'Marked as viewed',
-      "This records that the client has seen this document — you'll see it in the Activity log below."
-    );
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }
 
   function handleClearSignature(role: 'merchant' | 'client') {
     const whose = role === 'merchant' ? 'Your' : "The client's";
-    Alert.alert('Clear signature?', `${whose} signature will be removed.`, [
+    Alert.alert('Clear Signature?', `${whose} signature will be removed.`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Clear', style: 'destructive', onPress: () => withBusy(() => deleteSignature(id, role)) },
     ]);
   }
 
   function handleVoid() {
+    if (!document) return;
+    const label = document.doc_type === 'estimate' ? 'Estimate' : 'Invoice';
+    if (Platform.OS === 'ios') {
+      Alert.prompt(
+        `Cancel This ${label}?`,
+        "It stays on record but can't be edited, sent, or paid anymore. Add a reason if you like.",
+        [
+          { text: `Don't Cancel`, style: 'cancel' },
+          {
+            text: `Cancel ${label}`,
+            style: 'destructive',
+            onPress: (reason?: string) => withBusy(() => voidDocument(id, reason?.trim() || 'No reason given')),
+          },
+        ],
+        'plain-text',
+        '',
+        'default'
+      );
+      return;
+    }
     setVoidReason('');
     setVoidPromptVisible(true);
   }
@@ -176,10 +228,9 @@ export default function DocumentDetailScreen() {
 
   function handleDelete() {
     if (!document) return;
-    const docType = document.doc_type === 'estimate' ? 'estimate' : 'invoice';
     Alert.alert(
-      `Delete this ${docType}?`,
-      "This will permanently delete it, along with its line items, signatures, and payment records. This can't be undone.",
+      `Delete ${document.doc_number}?`,
+      "This permanently deletes the document with its line items, signatures, and payment records. This can't be undone.",
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -190,7 +241,7 @@ export default function DocumentDetailScreen() {
               await deleteDocument(id);
               router.replace('/(tabs)/documents');
             } catch (err) {
-              Alert.alert('Could not delete', err instanceof Error ? err.message : 'Something went wrong.');
+              Alert.alert('Could Not Delete', err instanceof Error ? err.message : 'Something went wrong.');
             }
           },
         },
@@ -198,60 +249,45 @@ export default function DocumentDetailScreen() {
     );
   }
 
-  function openActionsMenu() {
-    if (!document) return;
-    const options: { label: string; onPress: () => void; destructive?: boolean }[] = [
-      { label: 'Share PDF', onPress: () => handleGeneratePdfAnd('view') },
+  /** The document's secondary actions: a native menu on iOS, a dialog list on Android. */
+  function getMenuActions() {
+    if (!document) return [];
+    const label = document.doc_type === 'estimate' ? 'Estimate' : 'Invoice';
+    const actions: MenuAction[] = [
+      { label: 'Share PDF', symbol: 'square.and.arrow.up', onPress: () => handleGeneratePdfAnd('view') },
     ];
     if (canMarkViewed(document)) {
-      options.push({ label: 'Mark as Viewed', onPress: handleMarkViewed });
+      actions.push({ label: 'Mark as Viewed', symbol: 'eye', onPress: handleMarkViewed });
     }
     if (document.doc_type === 'invoice' && document.status !== 'void') {
-      options.push({
+      actions.push({
         label: schedule ? 'Edit Recurring' : 'Make Recurring',
+        symbol: 'repeat',
         onPress: () => router.push({ pathname: '/modals/recurring', params: { documentId: id } }),
       });
     }
     if (canVoid(document)) {
-      options.push({
-        label: document.doc_type === 'estimate' ? 'Cancel Estimate' : 'Cancel Invoice',
-        onPress: handleVoid,
-        destructive: true,
-      });
+      actions.push({ label: `Cancel ${label}`, symbol: 'xmark.circle', onPress: handleVoid, destructive: true });
     }
     if (canDelete(document)) {
-      options.push({
-        label: document.doc_type === 'estimate' ? 'Delete Estimate' : 'Delete Invoice',
-        onPress: handleDelete,
-        destructive: true,
-      });
+      actions.push({ label: `Delete ${label}`, symbol: 'trash', onPress: handleDelete, destructive: true });
     }
-
-    if (Platform.OS === 'ios') {
-      const destructiveButtonIndex = options
-        .map((o, i) => (o.destructive ? i : -1))
-        .filter((i) => i >= 0);
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: [...options.map((o) => o.label), 'Close'],
-          cancelButtonIndex: options.length,
-          destructiveButtonIndex,
-        },
-        (index) => {
-          if (index < options.length) options[index].onPress();
-        }
-      );
-    } else {
-      Alert.alert('Document Actions', undefined, [
-        ...options.map((o) => ({
-          text: o.label,
-          style: o.destructive ? ('destructive' as const) : undefined,
-          onPress: o.onPress,
-        })),
-        { text: 'Close', style: 'cancel' as const },
-      ]);
-    }
+    return actions;
   }
+
+  function openActionsMenu() {
+    Alert.alert(document?.doc_number ?? 'Document', undefined, [
+      ...getMenuActions().map((a) => ({
+        text: a.label,
+        style: a.destructive ? ('destructive' as const) : undefined,
+        onPress: a.onPress,
+      })),
+      { text: 'Cancel', style: 'cancel' as const },
+    ]);
+  }
+
+  menuActionsRef.current = getMenuActions;
+  openActionsMenuRef.current = openActionsMenu;
 
   async function handleConvert() {
     if (!profile) return;
@@ -265,7 +301,7 @@ export default function DocumentDetailScreen() {
     if (!document) return;
     const problem = checkReadyToSend();
     if (problem) {
-      Alert.alert('Almost there', problem);
+      Alert.alert('Not Ready to Send', problem);
       return;
     }
     const docType = document.doc_type;

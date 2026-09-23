@@ -1,7 +1,10 @@
-import { Pressable, Switch, Text, TextInput, View } from 'react-native';
+import { Pressable, Switch, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { computeLineItem } from '../lib/documentCalculations';
 import { formatMinor } from '../lib/money';
+import { BRAND, useThemeColors } from '../lib/theme';
+import { FormField } from './form/FormField';
 import { MoneyInput } from './MoneyInput';
 import type { LineItemEditable, TaxBracket } from '../types/models';
 
@@ -15,32 +18,35 @@ interface LineItemEditorProps {
 
 export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRemove }: LineItemEditorProps) {
   const computed = computeLineItem(line);
+  const colors = useThemeColors();
 
   return (
-    <View className="border border-separator rounded-xl p-3 mb-3 bg-card">
-      <View className="flex-row items-start mb-2">
-        <TextInput
-          className="flex-1 text-base text-label mr-2"
-          placeholder="Description"
-          value={line.description}
-          onChangeText={(description) => onChange({ description })}
-          multiline
-          maxLength={200}
-        />
+    <View className="rounded-2xl p-3 mb-3 bg-card gap-3">
+      <View className="flex-row items-start gap-1">
+        <View className="flex-1">
+          <FormField
+            label="Description"
+            value={line.description}
+            onChangeText={(description) => onChange({ description })}
+            multiline
+            maxLength={200}
+          />
+        </View>
         <Pressable
           onPress={onRemove}
-          hitSlop={8}
-          className="w-11 h-11 items-center justify-center -mr-2 -mt-1"
+          accessibilityRole="button"
+          accessibilityLabel={`Remove ${line.description || 'Item'}`}
+          hitSlop={4}
+          className="w-11 h-11 items-center justify-center -mr-1"
         >
-          <Text className="text-destructive text-lg">×</Text>
+          <Ionicons name="remove-circle" size={24} color={colors.destructive} />
         </Pressable>
       </View>
 
-      <View className="flex-row gap-2 mb-2">
-        <View className="w-20">
-          <Text className="text-xs text-secondary mb-1">Qty</Text>
-          <TextInput
-            className="border border-field rounded-lg px-3 py-2 text-base text-label"
+      <View className="flex-row gap-2">
+        <View className="flex-1">
+          <FormField
+            label="Qty"
             keyboardType="decimal-pad"
             value={String(line.quantity)}
             onChangeText={(text) => {
@@ -49,19 +55,19 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
             }}
           />
         </View>
-        <View className="w-20">
-          <Text className="text-xs text-secondary mb-1">Per</Text>
-          <TextInput
-            className="border border-field rounded-lg px-3 py-2 text-base text-label"
+        <View className="flex-1">
+          <FormField
+            label="Unit"
             value={line.unitLabel ?? ''}
             onChangeText={(unitLabel) => onChange({ unitLabel: unitLabel || null })}
-            placeholder="hr, item"
+            placeholder="hour"
+            autoCapitalize="none"
             maxLength={20}
           />
         </View>
-        <View className="flex-1">
+        <View style={{ flex: 1.4 }}>
           <MoneyInput
-            label="Rate"
+            label="Price"
             valueMinor={line.unitPriceMinor}
             currencyCode={currencyCode}
             onChangeMinor={(unitPriceMinor) => onChange({ unitPriceMinor })}
@@ -69,10 +75,12 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-sm text-secondary">Taxable</Text>
+      <View className="flex-row items-center justify-between min-h-[44px]">
+        <Text className="text-[17px] text-label">Taxable</Text>
         <Switch
           value={line.isTaxable}
+          accessibilityLabel="Taxable"
+          trackColor={{ true: BRAND.default }}
           onValueChange={(isTaxable) =>
             onChange({
               isTaxable,
@@ -84,7 +92,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
       </View>
 
       {line.isTaxable ? (
-        <View className="flex-row flex-wrap gap-2 mb-2 items-center">
+        <View className="flex-row flex-wrap gap-2 items-center" accessibilityRole="radiogroup">
           {taxBrackets.map((bracket) => {
             const selected = bracket.id === line.taxBracketId;
             return (
@@ -97,27 +105,31 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
                     taxRateBp: bracket.rate_bp,
                   })
                 }
-                hitSlop={4}
-                className={`px-3 py-2 min-h-[32px] justify-center rounded-full border ${selected ? 'bg-brand border-brand' : 'border-field'}`}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selected }}
+                className={`px-4 min-h-[44px] justify-center rounded-full ${selected ? 'bg-brand' : 'bg-fill'}`}
               >
-                <Text className={selected ? 'text-white text-xs' : 'text-label text-xs'}>
+                <Text className={`text-[15px] ${selected ? 'text-white font-semibold' : 'text-label'}`}>
                   {bracket.name}
                 </Text>
               </Pressable>
             );
           })}
           {taxBrackets.length <= 1 ? (
-            <Pressable onPress={() => router.push('/settings/tax-brackets')}>
-              <Text className="text-tint text-xs font-medium">+ Add a tax rate</Text>
+            <Pressable
+              onPress={() => router.push('/settings/tax-brackets/new')}
+              accessibilityRole="button"
+              className="min-h-[44px] justify-center px-1"
+            >
+              <Text className="text-tint text-[15px] font-medium">Add Tax Rate</Text>
             </Pressable>
           ) : null}
         </View>
       ) : null}
 
-      <View className="flex-row justify-end">
-        <Text className="text-sm font-semibold text-label">
-          {formatMinor(computed.lineTotalMinor, currencyCode)}
-        </Text>
+      <View className="flex-row justify-between items-center border-t border-separator pt-2">
+        <Text className="text-sm text-secondary">Line Total</Text>
+        <Text className="text-base font-semibold text-label">{formatMinor(computed.lineTotalMinor, currencyCode)}</Text>
       </View>
     </View>
   );
