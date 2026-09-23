@@ -71,7 +71,7 @@ interface MenuAction {
 }
 
 export default function DocumentDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, isNew } = useLocalSearchParams<{ id: string; isNew?: string }>();
   const navigation = useNavigation();
   const profile = useBusinessProfileStore((s) => s.profile);
   const [document, setDocument] = useState<DocumentRecord | null>(null);
@@ -107,6 +107,14 @@ export default function DocumentDetailScreen() {
       reload();
     }, [reload])
   );
+
+  // A document that was just created opens straight into its editor, with this screen underneath
+  // so the editor's Done lands here, ready to issue or share.
+  useEffect(() => {
+    if (isNew !== '1') return;
+    router.setParams({ isNew: undefined });
+    router.push(`/documents/${id}/edit`);
+  }, [id, isNew]);
 
   useEffect(() => {
     if (!document) return;
@@ -373,6 +381,17 @@ export default function DocumentDetailScreen() {
             <View className="self-stretch mt-5 gap-2">
               <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
               <Text className="text-footnote text-secondary text-center">{primaryAction.caption}</Text>
+            </View>
+          ) : null}
+          {document.status !== 'void' ? (
+            <View className="self-stretch mt-3">
+              <Button
+                label="Share PDF"
+                icon="square.and.arrow.up"
+                variant="tinted"
+                onPress={() => handleGeneratePdfAnd('view')}
+                accessibilityHint="Opens the share sheet to send, print or save the PDF to Files"
+              />
             </View>
           ) : null}
         </View>

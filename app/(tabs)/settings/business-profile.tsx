@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Alert, Image, Pressable, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActionSheetIOS, ActivityIndicator, Alert, Image, Platform, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Button } from '../../../src/components/Button';
@@ -43,6 +43,8 @@ export default function BusinessProfileScreen() {
   const [paymentInstructions, setPaymentInstructions] = useState('');
   const [footerTerms, setFooterTerms] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpdatingLogo, setIsUpdatingLogo] = useState(false);
+  const hydrated = useRef(false);
   const signedLogoUrl = useSignedUrl(logoUri);
   const colors = useThemeColors();
 
@@ -50,10 +52,17 @@ export default function BusinessProfileScreen() {
     load();
   }, [load]);
 
+  // The logo saves on its own as soon as it's picked, so it always mirrors the stored profile.
   useEffect(() => {
-    if (!profile) return;
+    setLogoUri(profile?.logo_uri ?? null);
+  }, [profile?.logo_uri]);
+
+  // The text fields are filled once; later profile reloads (after a logo change) must not wipe out
+  // edits the person hasn't saved yet.
+  useEffect(() => {
+    if (!profile || hydrated.current) return;
+    hydrated.current = true;
     setBusinessName(profile.business_name);
-    setLogoUri(profile.logo_uri);
     setAccentColor(profile.accent_color);
     setEmail(profile.email ?? '');
     setPhone(profile.phone ?? '');
@@ -66,7 +75,6 @@ export default function BusinessProfileScreen() {
   const isDirty =
     !!profile &&
     (businessName !== profile.business_name ||
-      logoUri !== profile.logo_uri ||
       accentColor !== profile.accent_color ||
       email !== (profile.email ?? '') ||
       phone !== (profile.phone ?? '') ||
@@ -85,10 +93,53 @@ export default function BusinessProfileScreen() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
     if (result.canceled || !result.assets[0]) return;
-    // A unique name per upload, so replacing the logo gets a new path — the old file is deleted on
-    // save, and no cached signed URL or image can keep showing the previous logo.
-    const persistedUri = await persistPickedFile(result.assets[0].uri, 'branding', `logo-${newId()}.jpg`);
-    setLogoUri(persistedUri);
+    const pickedUri = result.assets[0].uri;
+    await changeLogo(async () => {
+      // A unique name per upload, so replacing the logo gets a new path — the old file is deleted,
+      // and no cached signed URL or image can keep showing the previous logo.
+      const persistedUri = await persistPickedFile(pickedUri, 'branding', `logo-${newId()}.jpg`);
+      await update({ logo_uri: persistedUri });
+    });
+  }
+
+  function removeLogo() {
+    Alert.alert('Remove Logo?', 'Your documents will no longer show a logo.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove Logo', style: 'destructive', onPress: () => changeLogo(() => update({ logo_uri: null })) },
+    ]);
+  }
+
+  async function changeLogo(task: () => Promise<void>) {
+    setIsUpdatingLogo(true);
+    try {
+      await task();
+    } catch (err) {
+      Alert.alert('Couldn’t Update Logo', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsUpdatingLogo(false);
+    }
+  }
+
+  function showLogoOptions() {
+    if (!logoUri) {
+      pickLogo();
+      return;
+    }
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options: ['Choose Photo', 'Remove Logo', 'Cancel'], destructiveButtonIndex: 1, cancelButtonIndex: 2 },
+        (index) => {
+          if (index === 0) pickLogo();
+          if (index === 1) removeLogo();
+        }
+      );
+      return;
+    }
+    Alert.alert('Logo', undefined, [
+      { text: 'Choose Photo', onPress: pickLogo },
+      { text: 'Remove Logo', style: 'destructive', onPress: removeLogo },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   }
 
   async function handleSave() {
@@ -97,7 +148,6 @@ export default function BusinessProfileScreen() {
     try {
       await update({
         business_name: businessName.trim(),
-        logo_uri: logoUri,
         accent_color: accentColor,
         email: email.trim() || null,
         phone: phone.trim() || null,
@@ -120,22 +170,30 @@ export default function BusinessProfileScreen() {
   return (
     <FormScrollView>
       <View className="items-center gap-1 pb-4">
-        {signedLogoUrl ? (
-          <Image
-            source={{ uri: signedLogoUrl }}
-            className="w-24 h-24 rounded-3xl bg-card"
-            resizeMode="contain"
-            accessibilityLabel="Business logo"
-          />
-        ) : (
-          <View
-            className="w-24 h-24 rounded-3xl bg-card items-center justify-center"
-            style={{ borderCurve: 'continuous' }}
-          >
+        <View className="w-24 h-24 rounded-3xl bg-card items-center justify-center overflow-hidden" style={{ borderCurve: 'continuous' }}>
+          {signedLogoUrl ? (
+            <Image
+              source={{ uri: signedLogoUrl }}
+              className="w-24 h-24"
+              resizeMode="contain"
+              accessibilityLabel="Business logo"
+            />
+          ) : (
             <Icon name="photo" size={34} color={colors.secondary} />
-          </View>
-        )}
-        <Button label={logoUri ? 'Edit Logo' : 'Add Logo'} variant="plain" size="small" onPress={pickLogo} />
+          )}
+          {isUpdatingLogo ? (
+            <View className="absolute inset-0 items-center justify-center bg-card/70">
+              <ActivityIndicator accessibilityLabel="Updating Logo" />
+            </View>
+          ) : null}
+        </View>
+        <Button
+          label={logoUri ? 'Edit Logo' : 'Add Logo'}
+          variant="plain"
+          size="small"
+          disabled={isUpdatingLogo}
+          onPress={showLogoOptions}
+        />
       </View>
 
       <ListSection footer="Your business name appears on every document.">

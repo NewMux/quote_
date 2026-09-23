@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Image, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { DateField } from './DateField';
@@ -61,6 +61,8 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
     onStateChange
   );
 
+  const [isUploading, setIsUploading] = useState(false);
+
   async function pickReceiptPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -69,8 +71,15 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (result.canceled || !result.assets[0]) return;
-    const persistedUri = await persistPickedFile(result.assets[0].uri, 'receipts', `${newId()}.jpg`);
-    setReceiptUri(persistedUri);
+    setIsUploading(true);
+    try {
+      const persistedUri = await persistPickedFile(result.assets[0].uri, 'receipts', `${newId()}.jpg`);
+      setReceiptUri(persistedUri);
+    } catch (err) {
+      Alert.alert('Couldn’t Add Receipt', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   return (
@@ -120,7 +129,8 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
         <ListRow
           icon="photo"
           title={receiptUri ? 'Change Photo' : 'Attach Photo'}
-          onPress={pickReceiptPhoto}
+          onPress={isUploading ? undefined : pickReceiptPhoto}
+          trailing={isUploading ? <ActivityIndicator accessibilityLabel="Uploading Photo" /> : undefined}
           accessory="none"
         />
       </ListSection>

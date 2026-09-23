@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Avatar } from '../../../src/components/Avatar';
 import { Icon } from '../../../src/components/Icon';
 import { ListRow } from '../../../src/components/list/ListRow';
 import { GROUPED_RADIUS, ListSection } from '../../../src/components/list/ListSection';
 import { exportBackup } from '../../../src/lib/backup';
+import { useSignedUrl } from '../../../src/lib/useSignedUrl';
 import { disableReminders, enableReminders, isRemindersEnabled } from '../../../src/lib/notifications';
 import { useThemeColors } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
@@ -105,7 +106,7 @@ export default function SettingsScreen() {
               className={`flex-row items-center gap-4 px-4 py-3 ${pressed ? 'bg-fill' : 'bg-card'}`}
               style={{ borderRadius: GROUPED_RADIUS, borderCurve: 'continuous' }}
             >
-              <Avatar name={businessName} photoUri={profile?.logo_uri} seed={businessName} size={60} />
+              <BusinessMark name={businessName} logoPath={profile?.logo_uri} />
               <View className="flex-1">
                 <Text className="text-title3 font-semibold text-label" numberOfLines={1}>
                   {businessName}
@@ -201,5 +202,17 @@ export default function SettingsScreen() {
         <ListRow title="Delete Account" onPress={() => router.push('/settings/delete-account')} destructive />
       </ListSection>
     </ScrollView>
+  );
+}
+
+/** The business's logo, uncropped in a rounded square (logos are rarely circular); initials when
+ * there's no logo yet. */
+function BusinessMark({ name, logoPath }: { name: string; logoPath: string | null | undefined }) {
+  const logoUrl = useSignedUrl(logoPath);
+  if (!logoUrl) return <Avatar name={name} seed={name} size={60} />;
+  return (
+    <View className="w-[60px] h-[60px] rounded-2xl bg-white overflow-hidden" style={{ borderCurve: 'continuous' }}>
+      <Image source={{ uri: logoUrl }} className="w-[60px] h-[60px]" resizeMode="contain" accessibilityIgnoresInvertColors />
+    </View>
   );
 }

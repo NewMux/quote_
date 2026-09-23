@@ -48,6 +48,8 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
     onStateChange
   );
 
+  const [isUploading, setIsUploading] = useState(false);
+
   async function pickPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -56,15 +58,22 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (result.canceled || !result.assets[0]) return;
-    const persistedUri = await persistPickedFile(result.assets[0].uri, 'client-photos', `${newId()}.jpg`);
-    setPhotoUri(persistedUri);
+    setIsUploading(true);
+    try {
+      const persistedUri = await persistPickedFile(result.assets[0].uri, 'client-photos', `${newId()}.jpg`);
+      setPhotoUri(persistedUri);
+    } catch (err) {
+      Alert.alert('Couldn’t Add Photo', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   return (
     <FormScrollView>
       <View className="items-center gap-1 pb-4">
         <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={96} />
-        <Button label={photoUri ? 'Edit Photo' : 'Add Photo'} variant="plain" size="small" onPress={pickPhoto} />
+        <Button label={photoUri ? 'Edit Photo' : 'Add Photo'} variant="plain" size="small" loading={isUploading} onPress={pickPhoto} />
       </View>
 
       <ListSection>

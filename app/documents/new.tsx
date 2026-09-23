@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, View } from 'react-native';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
@@ -19,9 +19,14 @@ export default function NewDocumentScreen() {
   async function handleChoose(docType: DocType) {
     if (!profile || isCreating) return;
     setIsCreating(true);
-    const doc = await createDraftDocument(docType, profile, null, null);
-    setIsCreating(false);
-    router.replace(`/documents/${doc.id}/edit`);
+    try {
+      const doc = await createDraftDocument(docType, profile, null, null);
+      router.replace({ pathname: '/documents/[id]', params: { id: doc.id, isNew: '1' } });
+    } catch (err) {
+      Alert.alert('Couldn’t Create Document', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsCreating(false);
+    }
   }
 
   useEffect(() => {

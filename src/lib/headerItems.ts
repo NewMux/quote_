@@ -1,13 +1,32 @@
 import { Alert } from 'react-native';
 import { router, type NativeStackHeaderItem } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { createDraftDocument } from '../db/repositories/documents.repo';
+import { useBusinessProfileStore } from '../stores/useBusinessProfileStore';
 import type { DocType } from '../types/models';
 import { IS_IOS_26 } from './platform';
 
 /** Native iOS navigation bar items (SF Symbols, UIMenu). Screens pass these through
  * `unstable_headerRightItems`, with a React `headerRight` as the Android fallback. */
 
-export function startNewDocument(type: DocType) {
-  router.push({ pathname: '/documents/new', params: { type } });
+let isCreatingDocument = false;
+
+/** Creates a draft and opens it in the Documents tab (list → document → editor), from any tab. The
+ * editor's Done then lands on the new document, ready to issue or share, and Back reaches the list. */
+export async function startNewDocument(type: DocType) {
+  const profile = useBusinessProfileStore.getState().profile;
+  if (!profile || isCreatingDocument) return;
+  isCreatingDocument = true;
+  try {
+    const doc = await createDraftDocument(type, profile, null, null);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    router.navigate('/(tabs)/documents');
+    router.push({ pathname: '/documents/[id]', params: { id: doc.id, isNew: '1' } });
+  } catch (err) {
+    Alert.alert('Couldn’t Create Document', err instanceof Error ? err.message : 'Something went wrong.');
+  } finally {
+    isCreatingDocument = false;
+  }
 }
 
 /** Android fallback for the "+" menu: the same two choices as a system dialog. */
