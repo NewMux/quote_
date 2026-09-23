@@ -61,7 +61,7 @@ export default function SettlementFormScreen() {
 
   if (!document || settlement === undefined) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <SheetHeader title={settlementId ? 'Edit Payment' : 'Log Payment'} />
         <ActivityIndicator style={{ flex: 1 }} />
       </View>
@@ -71,7 +71,7 @@ export default function SettlementFormScreen() {
   const balanceDue = document.total_minor - document.amount_paid_minor;
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title={settlementId ? 'Edit Payment' : 'Log Payment'} />
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
         <SettlementForm

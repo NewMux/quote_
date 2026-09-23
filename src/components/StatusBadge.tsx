@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import { getDisplayStatus, statusLabel } from '../lib/statusMachine';
-import { STATUS_COLORS } from '../lib/theme';
+import { useStatusColors } from '../lib/theme';
 import type { DocumentListItem, DocumentRecord } from '../types/models';
 
 interface StatusBadgeProps {
@@ -9,7 +9,7 @@ interface StatusBadgeProps {
 
 export function StatusBadge({ document }: StatusBadgeProps) {
   const status = getDisplayStatus(document);
-  const colors = STATUS_COLORS[status];
+  const colors = useStatusColors()[status];
   return (
     <View style={{ backgroundColor: colors.bg }} className="rounded-full px-3 py-1 self-start">
       <Text style={{ color: colors.fg }} className="text-xs font-semibold">

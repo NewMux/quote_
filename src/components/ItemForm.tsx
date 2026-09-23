@@ -28,11 +28,11 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
   }, [load]);
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Name</Text>
+        <Text className="text-xs text-secondary mb-1">Name</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
           value={name}
           onChangeText={setName}
           maxLength={100}
@@ -40,9 +40,9 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
       </View>
 
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Description (optional)</Text>
+        <Text className="text-xs text-secondary mb-1">Description (optional)</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
           value={description}
           onChangeText={setDescription}
           multiline
@@ -60,9 +60,9 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
           />
         </View>
         <View className="w-24">
-          <Text className="text-xs text-gray-500 mb-1">Per (hr, item)</Text>
+          <Text className="text-xs text-secondary mb-1">Per (hr, item)</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
             value={unitLabel}
             onChangeText={setUnitLabel}
             maxLength={20}
@@ -70,14 +70,14 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between bg-white rounded-lg border border-gray-300 px-3 py-3">
-        <Text className="text-base text-gray-900">Taxable</Text>
+      <View className="flex-row items-center justify-between bg-card rounded-lg border border-field px-3 py-3">
+        <Text className="text-base text-label">Taxable</Text>
         <Switch value={isTaxable} onValueChange={setIsTaxable} />
       </View>
 
       {isTaxable ? (
         <View>
-          <Text className="text-xs text-gray-500 mb-2">Default Tax Rate</Text>
+          <Text className="text-xs text-secondary mb-2">Default Tax Rate</Text>
           <View className="flex-row flex-wrap gap-2">
             {taxBrackets.map((bracket) => {
               const selected = bracket.id === taxBracketId;
@@ -85,9 +85,9 @@ export function ItemForm({ initial, onSubmit, isSaving }: ItemFormProps) {
                 <Pressable
                   key={bracket.id}
                   onPress={() => setTaxBracketId(bracket.id)}
-                  className={`px-3 py-2 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
+                  className={`px-3 py-2 rounded-full border ${selected ? 'bg-brand border-brand' : 'border-field'}`}
                 >
-                  <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{bracket.name}</Text>
+                  <Text className={selected ? 'text-white text-sm' : 'text-label text-sm'}>{bracket.name}</Text>
                 </Pressable>
               );
             })}

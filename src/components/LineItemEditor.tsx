@@ -17,10 +17,10 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
   const computed = computeLineItem(line);
 
   return (
-    <View className="border border-gray-200 rounded-xl p-3 mb-3 bg-white">
+    <View className="border border-separator rounded-xl p-3 mb-3 bg-card">
       <View className="flex-row items-start mb-2">
         <TextInput
-          className="flex-1 text-base text-gray-900 mr-2"
+          className="flex-1 text-base text-label mr-2"
           placeholder="Description"
           value={line.description}
           onChangeText={(description) => onChange({ description })}
@@ -32,15 +32,15 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           hitSlop={8}
           className="w-11 h-11 items-center justify-center -mr-2 -mt-1"
         >
-          <Text className="text-red-500 text-lg">×</Text>
+          <Text className="text-destructive text-lg">×</Text>
         </Pressable>
       </View>
 
       <View className="flex-row gap-2 mb-2">
         <View className="w-20">
-          <Text className="text-xs text-gray-500 mb-1">Qty</Text>
+          <Text className="text-xs text-secondary mb-1">Qty</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 text-base text-label"
             keyboardType="decimal-pad"
             value={String(line.quantity)}
             onChangeText={(text) => {
@@ -50,9 +50,9 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           />
         </View>
         <View className="w-20">
-          <Text className="text-xs text-gray-500 mb-1">Per</Text>
+          <Text className="text-xs text-secondary mb-1">Per</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 text-base text-label"
             value={line.unitLabel ?? ''}
             onChangeText={(unitLabel) => onChange({ unitLabel: unitLabel || null })}
             placeholder="hr, item"
@@ -70,7 +70,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
       </View>
 
       <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-sm text-gray-600">Taxable</Text>
+        <Text className="text-sm text-secondary">Taxable</Text>
         <Switch
           value={line.isTaxable}
           onValueChange={(isTaxable) =>
@@ -98,9 +98,9 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
                   })
                 }
                 hitSlop={4}
-                className={`px-3 py-2 min-h-[32px] justify-center rounded-full border ${selected ? 'bg-brand border-brand' : 'border-gray-300'}`}
+                className={`px-3 py-2 min-h-[32px] justify-center rounded-full border ${selected ? 'bg-brand border-brand' : 'border-field'}`}
               >
-                <Text className={selected ? 'text-white text-xs' : 'text-gray-700 text-xs'}>
+                <Text className={selected ? 'text-white text-xs' : 'text-label text-xs'}>
                   {bracket.name}
                 </Text>
               </Pressable>
@@ -108,14 +108,14 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           })}
           {taxBrackets.length <= 1 ? (
             <Pressable onPress={() => router.push('/settings/tax-brackets')}>
-              <Text className="text-brand text-xs font-medium">+ Add a tax rate</Text>
+              <Text className="text-tint text-xs font-medium">+ Add a tax rate</Text>
             </Pressable>
           ) : null}
         </View>
       ) : null}
 
       <View className="flex-row justify-end">
-        <Text className="text-sm font-semibold text-gray-900">
+        <Text className="text-sm font-semibold text-label">
           {formatMinor(computed.lineTotalMinor, currencyCode)}
         </Text>
       </View>

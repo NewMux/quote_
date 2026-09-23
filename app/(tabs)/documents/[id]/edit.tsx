@@ -44,7 +44,7 @@ export default function EditDocumentScreen() {
   }, [navigation, editor.docNumber]);
 
   if (editor.isLoading || !editor.documentId) {
-    return <View className="flex-1 bg-white" />;
+    return <View className="flex-1 bg-card" />;
   }
 
   const totals = computeDocumentTotals(editor.lines, editor.discountType, editor.discountValue);
@@ -57,15 +57,15 @@ export default function EditDocumentScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}>
-        <View className="bg-white rounded-xl p-4 border border-gray-100">
-          <Text className="text-xs text-gray-500 mb-1">Client</Text>
+        <View className="bg-card rounded-xl p-4 border border-separator">
+          <Text className="text-xs text-secondary mb-1">Client</Text>
           <Pressable
             onPress={() => router.push('/modals/client-picker')}
-            className="border border-gray-300 rounded-lg px-3 py-2"
+            className="border border-field rounded-lg px-3 py-2"
           >
-            <Text className={editor.clientNameSnapshot ? 'text-gray-900' : 'text-gray-500'}>
+            <Text className={editor.clientNameSnapshot ? 'text-label' : 'text-secondary'}>
               {editor.clientNameSnapshot ?? 'Select a client'}
             </Text>
           </Pressable>
@@ -86,11 +86,11 @@ export default function EditDocumentScreen() {
 
         <View>
           <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-sm font-semibold text-gray-900">Line Items</Text>
+            <Text className="text-sm font-semibold text-label">Line Items</Text>
             <Button label="+ Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
           </View>
           {editor.lines.length === 0 ? (
-            <Text className="text-sm text-gray-500 py-4 text-center">No line items yet.</Text>
+            <Text className="text-sm text-secondary py-4 text-center">No line items yet.</Text>
           ) : null}
           {editor.lines.map((line) => (
             <LineItemEditor
@@ -111,7 +111,7 @@ export default function EditDocumentScreen() {
           onChange={editor.setDocumentDiscount}
         />
 
-        <View className="bg-white rounded-xl p-4 border border-gray-100">
+        <View className="bg-card rounded-xl p-4 border border-separator">
           <TotalsRow label="Subtotal" valueMinor={totals.subtotalMinor} currencyCode={editor.currencyCode} />
           {totals.discountAmountMinor > 0 ? (
             <TotalsRow
@@ -125,15 +125,15 @@ export default function EditDocumentScreen() {
             valueMinor={totals.taxTotalMinor}
             currencyCode={editor.currencyCode}
           />
-          <View className="border-t border-gray-200 mt-2 pt-2">
+          <View className="border-t border-separator mt-2 pt-2">
             <TotalsRow label="Total" valueMinor={totals.totalMinor} currencyCode={editor.currencyCode} bold />
           </View>
         </View>
 
         <View>
-          <Text className="text-xs text-gray-500 mb-1">Notes (optional)</Text>
+          <Text className="text-xs text-secondary mb-1">Notes (optional)</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
             value={editor.notes}
             onChangeText={editor.setNotes}
             multiline
@@ -141,9 +141,9 @@ export default function EditDocumentScreen() {
         </View>
 
         <View>
-          <Text className="text-xs text-gray-500 mb-1">Custom Terms for This Document (optional)</Text>
+          <Text className="text-xs text-secondary mb-1">Custom Terms for This Document (optional)</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
             value={editor.termsOverride}
             onChangeText={editor.setTermsOverride}
             multiline
@@ -152,8 +152,8 @@ export default function EditDocumentScreen() {
         </View>
       </ScrollView>
 
-      <View className="p-4 bg-white border-t border-gray-100 gap-2">
-        <Text className="text-xs text-gray-500 text-center">Changes save automatically as you go</Text>
+      <View className="p-4 bg-card border-t border-separator gap-2">
+        <Text className="text-xs text-secondary text-center">Changes save automatically as you go</Text>
         <Button label="Done" variant="filled" size="large" onPress={handleDone} />
       </View>
     </View>
@@ -173,8 +173,8 @@ function TotalsRow({
 }) {
   return (
     <View className="flex-row justify-between py-1">
-      <Text className={bold ? 'text-base font-semibold text-gray-900' : 'text-sm text-gray-600'}>{label}</Text>
-      <Text className={bold ? 'text-base font-semibold text-gray-900' : 'text-sm text-gray-900'}>
+      <Text className={bold ? 'text-base font-semibold text-label' : 'text-sm text-secondary'}>{label}</Text>
+      <Text className={bold ? 'text-base font-semibold text-label' : 'text-sm text-label'}>
         {formatMinor(valueMinor, currencyCode)}
       </Text>
     </View>
@@ -194,9 +194,9 @@ function DocumentDiscountEditor({
 }) {
   const enabled = discountType !== null;
   return (
-    <View className="bg-white rounded-xl p-4 border border-gray-100">
+    <View className="bg-card rounded-xl p-4 border border-separator">
       <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-sm font-semibold text-gray-900">Document Discount</Text>
+        <Text className="text-sm font-semibold text-label">Document Discount</Text>
         <Switch
           value={enabled}
           onValueChange={(value) => onChange(value ? 'fixed' : null, value ? 0 : null)}
@@ -204,18 +204,19 @@ function DocumentDiscountEditor({
       </View>
       {enabled ? (
         <View className="gap-2">
-          <Text className="text-xs text-gray-500">Discount Type</Text>
+          <Text className="text-xs text-secondary">Discount Type</Text>
           <View className="flex-row gap-2 items-center">
             <View style={{ width: 90 }}>
               <SegmentedControl
                 values={['%', getCurrencySymbol(currencyCode)]}
                 selectedIndex={discountType === 'percent' ? 0 : 1}
                 tintColor={BRAND.default}
+                activeFontStyle={{ color: '#FFFFFF' }}
                 onChange={(e) => onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', 0)}
               />
             </View>
             <TextInput
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base"
+              className="flex-1 border border-field rounded-lg px-3 py-2 text-base text-label"
               keyboardType="decimal-pad"
               value={
                 discountType === 'percent'

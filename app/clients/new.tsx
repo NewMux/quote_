@@ -18,7 +18,7 @@ export default function NewClientScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="New Client" />
       <ClientForm onSubmit={handleSubmit} isSaving={isSaving} />
     </View>

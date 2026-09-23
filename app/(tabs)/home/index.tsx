@@ -49,7 +49,7 @@ export default function HomeScreen() {
   const selectedPeriodIndex = PERIODS.findIndex((p) => p.kind === period.kind);
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <ScreenHeader title="Home" />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 16 }}>
         <View className="flex-row items-center gap-2">
@@ -58,6 +58,7 @@ export default function HomeScreen() {
               values={PERIODS.map((p) => p.label)}
               selectedIndex={selectedPeriodIndex}
               tintColor={BRAND.default}
+              activeFontStyle={{ color: '#FFFFFF' }}
               onChange={(e) => handlePeriodChange(e.nativeEvent.selectedSegmentIndex)}
             />
           </View>
@@ -65,7 +66,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/modals/custom-range')}
             accessibilityLabel="Pick a custom date range"
             className={`w-11 h-11 rounded-full items-center justify-center ${
-              period.kind === 'custom' ? 'bg-brand' : 'bg-gray-100'
+              period.kind === 'custom' ? 'bg-brand' : 'bg-fill'
             }`}
           >
             <Ionicons name="calendar-outline" size={20} color={period.kind === 'custom' ? 'white' : '#374151'} />
@@ -92,24 +93,25 @@ export default function HomeScreen() {
         <Card>
           <View className="flex-row justify-between items-start mb-2">
             <View>
-              <Text className="text-xs text-gray-500">Paid</Text>
-              <Text className="text-2xl font-bold text-gray-900">
+              <Text className="text-xs text-secondary">Paid</Text>
+              <Text className="text-2xl font-bold text-label">
                 {formatMinor(receivedThisMonth, currencyCode)}
               </Text>
             </View>
-            <Text className="text-xs text-gray-500 mt-1">This month</Text>
+            <Text className="text-xs text-secondary mt-1">This month</Text>
           </View>
           <LineChart data={revenueByMonth} />
         </Card>
 
         <Card>
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-sm font-semibold text-gray-900">Paid</Text>
+            <Text className="text-sm font-semibold text-label">Paid</Text>
             <View style={{ width: 220 }}>
               <SegmentedControl
                 values={GRANULARITIES.map((g) => g.label)}
                 selectedIndex={GRANULARITIES.findIndex((g) => g.value === granularity)}
                 tintColor={BRAND.default}
+                activeFontStyle={{ color: '#FFFFFF' }}
                 onChange={(e) => setGranularity(GRANULARITIES[e.nativeEvent.selectedSegmentIndex].value)}
               />
             </View>

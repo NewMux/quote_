@@ -21,13 +21,13 @@ export default function NewTaxBracketScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="New Tax Rate" />
       <View className="p-4 gap-4">
         <View>
-          <Text className="text-xs text-gray-500 mb-1">Name</Text>
+          <Text className="text-xs text-secondary mb-1">Name</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
             placeholder="e.g. Sales Tax"
             value={name}
             onChangeText={setName}
@@ -35,9 +35,9 @@ export default function NewTaxBracketScreen() {
           />
         </View>
         <View>
-          <Text className="text-xs text-gray-500 mb-1">Rate %</Text>
+          <Text className="text-xs text-secondary mb-1">Rate %</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+            className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
             placeholder="e.g. 8.25"
             keyboardType="decimal-pad"
             value={rate}

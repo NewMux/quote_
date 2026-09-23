@@ -24,7 +24,7 @@ export default function CurrencyPickerModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="Select Currency" />
       <FlatList
         style={{ flex: 1 }}
@@ -33,9 +33,9 @@ export default function CurrencyPickerModal() {
         contentContainerStyle={{ padding: 16 }}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
-          <View className="-mx-4 -mt-4 mb-4 p-4 bg-white border-b border-gray-100">
+          <View className="-mx-4 -mt-4 mb-4 p-4 bg-card border-b border-separator">
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 text-base"
+              className="border border-field rounded-lg px-3 py-2 text-base text-label"
               placeholder="Search currencies…"
               value={query}
               onChangeText={setQuery}
@@ -46,20 +46,20 @@ export default function CurrencyPickerModal() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => selectCurrency(item.code)}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-100 flex-row justify-between items-center"
+            className="bg-card rounded-xl p-4 mb-3 border border-separator flex-row justify-between items-center"
           >
             <View className="flex-1 flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-surface items-center justify-center">
-                <Text className="text-sm font-semibold text-gray-700">{getCurrencySymbol(item.code)}</Text>
+              <View className="w-10 h-10 rounded-full bg-grouped items-center justify-center">
+                <Text className="text-sm font-semibold text-label">{getCurrencySymbol(item.code)}</Text>
               </View>
               <View className="flex-1">
-                <Text className="text-base text-gray-900" numberOfLines={1}>
+                <Text className="text-base text-label" numberOfLines={1}>
                   {item.name}
                 </Text>
-                <Text className="text-xs text-gray-500">{item.code}</Text>
+                <Text className="text-xs text-secondary">{item.code}</Text>
               </View>
             </View>
-            {currentCode === item.code ? <Text className="text-brand text-base">✓</Text> : null}
+            {currentCode === item.code ? <Text className="text-tint text-base">✓</Text> : null}
           </Pressable>
         )}
       />

@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Light-mode defaults for the semantic color tokens. The root layout overrides these at runtime
+   for the current appearance (src/lib/theme.ts: THEME_VARS); this only guarantees a valid color
+   anywhere that runtime value hasn't reached. */
+@layer base {
+  :root {
+    --color-background: 255 255 255;
+    --color-grouped: 242 242 247;
+    --color-card: 255 255 255;
+    --color-elevated: 255 255 255;
+    --color-fill: 233 233 238;
+    --color-label: 17 24 39;
+    --color-secondary: 95 99 104;
+    --color-placeholder: 142 142 147;
+    --color-chevron: 184 184 189;
+    --color-separator: 229 229 234;
+    --color-field: 209 209 214;
+    --color-tint: 21 122 99;
+    --color-brand: 21 122 99;
+    --color-brandDark: 15 61 58;
+    --color-destructive: 215 0 21;
+    --color-warning: 180 83 9;
+    --color-info: 29 111 216;
+    --color-success: 27 138 85;
+  }
+}

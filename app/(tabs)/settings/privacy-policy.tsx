@@ -3,15 +3,15 @@ import { ScrollView, Text, View } from 'react-native';
 function Section({ title, children }: { title: string; children: string }) {
   return (
     <View className="mb-6">
-      <Text className="text-base font-semibold text-gray-900 mb-2">{title}</Text>
-      <Text className="text-sm text-gray-700 leading-5">{children}</Text>
+      <Text className="text-base font-semibold text-label mb-2">{title}</Text>
+      <Text className="text-sm text-label leading-5">{children}</Text>
     </View>
   );
 }
 
 export default function PrivacyPolicyScreen() {
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16 }}>
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16 }}>
       <Section title="What this app stores">
         The email address and password you sign up with, the business info you enter in Business
         Profile, the clients and items you add, the invoices and estimates you create, and any

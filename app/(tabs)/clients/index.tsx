@@ -48,7 +48,7 @@ export default function ClientsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <ScreenHeader title="Clients" />
       <FlatList
         style={{ flex: 1 }}
@@ -57,10 +57,10 @@ export default function ClientsScreen() {
         contentContainerStyle={{ padding: 16, gap: 12 }}
         ListHeaderComponent={
           <View className="flex-row items-center gap-2 mb-2">
-            <View className="flex-1 flex-row items-center bg-white rounded-2xl px-3 border border-gray-200">
+            <View className="flex-1 flex-row items-center bg-card rounded-2xl px-3 border border-separator">
               <Ionicons name="search" size={18} color="#9CA3AF" />
               <TextInput
-                className="flex-1 py-2.5 px-2 text-base text-gray-900"
+                className="flex-1 py-2.5 px-2 text-base text-label"
                 placeholder="Search clients…"
                 value={search}
                 onChangeText={setSearch}
@@ -70,7 +70,7 @@ export default function ClientsScreen() {
               onPress={() => router.push('/modals/client-filter')}
               accessibilityLabel="Filter clients"
               className={`w-11 h-11 rounded-full items-center justify-center ${
-                hasActiveFilter ? 'bg-brand' : 'bg-white border border-gray-200'
+                hasActiveFilter ? 'bg-brand' : 'bg-card border border-separator'
               }`}
             >
               <Ionicons name="options-outline" size={20} color={hasActiveFilter ? 'white' : '#374151'} />
@@ -113,16 +113,16 @@ export default function ClientsScreen() {
               <Card className="p-4 flex-row items-center gap-3">
                 <Avatar name={item.display_name} photoUri={item.photo_uri} seed={item.id} size={44} />
                 <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                  <Text className="text-base font-semibold text-label" numberOfLines={1}>
                     {item.display_name}
                   </Text>
                   {item.email ? (
-                    <Text className="text-sm text-gray-500" numberOfLines={1}>
+                    <Text className="text-sm text-secondary" numberOfLines={1}>
                       {item.email}
                     </Text>
                   ) : null}
                   {item.phone ? (
-                    <Text className="text-sm text-gray-500" numberOfLines={1}>
+                    <Text className="text-sm text-secondary" numberOfLines={1}>
                       {item.phone}
                     </Text>
                   ) : null}

@@ -10,5 +10,5 @@ export default function NewPlaceholderScreen() {
     router.replace('/documents/new');
   }, []);
 
-  return <View className="flex-1 bg-surface" />;
+  return <View className="flex-1 bg-grouped" />;
 }

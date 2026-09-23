@@ -22,7 +22,7 @@ export default function RecurringInvoicesScreen() {
 
   if (!schedules) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface">
+      <View className="flex-1 items-center justify-center bg-grouped">
         <ActivityIndicator />
       </View>
     );
@@ -30,7 +30,7 @@ export default function RecurringInvoicesScreen() {
 
   return (
     <FlatList
-      className="flex-1 bg-surface"
+      className="flex-1 bg-grouped"
       contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
       data={schedules}
       keyExtractor={(item) => item.id}
@@ -45,10 +45,10 @@ export default function RecurringInvoicesScreen() {
           <Card className="flex-row items-center gap-3">
             <Ionicons name="repeat" size={20} color={BRAND.default} />
             <View className="flex-1">
-              <Text className="text-base text-gray-900" numberOfLines={1}>
+              <Text className="text-base text-label" numberOfLines={1}>
                 {item.client_name ?? 'No client'} · {item.template_doc_number}
               </Text>
-              <Text className="text-xs text-gray-500" numberOfLines={1}>
+              <Text className="text-xs text-secondary" numberOfLines={1}>
                 {frequencyLabel(item.frequency)} · next {formatScheduleDate(item.next_run_date)}
               </Text>
             </View>

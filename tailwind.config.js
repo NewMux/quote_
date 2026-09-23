@@ -1,4 +1,10 @@
 /** @type {import('tailwindcss').Config} */
+
+// Semantic color tokens. Their values come from CSS variables that the root layout sets for the
+// current Light/Dark appearance (see src/lib/theme.ts), so `bg-card`, `text-label`, etc. adapt
+// automatically.
+const token = (name) => `rgb(var(--color-${name}) / <alpha-value>)`;
+
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
@@ -6,12 +12,25 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#157A63',
-          dark: '#0F3D3A',
+          DEFAULT: token('brand'),
+          dark: token('brandDark'),
           darker: '#0B2B27',
           mint: '#8FE3C0',
         },
-        surface: '#F4F6F7',
+        background: token('background'),
+        grouped: token('grouped'),
+        card: token('card'),
+        elevated: token('elevated'),
+        fill: token('fill'),
+        label: token('label'),
+        secondary: token('secondary'),
+        placeholder: token('placeholder'),
+        separator: token('separator'),
+        field: token('field'),
+        tint: token('tint'),
+        destructive: token('destructive'),
+        warning: token('warning'),
+        success: token('success'),
       },
     },
   },

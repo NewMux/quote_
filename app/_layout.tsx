@@ -1,13 +1,46 @@
 import '../global.css';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { ActivityIndicator, View, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { THEME_COLORS, THEME_VARS } from '../src/lib/theme';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
 import { refreshAllReminders } from '../src/lib/notifications';
 import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
+
+/** Follows the system Light/Dark appearance: feeds the semantic color variables to NativeWind and
+ * gives the native headers, tab bar, and back buttons matching colors. */
+function ThemeRoot({ children }: { children: ReactNode }) {
+  const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = THEME_COLORS[scheme];
+  const navigationTheme = useMemo(() => {
+    const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        primary: colors.tint,
+        background: colors.grouped,
+        card: scheme === 'dark' ? colors.card : colors.background,
+        text: colors.label,
+        border: colors.separator,
+        notification: colors.destructive,
+      },
+    };
+  }, [scheme, colors]);
+
+  return (
+    <View style={[{ flex: 1, backgroundColor: colors.grouped }, THEME_VARS[scheme]]}>
+      <ThemeProvider value={navigationTheme}>
+        <StatusBar style="auto" />
+        {children}
+      </ThemeProvider>
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -42,13 +75,16 @@ export default function RootLayout() {
 
   if (!ready || isAuthLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" />
-      </View>
+      <ThemeRoot>
+        <View className="flex-1 items-center justify-center bg-grouped">
+          <ActivityIndicator size="large" accessibilityLabel="Loading" />
+        </View>
+      </ThemeRoot>
     );
   }
 
   return (
+    <ThemeRoot>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -181,5 +217,6 @@ export default function RootLayout() {
         />
       </Stack>
     </GestureHandlerRootView>
+    </ThemeRoot>
   );
 }

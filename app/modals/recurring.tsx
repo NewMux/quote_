@@ -68,7 +68,7 @@ export default function RecurringModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title={hasSchedule ? 'Edit Recurring' : 'Make Recurring'} />
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
@@ -76,17 +76,18 @@ export default function RecurringModal() {
         </View>
       ) : (
         <View className="p-4 gap-5">
-          <Text className="text-sm text-gray-600 leading-5">
+          <Text className="text-sm text-secondary leading-5">
             A new draft copy of this invoice is created on each date. You review it and send it
             yourself — nothing goes to your client automatically.
           </Text>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-2">Repeats</Text>
+            <Text className="text-xs text-secondary mb-2">Repeats</Text>
             <SegmentedControl
               values={FREQUENCY_OPTIONS.map((o) => o.label)}
               selectedIndex={FREQUENCY_OPTIONS.findIndex((o) => o.value === frequency)}
               tintColor={BRAND.default}
+              activeFontStyle={{ color: '#FFFFFF' }}
               onChange={(e) => setFrequency(FREQUENCY_OPTIONS[e.nativeEvent.selectedSegmentIndex].value)}
             />
           </View>

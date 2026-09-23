@@ -32,7 +32,7 @@ export default function ItemPickerModal() {
   }, [items, query]);
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="Select Item" />
       <FlatList
         style={{ flex: 1 }}
@@ -40,9 +40,9 @@ export default function ItemPickerModal() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         ListHeaderComponent={
-          <View className="-mx-4 -mt-4 mb-4 p-4 bg-white border-b border-gray-100">
+          <View className="-mx-4 -mt-4 mb-4 p-4 bg-card border-b border-separator">
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 text-base"
+              className="border border-field rounded-lg px-3 py-2 text-base text-label"
               placeholder="Search items…"
               value={query}
               onChangeText={setQuery}
@@ -57,10 +57,10 @@ export default function ItemPickerModal() {
               addLineItemFromCatalog(item, taxBracket);
               router.back();
             }}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-100 flex-row justify-between items-center"
+            className="bg-card rounded-xl p-4 mb-3 border border-separator flex-row justify-between items-center"
           >
-            <Text className="text-base text-gray-900">{item.name}</Text>
-            <Text className="text-sm text-gray-500">{formatMinor(item.default_unit_price_minor, currencyCode)}</Text>
+            <Text className="text-base text-label">{item.name}</Text>
+            <Text className="text-sm text-secondary">{formatMinor(item.default_unit_price_minor, currencyCode)}</Text>
           </Pressable>
         )}
         ListFooterComponent={

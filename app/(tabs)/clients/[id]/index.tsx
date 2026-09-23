@@ -42,7 +42,7 @@ export default function ClientDetailScreen() {
 
   if (!client) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <ActivityIndicator />
       </View>
     );
@@ -101,18 +101,18 @@ export default function ClientDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
-      <View className="bg-white p-4 border-b border-gray-100 flex-row items-center gap-3">
+    <View className="flex-1 bg-grouped">
+      <View className="bg-card p-4 border-b border-separator flex-row items-center gap-3">
         <Avatar name={client.display_name} photoUri={client.photo_uri} seed={client.id} size={56} />
         <View className="flex-1">
-          <Text className="text-xl font-semibold text-gray-900">{client.display_name}</Text>
-          {client.contact_name ? <Text className="text-sm text-gray-500">{client.contact_name}</Text> : null}
-          {client.email ? <Text className="text-sm text-gray-500">{client.email}</Text> : null}
-          {client.phone ? <Text className="text-sm text-gray-500">{client.phone}</Text> : null}
-          {client.address ? <Text className="text-sm text-gray-500">{client.address}</Text> : null}
+          <Text className="text-xl font-semibold text-label">{client.display_name}</Text>
+          {client.contact_name ? <Text className="text-sm text-secondary">{client.contact_name}</Text> : null}
+          {client.email ? <Text className="text-sm text-secondary">{client.email}</Text> : null}
+          {client.phone ? <Text className="text-sm text-secondary">{client.phone}</Text> : null}
+          {client.address ? <Text className="text-sm text-secondary">{client.address}</Text> : null}
           <View className="flex-row gap-3 mt-2">
             <Pressable onPress={() => router.push(`/clients/${id}/edit`)}>
-              <Text className="text-brand text-sm font-medium">Edit</Text>
+              <Text className="text-tint text-sm font-medium">Edit</Text>
             </Pressable>
           </View>
         </View>
@@ -127,12 +127,12 @@ export default function ClientDetailScreen() {
           <Pressable onPress={() => router.push(`/documents/${item.id}`)}>
             <Card className="p-4 flex-row justify-between items-center gap-3">
               <View className="flex-1">
-                <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                <Text className="text-base font-semibold text-label" numberOfLines={1}>
                   {item.doc_number}
                 </Text>
                 <StatusBadge document={item} />
               </View>
-              <Text className="text-base font-medium text-gray-900" numberOfLines={1}>
+              <Text className="text-base font-medium text-label" numberOfLines={1}>
                 {formatMinor(item.total_minor, item.currency_code)}
               </Text>
             </Card>

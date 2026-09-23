@@ -37,7 +37,7 @@ export function ClientForm({ initial, onSubmit, isSaving }: ClientFormProps) {
   }
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View className="items-center gap-2">
         <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={72} />
         <Button label={photoUri ? 'Change photo' : 'Add photo'} variant="plain" onPress={pickPhoto} />
@@ -95,9 +95,9 @@ function Field({
 }) {
   return (
     <View>
-      <Text className="text-xs text-gray-500 mb-1">{label}</Text>
+      <Text className="text-xs text-secondary mb-1">{label}</Text>
       <TextInput
-        className="border border-gray-300 rounded-2xl px-3 py-2 bg-white text-base text-gray-900"
+        className="border border-field rounded-2xl px-3 py-2 bg-card text-base text-label"
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}

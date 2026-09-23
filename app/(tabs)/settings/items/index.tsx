@@ -18,7 +18,7 @@ export default function ItemsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
@@ -30,16 +30,16 @@ export default function ItemsScreen() {
           <Pressable onPress={() => router.push(`/items/${item.id}/edit`)}>
             <Card className="mb-3 p-4 flex-row justify-between items-center">
               <View className="flex-1 pr-3">
-                <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+                <Text className="text-base font-semibold text-label" numberOfLines={1}>
                   {item.name}
                 </Text>
                 {item.description ? (
-                  <Text className="text-sm text-gray-500" numberOfLines={1}>
+                  <Text className="text-sm text-secondary" numberOfLines={1}>
                     {item.description}
                   </Text>
                 ) : null}
               </View>
-              <Text className="text-base font-medium text-gray-900" numberOfLines={1}>
+              <Text className="text-base font-medium text-label" numberOfLines={1}>
                 {formatMinor(item.default_unit_price_minor, currencyCode)}
               </Text>
             </Card>

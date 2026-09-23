@@ -35,10 +35,10 @@ export default function DeleteAccountScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View className="bg-white rounded-xl p-4 border border-red-200">
-        <Text className="text-base font-semibold text-gray-900 mb-2">This can&apos;t be undone</Text>
-        <Text className="text-sm text-gray-700 leading-5">
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <View className="bg-card rounded-xl p-4 border border-destructive/30">
+        <Text className="text-base font-semibold text-label mb-2">This can&apos;t be undone</Text>
+        <Text className="text-sm text-label leading-5">
           This permanently deletes your account and everything in it — every client, invoice,
           estimate, item, tax rate, signature, photo, and payment record — and signs you out for
           good. There&apos;s no backup and no way to get this back. If you just want to clear your
@@ -46,20 +46,20 @@ export default function DeleteAccountScreen() {
         </Text>
       </View>
 
-      <View className="bg-white rounded-xl p-4 border border-gray-200">
-        <Text className="text-sm text-gray-700 leading-5">
+      <View className="bg-card rounded-xl p-4 border border-separator">
+        <Text className="text-sm text-label leading-5">
           Deleting your account doesn&apos;t cancel a Invoice Them Pro subscription — Apple bills it
           separately. Cancel it first so you aren&apos;t charged again.
         </Text>
         <Pressable onPress={() => Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL)} hitSlop={8}>
-          <Text className="text-sm text-brand font-medium mt-2">Manage Subscription</Text>
+          <Text className="text-sm text-tint font-medium mt-2">Manage Subscription</Text>
         </Pressable>
       </View>
 
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Type {CONFIRM_WORD} to confirm</Text>
+        <Text className="text-xs text-secondary mb-1">Type {CONFIRM_WORD} to confirm</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 text-base bg-white"
+          className="border border-field rounded-lg px-3 py-2 text-base text-label bg-card"
           value={confirmText}
           onChangeText={setConfirmText}
           autoCapitalize="characters"

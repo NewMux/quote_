@@ -36,24 +36,24 @@ export default function NewDocumentScreen() {
 
   if (isCreating || !profile || type) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface p-6 justify-center gap-4">
-      <Text className="text-lg font-semibold text-gray-900 text-center mb-4">
+    <View className="flex-1 bg-grouped p-6 justify-center gap-4">
+      <Text className="text-lg font-semibold text-label text-center mb-4">
         What would you like to create?
       </Text>
-      <Pressable onPress={() => handleChoose('estimate')} className="bg-white border border-gray-200 rounded-2xl p-6 items-center">
-        <Text className="text-lg font-semibold text-gray-900">Estimate</Text>
-        <Text className="text-sm text-gray-500 mt-1">A quote you can convert to an invoice later</Text>
+      <Pressable onPress={() => handleChoose('estimate')} className="bg-card border border-separator rounded-2xl p-6 items-center">
+        <Text className="text-lg font-semibold text-label">Estimate</Text>
+        <Text className="text-sm text-secondary mt-1">A quote you can convert to an invoice later</Text>
       </Pressable>
-      <Pressable onPress={() => handleChoose('invoice')} className="bg-white border border-gray-200 rounded-2xl p-6 items-center">
-        <Text className="text-lg font-semibold text-gray-900">Invoice</Text>
-        <Text className="text-sm text-gray-500 mt-1">A bill your client can pay</Text>
+      <Pressable onPress={() => handleChoose('invoice')} className="bg-card border border-separator rounded-2xl p-6 items-center">
+        <Text className="text-lg font-semibold text-label">Invoice</Text>
+        <Text className="text-sm text-secondary mt-1">A bill your client can pay</Text>
       </Pressable>
     </View>
   );

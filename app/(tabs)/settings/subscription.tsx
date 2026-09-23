@@ -54,27 +54,27 @@ export default function SubscriptionScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Card className="gap-1">
         {!isAvailable ? (
           <>
-            <Text className="text-base font-semibold text-gray-900">Development build</Text>
-            <Text className="text-sm text-gray-500">
+            <Text className="text-base font-semibold text-label">Development build</Text>
+            <Text className="text-sm text-secondary">
               Subscriptions aren&apos;t set up in this build, so every feature is unlocked.
             </Text>
           </>
         ) : entitlement ? (
           <>
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-base font-semibold text-label">
               Invoice Them Pro · {planName(entitlement.productIdentifier)}
             </Text>
-            <Text className="text-sm text-gray-500">
+            <Text className="text-sm text-secondary">
               {entitlement.periodType === 'TRIAL' ? 'Free trial' : 'Active'}
               {dateText ? ` · ${dateText}` : ''}
             </Text>
           </>
         ) : (
-          <Text className="text-base text-gray-900">No active subscription</Text>
+          <Text className="text-base text-label">No active subscription</Text>
         )}
       </Card>
 
@@ -90,7 +90,7 @@ export default function SubscriptionScreen() {
         ) : null}
       </View>
 
-      <Text className="text-xs text-gray-500 leading-4">
+      <Text className="text-xs text-secondary leading-4">
         Your subscription is billed through your Apple ID. To change plans or cancel, use Manage
         Subscription — cancelling keeps Invoice Them Pro active until the end of the current period.
       </Text>

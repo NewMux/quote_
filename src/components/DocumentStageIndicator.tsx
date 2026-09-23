@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BRAND } from '../lib/theme';
+import { useThemeColors } from '../lib/theme';
 import type { DocumentRecord } from '../types/models';
 
 const INVOICE_STAGES = ['Draft', 'Issued', 'Paid'];
@@ -20,16 +20,21 @@ function currentStageIndex(document: DocumentRecord): number {
 /** Gives the contextual primary CTA (Issue -> Convert/Log Payment -> Email) a visible "why" —
  * hidden for void documents since the status badge already explains that case. */
 export function DocumentStageIndicator({ document }: { document: DocumentRecord }) {
+  const colors = useThemeColors();
   if (document.status === 'void') return null;
   const stages = document.doc_type === 'estimate' ? ESTIMATE_STAGES : INVOICE_STAGES;
   const current = currentStageIndex(document);
 
   return (
-    <View className="flex-row items-center">
+    <View
+      className="flex-row items-center"
+      accessible
+      accessibilityLabel={`Stage ${current + 1} of ${stages.length}: ${stages[current]}`}
+    >
       {stages.map((stage, index) => (
         <View key={stage} className="flex-row items-center">
           <Text
-            className={`text-xs ${index <= current ? 'text-brand font-semibold' : 'text-gray-500'}`}
+            className={`text-xs ${index <= current ? 'text-tint font-semibold' : 'text-secondary'}`}
           >
             {stage}
           </Text>
@@ -37,7 +42,7 @@ export function DocumentStageIndicator({ document }: { document: DocumentRecord 
             <Ionicons
               name="chevron-forward"
               size={12}
-              color={index < current ? BRAND.default : '#D1D5DB'}
+              color={index < current ? colors.tint : colors.chevron}
               style={{ marginHorizontal: 4 }}
             />
           ) : null}

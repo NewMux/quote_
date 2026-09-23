@@ -13,11 +13,11 @@ export default function ClientFilterModal() {
   const { sortBy, setSortBy, hasBalanceOnly, setHasBalanceOnly } = useClientsStore();
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="Filter Clients" closeLabel="Done" />
       <View className="p-4 gap-6">
         <View>
-          <Text className="text-xs text-gray-500 mb-2">Sort By</Text>
+          <Text className="text-xs text-secondary mb-2">Sort By</Text>
           <View className="flex-row flex-wrap gap-2">
             {SORT_OPTIONS.map((opt) => {
               const selected = sortBy === opt.value;
@@ -26,18 +26,18 @@ export default function ClientFilterModal() {
                   key={opt.value}
                   onPress={() => setSortBy(opt.value)}
                   className={`px-3 py-2 rounded-full border ${
-                    selected ? 'bg-brand border-brand' : 'border-gray-300'
+                    selected ? 'bg-brand border-brand' : 'border-field'
                   }`}
                 >
-                  <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{opt.label}</Text>
+                  <Text className={selected ? 'text-white text-sm' : 'text-label text-sm'}>{opt.label}</Text>
                 </Pressable>
               );
             })}
           </View>
         </View>
 
-        <View className="flex-row items-center justify-between bg-white rounded-lg border border-gray-300 px-3 py-3">
-          <Text className="text-base text-gray-900">With outstanding balance only</Text>
+        <View className="flex-row items-center justify-between bg-card rounded-lg border border-field px-3 py-3">
+          <Text className="text-base text-label">With outstanding balance only</Text>
           <Switch value={hasBalanceOnly} onValueChange={setHasBalanceOnly} />
         </View>
       </View>

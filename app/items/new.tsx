@@ -18,7 +18,7 @@ export default function NewItemScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="New Item" />
       <ItemForm onSubmit={handleSubmit} isSaving={isSaving} />
     </View>

@@ -44,7 +44,7 @@ export default function NumberingScreen() {
   const estimatePreview = formatDocNumber(estimatePrefix, 1, previewPadding, previewYear);
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Field label="Estimate Prefix" value={estimatePrefix} onChangeText={setEstimatePrefix} />
       <Field label="Invoice Prefix" value={invoicePrefix} onChangeText={setInvoicePrefix} />
       <Field
@@ -60,18 +60,18 @@ export default function NumberingScreen() {
         keyboardType="number-pad"
       />
 
-      <View className="bg-white rounded-lg border border-gray-100 px-3 py-3 gap-1">
-        <Text className="text-xs text-gray-500">Next numbers will look like:</Text>
-        <Text className="text-base font-semibold text-gray-900">{estimatePreview}</Text>
-        <Text className="text-base font-semibold text-gray-900">{invoicePreview}</Text>
+      <View className="bg-card rounded-lg border border-separator px-3 py-3 gap-1">
+        <Text className="text-xs text-secondary">Next numbers will look like:</Text>
+        <Text className="text-base font-semibold text-label">{estimatePreview}</Text>
+        <Text className="text-base font-semibold text-label">{invoicePreview}</Text>
       </View>
 
-      <View className="bg-white rounded-lg border border-gray-300 px-3 py-3">
+      <View className="bg-card rounded-lg border border-field px-3 py-3">
         <View className="flex-row items-center justify-between">
-          <Text className="text-base text-gray-900">Start Over Each Year</Text>
+          <Text className="text-base text-label">Start Over Each Year</Text>
           <Switch value={resetYearly} onValueChange={setResetYearly} />
         </View>
-        <Text className="text-xs text-gray-500 mt-1">
+        <Text className="text-xs text-secondary mt-1">
           e.g. INV-001 becomes the first number again each January
         </Text>
       </View>
@@ -94,9 +94,9 @@ function Field({
 }) {
   return (
     <View>
-      <Text className="text-xs text-gray-500 mb-1">{label}</Text>
+      <Text className="text-xs text-secondary mb-1">{label}</Text>
       <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+        className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}

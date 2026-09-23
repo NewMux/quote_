@@ -117,7 +117,7 @@ export default function DocumentDetailScreen() {
 
   if (!document) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <ActivityIndicator />
       </View>
     );
@@ -298,11 +298,11 @@ export default function DocumentDetailScreen() {
   });
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 16 }}>
       <Card>
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-lg font-bold text-gray-900">{document.doc_number}</Text>
+          <Text className="text-lg font-bold text-label">{document.doc_number}</Text>
           <StatusBadge document={document} />
         </View>
         <View className="mb-3">
@@ -316,28 +316,28 @@ export default function DocumentDetailScreen() {
             size={40}
           />
           <View className="flex-1">
-            <Text className="text-base text-gray-900">
+            <Text className="text-base text-label">
               {client?.display_name ?? document.client_name_snapshot ?? 'No client'}
             </Text>
-            {client?.email ? <Text className="text-sm text-gray-500">{client.email}</Text> : null}
+            {client?.email ? <Text className="text-sm text-secondary">{client.email}</Text> : null}
           </View>
         </View>
-        <View className="flex-row justify-between pt-3 border-t border-gray-100">
+        <View className="flex-row justify-between pt-3 border-t border-separator">
           <View>
-            <Text className="text-xs text-gray-500">Issued</Text>
-            <Text className="text-sm text-gray-900">{document.issue_date ?? '—'}</Text>
+            <Text className="text-xs text-secondary">Issued</Text>
+            <Text className="text-sm text-label">{document.issue_date ?? '—'}</Text>
           </View>
           <View>
-            <Text className="text-xs text-gray-500">{document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}</Text>
-            <Text className="text-sm text-gray-900">
+            <Text className="text-xs text-secondary">{document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}</Text>
+            <Text className="text-sm text-label">
               {document.doc_type === 'invoice' ? document.due_date ?? '—' : document.expiry_date ?? '—'}
             </Text>
           </View>
         </View>
         {document.status === 'void' ? (
-          <View className="mt-3 pt-3 border-t border-gray-100">
-            <Text className="text-xs text-gray-500">Canceled{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
-            <Text className="text-sm text-gray-700 mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
+          <View className="mt-3 pt-3 border-t border-separator">
+            <Text className="text-xs text-secondary">Canceled{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
+            <Text className="text-sm text-label mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
           </View>
         ) : null}
       </Card>
@@ -346,7 +346,7 @@ export default function DocumentDetailScreen() {
         <Pressable onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}>
           <Card className="flex-row items-center gap-3">
             <Ionicons name="repeat" size={20} color={BRAND.default} />
-            <Text className="flex-1 text-sm text-gray-900" numberOfLines={2}>
+            <Text className="flex-1 text-sm text-label" numberOfLines={2}>
               {describeSchedule(schedule.frequency, schedule.next_run_date)}
             </Text>
             <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
@@ -355,11 +355,11 @@ export default function DocumentDetailScreen() {
       ) : null}
 
       <Card>
-        <Text className="text-sm font-semibold text-gray-900 mb-2">Line Items</Text>
+        <Text className="text-sm font-semibold text-label mb-2">Line Items</Text>
         {lines.length > 0 ? (
           lines.map((line) => <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />)
         ) : (
-          <Text className="text-sm text-gray-500 py-2">No line items yet — tap Edit to add some.</Text>
+          <Text className="text-sm text-secondary py-2">No line items yet — tap Edit to add some.</Text>
         )}
       </Card>
 
@@ -391,7 +391,7 @@ export default function DocumentDetailScreen() {
       </Card>
 
       {!canEdit(document) && document.status !== 'void' ? (
-        <Text className="text-xs text-gray-500">
+        <Text className="text-xs text-secondary">
           Editing is locked because this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} has been
           issued.
         </Text>
@@ -399,7 +399,7 @@ export default function DocumentDetailScreen() {
 
       {settlements.length > 0 ? (
         <Card>
-          <Text className="text-sm font-semibold text-gray-900 mb-2">Payments</Text>
+          <Text className="text-sm font-semibold text-label mb-2">Payments</Text>
           {settlements.map((s) => (
             <Pressable
               key={s.id}
@@ -407,11 +407,11 @@ export default function DocumentDetailScreen() {
                 router.push({ pathname: `/documents/${id}/settlement-new`, params: { settlementId: s.id } })
               }
             >
-              <View className="flex-row justify-between py-2 border-b border-gray-50">
-                <Text className="text-sm text-gray-700">
+              <View className="flex-row justify-between py-2 border-b border-separator">
+                <Text className="text-sm text-label">
                   {s.method} — {s.settled_date}
                 </Text>
-                <Text className="text-sm text-gray-900">{formatMinor(s.amount_minor, document.currency_code)}</Text>
+                <Text className="text-sm text-label">{formatMinor(s.amount_minor, document.currency_code)}</Text>
               </View>
             </Pressable>
           ))}
@@ -419,13 +419,13 @@ export default function DocumentDetailScreen() {
       ) : null}
 
       <Card>
-        <Text className="text-sm font-semibold text-gray-900 mb-2">Signatures</Text>
+        <Text className="text-sm font-semibold text-label mb-2">Signatures</Text>
         {(['merchant', 'client'] as const).map((role) => {
           const sig = signatures.find((s) => s.signer_role === role);
           if (sig) {
             return (
               <View key={role} className="flex-row justify-between items-center py-1">
-                <Text className="text-sm text-gray-700">
+                <Text className="text-sm text-label">
                   {role === 'merchant' ? 'You' : 'Client'} signed {sig.signed_at.slice(0, 10)}
                 </Text>
                 <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
@@ -434,7 +434,7 @@ export default function DocumentDetailScreen() {
           }
           return (
             <View key={role} className="flex-row justify-between items-center py-1">
-              <Text className="text-sm text-gray-500">
+              <Text className="text-sm text-secondary">
                 {role === 'merchant' ? "You haven't signed" : "Client hasn't signed"}
               </Text>
               <Button
@@ -449,36 +449,36 @@ export default function DocumentDetailScreen() {
       </Card>
 
       <Card>
-        <Text className="text-sm font-semibold text-gray-900 mb-2">Activity</Text>
+        <Text className="text-sm font-semibold text-label mb-2">Activity</Text>
         <ActivityLogList entries={activity} />
       </Card>
       </ScrollView>
 
       {primaryAction ? (
-        <View className="p-4 bg-white border-t border-gray-100 gap-1.5">
+        <View className="p-4 bg-card border-t border-separator gap-1.5">
           <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
-          <Text className="text-xs text-gray-500 text-center">{primaryAction.caption}</Text>
+          <Text className="text-xs text-secondary text-center">{primaryAction.caption}</Text>
         </View>
       ) : null}
 
       {busy ? (
-        <View className="absolute inset-0 items-center justify-center bg-white/60">
+        <View className="absolute inset-0 items-center justify-center bg-card/60">
           <ActivityIndicator size="large" />
         </View>
       ) : null}
 
       <Modal visible={voidPromptVisible} transparent animationType="fade" onRequestClose={() => setVoidPromptVisible(false)}>
         <View className="flex-1 items-center justify-center bg-black/40 px-6">
-          <View className="bg-white rounded-2xl p-5 w-full gap-3">
-            <Text className="text-base font-semibold text-gray-900">
+          <View className="bg-card rounded-2xl p-5 w-full gap-3">
+            <Text className="text-base font-semibold text-label">
               Cancel this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'}?
             </Text>
-            <Text className="text-sm text-gray-600">
+            <Text className="text-sm text-secondary">
               This {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} will be canceled. It stays on
               record but can&apos;t be edited, sent, or paid anymore.
             </Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900"
+              className="border border-field rounded-lg px-3 py-2 text-base text-label"
               placeholder="Reason (optional)"
               value={voidReason}
               onChangeText={setVoidReason}
@@ -540,8 +540,8 @@ function TotalsRow({
 }) {
   return (
     <View className="flex-row justify-between py-1">
-      <Text className="text-sm text-gray-600">{label}</Text>
-      <Text className="text-sm text-gray-900">{formatMinor(valueMinor, currencyCode)}</Text>
+      <Text className="text-sm text-secondary">{label}</Text>
+      <Text className="text-sm text-label">{formatMinor(valueMinor, currencyCode)}</Text>
     </View>
   );
 }

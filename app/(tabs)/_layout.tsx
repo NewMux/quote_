@@ -76,7 +76,7 @@ export default function TabsLayout() {
   // check gates the whole app behind the subscription.
   if (!isSubscriptionReady) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <ActivityIndicator size="large" />
       </View>
     );

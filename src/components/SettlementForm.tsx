@@ -70,11 +70,12 @@ export function SettlementForm({
   return (
     <View className="gap-4">
       <View>
-        <Text className="text-xs text-gray-500 mb-2">Method</Text>
+        <Text className="text-xs text-secondary mb-2">Method</Text>
         <SegmentedControl
           values={METHODS.map((m) => m.label)}
           selectedIndex={METHODS.findIndex((m) => m.value === method)}
           tintColor={BRAND.default}
+          activeFontStyle={{ color: '#FFFFFF' }}
           onChange={(e) => setMethod(METHODS[e.nativeEvent.selectedSegmentIndex].value)}
         />
       </View>
@@ -84,9 +85,9 @@ export function SettlementForm({
       <DateField label="Date" value={settledDate} onChange={setSettledDate} />
 
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Reference Number (optional)</Text>
+        <Text className="text-xs text-secondary mb-1">Reference Number (optional)</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
           value={referenceNumber}
           onChangeText={setReferenceNumber}
           placeholder="Check #, transaction ID, etc."
@@ -94,9 +95,9 @@ export function SettlementForm({
       </View>
 
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Notes (optional)</Text>
+        <Text className="text-xs text-secondary mb-1">Notes (optional)</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
           value={notes}
           onChangeText={setNotes}
           multiline
@@ -104,7 +105,7 @@ export function SettlementForm({
       </View>
 
       <View>
-        <Text className="text-xs text-gray-500 mb-2">Receipt Photo (optional)</Text>
+        <Text className="text-xs text-secondary mb-2">Receipt Photo (optional)</Text>
         {signedReceiptUrl ? (
           <Image source={{ uri: signedReceiptUrl }} className="w-full h-40 rounded-lg mb-2" resizeMode="cover" />
         ) : null}

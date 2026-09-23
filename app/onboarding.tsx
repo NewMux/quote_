@@ -52,9 +52,9 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-surface">
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-grouped">
       <View className="px-6 pt-4">
-        <Text className="text-xs text-gray-500 text-center">
+        <Text className="text-xs text-secondary text-center">
           Step {step + 1} of {TOTAL_STEPS}
         </Text>
       </View>
@@ -62,8 +62,8 @@ export default function OnboardingScreen() {
       <View className="flex-1 px-6 justify-center gap-6">
         {step === 0 ? (
           <View className="gap-3">
-            <Text className="text-2xl font-bold text-gray-900 text-center">Welcome!</Text>
-            <Text className="text-base text-gray-500 text-center">
+            <Text className="text-2xl font-bold text-label text-center">Welcome!</Text>
+            <Text className="text-base text-secondary text-center">
               Let&apos;s get your business set up — this takes about a minute.
             </Text>
           </View>
@@ -71,11 +71,11 @@ export default function OnboardingScreen() {
 
         {step === 1 ? (
           <View className="gap-4">
-            <Text className="text-2xl font-bold text-gray-900">Your Business</Text>
+            <Text className="text-2xl font-bold text-label">Your Business</Text>
             <View>
-              <Text className="text-xs text-gray-500 mb-1">Business Name</Text>
+              <Text className="text-xs text-secondary mb-1">Business Name</Text>
               <TextInput
-                className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+                className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
                 value={businessName}
                 onChangeText={setBusinessName}
                 placeholder="e.g. Sam's Plumbing"
@@ -83,15 +83,15 @@ export default function OnboardingScreen() {
               />
             </View>
             <View>
-              <Text className="text-xs text-gray-500 mb-1">Currency</Text>
+              <Text className="text-xs text-secondary mb-1">Currency</Text>
               <Pressable
                 onPress={() => router.push('/modals/currency-picker')}
-                className="border border-gray-300 rounded-lg px-3 py-2 bg-white flex-row justify-between items-center"
+                className="border border-field rounded-lg px-3 py-2 bg-card flex-row justify-between items-center"
               >
-                <Text className="text-base text-gray-900">
+                <Text className="text-base text-label">
                   {getCurrencyName(currencyCode)} ({currencyCode})
                 </Text>
-                <Text className="text-gray-400">›</Text>
+                <Text className="text-secondary">›</Text>
               </Pressable>
             </View>
           </View>
@@ -99,22 +99,22 @@ export default function OnboardingScreen() {
 
         {step === 2 ? (
           <View className="gap-4">
-            <Text className="text-2xl font-bold text-gray-900">Sales Tax</Text>
-            <Text className="text-base text-gray-500">Do you charge sales tax or VAT on what you sell?</Text>
-            <View className="flex-row items-center justify-between bg-white rounded-lg border border-gray-300 px-3 py-3">
-              <Text className="text-base text-gray-900">I charge sales tax or VAT</Text>
+            <Text className="text-2xl font-bold text-label">Sales Tax</Text>
+            <Text className="text-base text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
+            <View className="flex-row items-center justify-between bg-card rounded-lg border border-field px-3 py-3">
+              <Text className="text-base text-label">I charge sales tax or VAT</Text>
               <Switch value={chargesTax} onValueChange={setChargesTax} />
             </View>
             {chargesTax ? (
               <View className="flex-row gap-2">
                 <TextInput
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+                  className="flex-1 border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
                   placeholder="e.g. Sales Tax"
                   value={taxName}
                   onChangeText={setTaxName}
                 />
                 <TextInput
-                  className="w-24 border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+                  className="w-24 border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
                   placeholder="Rate %"
                   keyboardType="decimal-pad"
                   value={taxRate}
@@ -122,15 +122,15 @@ export default function OnboardingScreen() {
                 />
               </View>
             ) : (
-              <Text className="text-xs text-gray-500">No problem — you can add this anytime in Settings.</Text>
+              <Text className="text-xs text-secondary">No problem — you can add this anytime in Settings.</Text>
             )}
           </View>
         ) : null}
 
         {step === 3 ? (
           <View className="gap-3">
-            <Text className="text-2xl font-bold text-gray-900 text-center">You&apos;re all set!</Text>
-            <Text className="text-base text-gray-500 text-center">
+            <Text className="text-2xl font-bold text-label text-center">You&apos;re all set!</Text>
+            <Text className="text-base text-secondary text-center">
               You can customize invoice numbering and tax rates anytime in Settings.
             </Text>
           </View>

@@ -45,7 +45,7 @@ export default function ClientPickerModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title={isFilterMode ? 'Filter by Client' : 'Select Client'} />
       <FlatList
         style={{ flex: 1 }}
@@ -54,9 +54,9 @@ export default function ClientPickerModal() {
         contentContainerStyle={{ padding: 16 }}
         ListHeaderComponent={
           <View>
-            <View className="-mx-4 -mt-4 mb-4 p-4 bg-white border-b border-gray-100">
+            <View className="-mx-4 -mt-4 mb-4 p-4 bg-card border-b border-separator">
               <TextInput
-                className="border border-gray-300 rounded-lg px-3 py-2 text-base"
+                className="border border-field rounded-lg px-3 py-2 text-base text-label"
                 placeholder="Search clients…"
                 value={query}
                 onChangeText={setQuery}
@@ -68,9 +68,9 @@ export default function ClientPickerModal() {
                   setFilter({ ...filter, clientId: undefined });
                   router.back();
                 }}
-                className="bg-white rounded-xl p-4 mb-3 border border-gray-100"
+                className="bg-card rounded-xl p-4 mb-3 border border-separator"
               >
-                <Text className="text-base text-brand font-medium">All Clients</Text>
+                <Text className="text-base text-tint font-medium">All Clients</Text>
               </Pressable>
             ) : null}
           </View>
@@ -79,9 +79,9 @@ export default function ClientPickerModal() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => selectClient(item.id, item.display_name)}
-            className="bg-white rounded-xl p-4 mb-3 border border-gray-100"
+            className="bg-card rounded-xl p-4 mb-3 border border-separator"
           >
-            <Text className="text-base text-gray-900">{item.display_name}</Text>
+            <Text className="text-base text-label">{item.display_name}</Text>
           </Pressable>
         )}
         ListFooterComponent={

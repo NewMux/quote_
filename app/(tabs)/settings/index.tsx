@@ -117,15 +117,15 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <ScreenHeader title="Settings" />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {email ? (
-          <View className="bg-white rounded-2xl p-4 mb-4 flex-row items-center gap-3 border border-gray-100">
+          <View className="bg-card rounded-2xl p-4 mb-4 flex-row items-center gap-3 border border-separator">
             <Ionicons name="person-circle-outline" size={32} color={BRAND.default} />
             <View className="flex-1">
-              <Text className="text-xs text-gray-500">Signed in as</Text>
-              <Text className="text-base text-gray-900" numberOfLines={1}>
+              <Text className="text-xs text-secondary">Signed in as</Text>
+              <Text className="text-base text-label" numberOfLines={1}>
                 {email}
               </Text>
             </View>
@@ -137,14 +137,14 @@ export default function SettingsScreen() {
             <Pressable key={row.href} onPress={() => router.push(row.href as never)}>
               <View
                 className={`flex-row items-center justify-between p-4 ${
-                  index < ROWS.length - 1 ? 'border-b border-gray-100' : ''
+                  index < ROWS.length - 1 ? 'border-b border-separator' : ''
                 }`}
               >
                 <View className="flex-row items-center gap-3 flex-1">
                   <Ionicons name={row.icon} size={20} color="#374151" />
                   <View className="flex-1">
-                    <Text className="text-base text-gray-900">{row.label}</Text>
-                    <Text className="text-xs text-gray-500" numberOfLines={1}>
+                    <Text className="text-base text-label">{row.label}</Text>
+                    <Text className="text-xs text-secondary" numberOfLines={1}>
                       {row.subtitle}
                     </Text>
                   </View>
@@ -156,12 +156,12 @@ export default function SettingsScreen() {
         </Card>
 
         <Pressable onPress={handleExport}>
-          <View className="bg-white rounded-2xl p-4 mt-4 flex-row items-center justify-between border border-gray-100">
+          <View className="bg-card rounded-2xl p-4 mt-4 flex-row items-center justify-between border border-separator">
             <View className="flex-row items-center gap-3 flex-1">
               <Ionicons name="share-outline" size={20} color="#374151" />
               <View className="flex-1">
-                <Text className="text-base text-gray-900">Export Data</Text>
-                <Text className="text-xs text-gray-500" numberOfLines={2}>
+                <Text className="text-base text-label">Export Data</Text>
+                <Text className="text-xs text-secondary" numberOfLines={2}>
                   Save a backup of your clients, invoices, and estimates to Files, email, or cloud
                   storage
                 </Text>
@@ -170,12 +170,12 @@ export default function SettingsScreen() {
           </View>
         </Pressable>
 
-        <View className="bg-white rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-gray-100">
+        <View className="bg-card rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-separator">
           <View className="flex-row items-center gap-3 flex-1">
             <Ionicons name="notifications-outline" size={20} color="#374151" />
             <View className="flex-1">
-              <Text className="text-base text-gray-900">Overdue Invoice Reminders</Text>
-              <Text className="text-xs text-gray-500" numberOfLines={2}>
+              <Text className="text-base text-label">Overdue Invoice Reminders</Text>
+              <Text className="text-xs text-secondary" numberOfLines={2}>
                 Get notified on this device when an invoice becomes overdue
               </Text>
             </View>
@@ -189,12 +189,12 @@ export default function SettingsScreen() {
         </View>
 
         <Pressable onPress={() => router.push('/settings/delete-data')}>
-          <View className="bg-red-50 rounded-2xl p-4 mt-6 flex-row items-center justify-between border border-red-100">
+          <View className="bg-destructive/10 rounded-2xl p-4 mt-6 flex-row items-center justify-between border border-destructive/30">
             <View className="flex-row items-center gap-3 flex-1">
               <Ionicons name="trash-outline" size={20} color="#DC2626" />
               <View className="flex-1">
-                <Text className="text-base text-red-600 font-medium">Delete All Data</Text>
-                <Text className="text-xs text-red-400" numberOfLines={1}>
+                <Text className="text-base text-destructive font-medium">Delete All Data</Text>
+                <Text className="text-xs text-destructive" numberOfLines={1}>
                   Permanently erase everything in your account
                 </Text>
               </View>
@@ -204,12 +204,12 @@ export default function SettingsScreen() {
         </Pressable>
 
         <Pressable onPress={() => router.push('/settings/delete-account')}>
-          <View className="bg-red-50 rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-red-100">
+          <View className="bg-destructive/10 rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-destructive/30">
             <View className="flex-row items-center gap-3 flex-1">
               <Ionicons name="person-remove-outline" size={20} color="#DC2626" />
               <View className="flex-1">
-                <Text className="text-base text-red-600 font-medium">Delete Account</Text>
-                <Text className="text-xs text-red-400" numberOfLines={2}>
+                <Text className="text-base text-destructive font-medium">Delete Account</Text>
+                <Text className="text-xs text-destructive" numberOfLines={2}>
                   Permanently delete your account and everything in it
                 </Text>
               </View>
@@ -219,10 +219,10 @@ export default function SettingsScreen() {
         </Pressable>
 
         <Pressable onPress={handleSignOut}>
-          <View className="bg-white rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-gray-100">
+          <View className="bg-card rounded-2xl p-4 mt-3 flex-row items-center justify-between border border-separator">
             <View className="flex-row items-center gap-3 flex-1">
               <Ionicons name="log-out-outline" size={20} color="#374151" />
-              <Text className="text-base text-gray-900">Sign Out</Text>
+              <Text className="text-base text-label">Sign Out</Text>
             </View>
           </View>
         </Pressable>

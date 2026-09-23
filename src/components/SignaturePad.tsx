@@ -12,7 +12,7 @@ export function SignaturePad({ onSave }: SignaturePadProps) {
 
   return (
     <View className="flex-1">
-      <View className="flex-1 border border-gray-300 rounded-xl overflow-hidden bg-white">
+      <View className="flex-1 border border-field rounded-xl overflow-hidden bg-card">
         <SignatureView
           ref={ref}
           onOK={onSave}

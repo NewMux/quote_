@@ -17,14 +17,14 @@ const CONTAINER_CLASSES: Record<ButtonVariant, string> = {
   filled: 'bg-brand',
   tinted: 'bg-brand/10',
   plain: '',
-  destructive: 'bg-red-50',
+  destructive: 'bg-destructive/10',
 };
 
 const TEXT_CLASSES: Record<ButtonVariant, string> = {
   filled: 'text-white',
-  tinted: 'text-brand',
-  plain: 'text-brand',
-  destructive: 'text-red-600',
+  tinted: 'text-tint',
+  plain: 'text-tint',
+  destructive: 'text-destructive',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

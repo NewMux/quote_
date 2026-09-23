@@ -24,13 +24,13 @@ export default function CustomRangeModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="Custom Range" />
       <View className="p-4 gap-4">
         <DateField label="Start Date" value={startDate} onChange={setStartDate} />
         <DateField label="End Date" value={endDate} onChange={setEndDate} />
         {startDate && endDate && startDate > endDate ? (
-          <Text className="text-xs text-red-500">Start date must be before end date.</Text>
+          <Text className="text-xs text-destructive">Start date must be before end date.</Text>
         ) : null}
         <Button label="Apply" size="large" disabled={!canApply} onPress={apply} />
       </View>

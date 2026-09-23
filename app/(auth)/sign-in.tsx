@@ -29,18 +29,18 @@ export default function SignInScreen() {
   const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-surface">
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-grouped">
       <View className="flex-1 px-6 justify-center gap-6">
         <View className="gap-2">
-          <Text className="text-2xl font-bold text-gray-900 text-center">Welcome back</Text>
-          <Text className="text-base text-gray-500 text-center">Sign in to your account</Text>
+          <Text className="text-2xl font-bold text-label text-center">Welcome back</Text>
+          <Text className="text-base text-secondary text-center">Sign in to your account</Text>
         </View>
 
         <View className="gap-4">
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Email</Text>
+            <Text className="text-xs text-secondary mb-1">Email</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
@@ -51,9 +51,9 @@ export default function SignInScreen() {
             />
           </View>
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Password</Text>
+            <Text className="text-xs text-secondary mb-1">Password</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
               value={password}
               onChangeText={setPassword}
               placeholder="Your password"
@@ -63,7 +63,7 @@ export default function SignInScreen() {
             />
           </View>
           <Pressable onPress={() => router.push('/(auth)/forgot-password')} className="self-end">
-            <Text className="text-brand text-sm font-medium">Forgot password?</Text>
+            <Text className="text-tint text-sm font-medium">Forgot password?</Text>
           </Pressable>
         </View>
       </View>
@@ -76,7 +76,7 @@ export default function SignInScreen() {
           onPress={handleSignIn}
         />
         <Pressable onPress={() => router.push('/(auth)/sign-up')} className="items-center py-2">
-          <Text className="text-brand text-sm font-medium">Don&apos;t have an account? Sign Up</Text>
+          <Text className="text-tint text-sm font-medium">Don&apos;t have an account? Sign Up</Text>
         </Pressable>
       </View>
     </SafeAreaView>

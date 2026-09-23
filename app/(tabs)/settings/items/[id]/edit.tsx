@@ -22,7 +22,7 @@ export default function EditItemScreen() {
       title: item ? `Edit ${item.name}` : 'Edit Item',
       headerRight: () => (
         <Pressable onPress={confirmArchive}>
-          <Text className="text-red-500">Archive</Text>
+          <Text className="text-destructive">Archive</Text>
         </Pressable>
       ),
     });
@@ -52,7 +52,7 @@ export default function EditItemScreen() {
 
   if (!item) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <ActivityIndicator />
       </View>
     );

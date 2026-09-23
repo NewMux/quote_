@@ -29,7 +29,7 @@ export default function EditTaxBracketScreen() {
       title: bracket ? `Edit ${bracket.name}` : 'Edit Tax Rate',
       headerRight: () => (
         <Pressable onPress={confirmArchive}>
-          <Text className="text-red-500">Archive</Text>
+          <Text className="text-destructive">Archive</Text>
         </Pressable>
       ),
     });
@@ -60,31 +60,31 @@ export default function EditTaxBracketScreen() {
 
   if (!bracket) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-card">
         <ActivityIndicator />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface p-4 gap-4">
+    <View className="flex-1 bg-grouped p-4 gap-4">
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Name</Text>
+        <Text className="text-xs text-secondary mb-1">Name</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
           value={name}
           onChangeText={setName}
         />
       </View>
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Rate %</Text>
+        <Text className="text-xs text-secondary mb-1">Rate %</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+          className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
           keyboardType="decimal-pad"
           value={rate}
           onChangeText={setRate}
         />
-        <Text className="text-xs text-gray-500 mt-1">Currently {formatRateBp(bracket.rate_bp)}</Text>
+        <Text className="text-xs text-secondary mt-1">Currently {formatRateBp(bracket.rate_bp)}</Text>
       </View>
       <Button
         label={isSaving ? 'Saving…' : 'Save'}

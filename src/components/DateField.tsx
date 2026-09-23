@@ -15,12 +15,12 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
 
   return (
     <View>
-      <Text className="text-xs text-gray-500 mb-1">{label}</Text>
+      <Text className="text-xs text-secondary mb-1">{label}</Text>
       <Pressable
         onPress={() => setShow(true)}
-        className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
+        className="border border-field rounded-lg px-3 py-2 bg-card"
       >
-        <Text className={value ? 'text-gray-900' : 'text-gray-500'}>
+        <Text className={value ? 'text-label' : 'text-secondary'}>
           {value ? format(parseISO(value), 'MMM d, yyyy') : placeholder}
         </Text>
       </Pressable>
@@ -30,7 +30,7 @@ export function DateField({ label, value, onChange, placeholder = 'Select date' 
             className="flex-1 items-center justify-center bg-black/40 px-6"
             onPress={() => setShow(false)}
           >
-            <View className="bg-white rounded-2xl p-2" style={{ width: 320 }}>
+            <View className="bg-card rounded-2xl p-2" style={{ width: 320 }}>
               <DateTimePicker
                 value={value ? parseISO(value) : new Date()}
                 mode="date"

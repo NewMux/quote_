@@ -14,9 +14,9 @@ interface ScreenHeaderProps {
  * on that native behavior. */
 export function ScreenHeader({ title, right }: ScreenHeaderProps) {
   return (
-    <SafeAreaView edges={['top']} className="bg-white border-b border-gray-100">
+    <SafeAreaView edges={['top']} className="bg-card border-b border-separator">
       <View className="flex-row items-center justify-between px-4 pt-2 pb-3">
-        <Text className="text-3xl font-bold text-gray-900">{title}</Text>
+        <Text className="text-3xl font-bold text-label">{title}</Text>
         {right}
       </View>
     </SafeAreaView>

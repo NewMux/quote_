@@ -27,10 +27,10 @@ export default function DeleteDataScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View className="bg-white rounded-xl p-4 border border-red-200">
-        <Text className="text-base font-semibold text-gray-900 mb-2">This can&apos;t be undone</Text>
-        <Text className="text-sm text-gray-700 leading-5">
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <View className="bg-card rounded-xl p-4 border border-destructive/30">
+        <Text className="text-base font-semibold text-label mb-2">This can&apos;t be undone</Text>
+        <Text className="text-sm text-label leading-5">
           This permanently erases every client, invoice, estimate, item, tax rate, signature,
           photo, and payment record in your account — and resets your business profile.
           There&apos;s no backup and no way to get this back.
@@ -38,9 +38,9 @@ export default function DeleteDataScreen() {
       </View>
 
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Type {CONFIRM_WORD} to confirm</Text>
+        <Text className="text-xs text-secondary mb-1">Type {CONFIRM_WORD} to confirm</Text>
         <TextInput
-          className="border border-gray-300 rounded-lg px-3 py-2 text-base bg-white"
+          className="border border-field rounded-lg px-3 py-2 text-base text-label bg-card"
           value={confirmText}
           onChangeText={setConfirmText}
           autoCapitalize="characters"

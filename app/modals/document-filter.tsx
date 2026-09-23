@@ -42,11 +42,11 @@ export default function DocumentFilterModal() {
   const hasActiveFilter = !!(filter.status || filter.clientId || filter.dateFrom || filter.dateTo);
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="Filter Documents" closeLabel="Done" />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
         <View>
-          <Text className="text-xs text-gray-500 mb-2">Status</Text>
+          <Text className="text-xs text-secondary mb-2">Status</Text>
           <View className="flex-row flex-wrap gap-2">
             {STATUS_OPTIONS.map((opt) => {
               const selected = filter.status === opt.value;
@@ -55,10 +55,10 @@ export default function DocumentFilterModal() {
                   key={opt.label}
                   onPress={() => setFilter({ ...filter, status: opt.value })}
                   className={`px-3 py-2 rounded-full border ${
-                    selected ? 'bg-brand border-brand' : 'border-gray-300'
+                    selected ? 'bg-brand border-brand' : 'border-field'
                   }`}
                 >
-                  <Text className={selected ? 'text-white text-sm' : 'text-gray-700 text-sm'}>{opt.label}</Text>
+                  <Text className={selected ? 'text-white text-sm' : 'text-label text-sm'}>{opt.label}</Text>
                 </Pressable>
               );
             })}
@@ -66,12 +66,12 @@ export default function DocumentFilterModal() {
         </View>
 
         <View>
-          <Text className="text-xs text-gray-500 mb-2">Client</Text>
+          <Text className="text-xs text-secondary mb-2">Client</Text>
           <Pressable
             onPress={() => router.push({ pathname: '/modals/client-picker', params: { mode: 'filter' } })}
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
+            className="border border-field rounded-lg px-3 py-2 bg-card"
           >
-            <Text className={clientName ? 'text-gray-900' : 'text-gray-500'}>{clientName ?? 'All Clients'}</Text>
+            <Text className={clientName ? 'text-label' : 'text-secondary'}>{clientName ?? 'All Clients'}</Text>
           </Pressable>
         </View>
 

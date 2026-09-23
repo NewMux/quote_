@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { Button } from '../src/components/Button';
 import { APPLE_EULA_URL, annualSavingsPercent, trialLabel } from '../src/lib/subscription';
-import { BRAND } from '../src/lib/theme';
+import { BRAND, useThemeColors } from '../src/lib/theme';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
 
@@ -35,6 +35,7 @@ function PlanCard({
   selected: boolean;
   onPress: () => void;
 }) {
+  const colors = useThemeColors();
   return (
     <Pressable
       onPress={onPress}
@@ -43,27 +44,27 @@ function PlanCard({
       accessibilityLabel={`${title}, ${price}${detail ? `, ${detail}` : ''}`}
     >
       <View
-        className={`bg-white rounded-2xl p-4 flex-row items-center gap-3 border-2 ${
-          selected ? 'border-brand' : 'border-gray-100'
+        className={`bg-card rounded-2xl p-4 flex-row items-center gap-3 border-2 ${
+          selected ? 'border-brand' : 'border-separator'
         }`}
       >
         <Ionicons
           name={selected ? 'checkmark-circle' : 'ellipse-outline'}
           size={24}
-          color={selected ? BRAND.default : '#9CA3AF'}
+          color={selected ? colors.tint : colors.chevron}
         />
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-base font-semibold text-gray-900">{title}</Text>
+            <Text className="text-base font-semibold text-label">{title}</Text>
             {badge ? (
               <View className="bg-brand/10 rounded-full px-2 py-0.5">
-                <Text className="text-xs font-semibold text-brand">{badge}</Text>
+                <Text className="text-xs font-semibold text-tint">{badge}</Text>
               </View>
             ) : null}
           </View>
-          {detail ? <Text className="text-xs text-gray-500 mt-0.5">{detail}</Text> : null}
+          {detail ? <Text className="text-xs text-secondary mt-0.5">{detail}</Text> : null}
         </View>
-        <Text className="text-base font-semibold text-gray-900">{price}</Text>
+        <Text className="text-base font-semibold text-label">{price}</Text>
       </View>
     </Pressable>
   );
@@ -76,6 +77,7 @@ export default function PaywallScreen() {
   const purchase = useSubscriptionStore((s) => s.purchase);
   const restore = useSubscriptionStore((s) => s.restore);
   const signOut = useAuthStore((s) => s.signOut);
+  const colors = useThemeColors();
 
   const [loadError, setLoadError] = useState(false);
   const [plan, setPlan] = useState<PlanKind>('annual');
@@ -147,7 +149,7 @@ export default function PaywallScreen() {
     : null;
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <LinearGradient colors={[BRAND.default, BRAND.darker]}>
         <SafeAreaView edges={['top']}>
           <View className="px-6 pt-6 pb-8 items-center gap-2">
@@ -166,15 +168,15 @@ export default function PaywallScreen() {
         <View className="gap-3">
           {BENEFITS.map((benefit) => (
             <View key={benefit.text} className="flex-row items-center gap-3">
-              <Ionicons name={benefit.icon} size={20} color={BRAND.default} />
-              <Text className="text-base text-gray-900 flex-1">{benefit.text}</Text>
+              <Ionicons name={benefit.icon} size={20} color={colors.tint} />
+              <Text className="text-base text-label flex-1">{benefit.text}</Text>
             </View>
           ))}
         </View>
 
         {loadError ? (
-          <View className="bg-white rounded-2xl p-4 gap-3 items-center border border-gray-100">
-            <Text className="text-sm text-gray-700 text-center">
+          <View className="bg-card rounded-2xl p-4 gap-3 items-center border border-separator">
+            <Text className="text-sm text-label text-center">
               Couldn&apos;t load subscription options. Check your connection and try again.
             </Text>
             <Button label="Try Again" variant="tinted" onPress={fetchOffering} />
@@ -216,17 +218,17 @@ export default function PaywallScreen() {
           <Button label="Restore Purchases" variant="plain" onPress={handleRestore} disabled={isWorking} />
         </View>
 
-        {renewalText ? <Text className="text-xs text-gray-500 leading-4">{renewalText}</Text> : null}
+        {renewalText ? <Text className="text-xs text-secondary leading-4">{renewalText}</Text> : null}
 
         <View className="flex-row justify-center gap-6">
           <Pressable onPress={() => router.push('/privacy-policy')} hitSlop={8}>
-            <Text className="text-xs text-brand">Privacy Policy</Text>
+            <Text className="text-xs text-tint">Privacy Policy</Text>
           </Pressable>
           <Pressable onPress={() => Linking.openURL(APPLE_EULA_URL)} hitSlop={8}>
-            <Text className="text-xs text-brand">Terms of Use</Text>
+            <Text className="text-xs text-tint">Terms of Use</Text>
           </Pressable>
           <Pressable onPress={handleSignOut} hitSlop={8}>
-            <Text className="text-xs text-gray-500">Sign Out</Text>
+            <Text className="text-xs text-secondary">Sign Out</Text>
           </Pressable>
         </View>
       </ScrollView>

@@ -38,18 +38,18 @@ export default function SignUpScreen() {
     email.trim().length > 0 && password.length >= MIN_PASSWORD_LENGTH && confirmPassword.length > 0 && !isSubmitting;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-surface">
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-grouped">
       <View className="flex-1 px-6 justify-center gap-6">
         <View className="gap-2">
-          <Text className="text-2xl font-bold text-gray-900 text-center">Create your account</Text>
-          <Text className="text-base text-gray-500 text-center">Get started in under a minute</Text>
+          <Text className="text-2xl font-bold text-label text-center">Create your account</Text>
+          <Text className="text-base text-secondary text-center">Get started in under a minute</Text>
         </View>
 
         <View className="gap-4">
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Email</Text>
+            <Text className="text-xs text-secondary mb-1">Email</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
@@ -60,9 +60,9 @@ export default function SignUpScreen() {
             />
           </View>
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Password</Text>
+            <Text className="text-xs text-secondary mb-1">Password</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
               value={password}
               onChangeText={setPassword}
               placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
@@ -72,9 +72,9 @@ export default function SignUpScreen() {
             />
           </View>
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Confirm Password</Text>
+            <Text className="text-xs text-secondary mb-1">Confirm Password</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Re-enter your password"
@@ -94,7 +94,7 @@ export default function SignUpScreen() {
           onPress={handleSignUp}
         />
         <Pressable onPress={() => router.push('/(auth)/sign-in')} className="items-center py-2">
-          <Text className="text-brand text-sm font-medium">Already have an account? Sign In</Text>
+          <Text className="text-tint text-sm font-medium">Already have an account? Sign In</Text>
         </Pressable>
       </View>
     </SafeAreaView>

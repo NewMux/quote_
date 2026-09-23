@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Animated, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { BRAND } from '../lib/theme';
+import { useThemeColors } from '../lib/theme';
 
 type IconButtonVariant = 'tinted' | 'destructive' | 'plain';
 
@@ -15,20 +15,16 @@ interface IconButtonProps {
 
 const CONTAINER_CLASSES: Record<IconButtonVariant, string> = {
   tinted: 'bg-brand/10',
-  destructive: 'bg-red-50',
+  destructive: 'bg-destructive/10',
   plain: '',
-};
-
-const ICON_COLORS: Record<IconButtonVariant, string> = {
-  tinted: BRAND.default,
-  destructive: '#DC2626',
-  plain: '#374151',
 };
 
 /** A 44x44pt circular icon-only control. Always pass a real accessibilityLabel — with no
  * visible text, that's the only thing a screen reader has to describe the action. */
 export function IconButton({ icon, onPress, accessibilityLabel, variant = 'tinted' }: IconButtonProps) {
   const scale = useRef(new Animated.Value(1)).current;
+  const colors = useThemeColors();
+  const iconColor = variant === 'destructive' ? colors.destructive : variant === 'plain' ? colors.label : colors.tint;
 
   function handlePressIn() {
     Animated.spring(scale, { toValue: 0.92, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
@@ -54,7 +50,7 @@ export function IconButton({ icon, onPress, accessibilityLabel, variant = 'tinte
         style={{ transform: [{ scale }] }}
         className={`w-11 h-11 rounded-full items-center justify-center ${CONTAINER_CLASSES[variant]}`}
       >
-        <Ionicons name={icon} size={20} color={ICON_COLORS[variant]} />
+        <Ionicons name={icon} size={20} color={iconColor} />
       </Animated.View>
     </Pressable>
   );

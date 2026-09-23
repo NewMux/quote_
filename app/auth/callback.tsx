@@ -41,14 +41,14 @@ export default function AuthCallbackScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface px-6">
-        <Text className="text-base text-gray-700 text-center">{error}</Text>
+      <View className="flex-1 items-center justify-center bg-grouped px-6">
+        <Text className="text-base text-label text-center">{error}</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 items-center justify-center bg-surface">
+    <View className="flex-1 items-center justify-center bg-grouped">
       <ActivityIndicator size="large" />
     </View>
   );

@@ -24,7 +24,7 @@ export default function SignModal() {
   }
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-grouped">
       <SheetHeader title="Signature" />
       <View className="flex-1 p-4">
         <SignaturePad onSave={handleSave} />

@@ -74,9 +74,9 @@ export default function BusinessProfileScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <View>
-        <Text className="text-xs text-gray-500 mb-2">Logo</Text>
+        <Text className="text-xs text-secondary mb-2">Logo</Text>
         {signedLogoUrl ? (
           <Image source={{ uri: signedLogoUrl }} className="w-24 h-24 rounded-lg mb-2" resizeMode="contain" />
         ) : null}
@@ -88,29 +88,29 @@ export default function BusinessProfileScreen() {
       <Field label="Business Name" value={businessName} onChangeText={setBusinessName} />
 
       <View>
-        <Text className="text-xs text-gray-500 mb-2">Accent Color</Text>
+        <Text className="text-xs text-secondary mb-2">Accent Color</Text>
         <View className="flex-row gap-2">
           {ACCENT_COLORS.map((color) => (
             <Pressable
               key={color}
               onPress={() => setAccentColor(color)}
               style={{ backgroundColor: color }}
-              className={`w-9 h-9 rounded-full ${accentColor === color ? 'border-2 border-gray-900' : ''}`}
+              className={`w-9 h-9 rounded-full ${accentColor === color ? 'border-2 border-label' : ''}`}
             />
           ))}
         </View>
       </View>
 
       <View>
-        <Text className="text-xs text-gray-500 mb-1">Currency</Text>
+        <Text className="text-xs text-secondary mb-1">Currency</Text>
         <Pressable
           onPress={() => router.push('/modals/currency-picker')}
-          className="border border-gray-300 rounded-lg px-3 py-2 bg-white flex-row justify-between items-center"
+          className="border border-field rounded-lg px-3 py-2 bg-card flex-row justify-between items-center"
         >
-          <Text className="text-base text-gray-900">
+          <Text className="text-base text-label">
             {getCurrencyName(profile?.default_currency_code ?? 'USD')} ({profile?.default_currency_code ?? 'USD'})
           </Text>
-          <Text className="text-gray-400">›</Text>
+          <Text className="text-secondary">›</Text>
         </Pressable>
       </View>
 
@@ -148,9 +148,9 @@ function Field({
 }) {
   return (
     <View>
-      <Text className="text-xs text-gray-500 mb-1">{label}</Text>
+      <Text className="text-xs text-secondary mb-1">{label}</Text>
       <TextInput
-        className="border border-gray-300 rounded-lg px-3 py-2 bg-white text-base text-gray-900"
+        className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}

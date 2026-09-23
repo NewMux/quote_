@@ -23,19 +23,19 @@ interface ActivityLogListProps {
 
 export function ActivityLogList({ entries }: ActivityLogListProps) {
   if (entries.length === 0) {
-    return <Text className="text-sm text-gray-500">No activity yet.</Text>;
+    return <Text className="text-sm text-secondary">No activity yet.</Text>;
   }
   return (
     <View>
       {entries.map((entry) => (
         <View key={entry.id} className="flex-row justify-between py-1.5">
           <View className="flex-1 pr-2">
-            <Text className="text-sm text-gray-700" numberOfLines={2}>
+            <Text className="text-sm text-label" numberOfLines={2}>
               {LABELS[entry.event_type]}
               {entry.event_detail ? ` — ${entry.event_detail}` : ''}
             </Text>
           </View>
-          <Text className="text-xs text-gray-500 flex-shrink-0">
+          <Text className="text-xs text-secondary flex-shrink-0">
             {format(parseISO(entry.created_at), 'MMM d, h:mm a')}
           </Text>
         </View>
