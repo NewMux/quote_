@@ -107,6 +107,30 @@ export function useStatusColors() {
   return useColorScheme() === 'dark' ? STATUS_DARK : STATUS_LIGHT;
 }
 
+/** iOS system colors, for SF Symbols that carry a category (summary tiles, status glyphs). Only for
+ * icons and fills next to a text label — never as the color of small text. */
+const SYSTEM_LIGHT = {
+  green: '#34C759',
+  orange: '#FF9500',
+  red: '#FF3B30',
+  gray: '#8E8E93',
+  blue: '#007AFF',
+  indigo: '#5856D6',
+} as const;
+
+const SYSTEM_DARK: Record<keyof typeof SYSTEM_LIGHT, string> = {
+  green: '#30D158',
+  orange: '#FF9F0A',
+  red: '#FF453A',
+  gray: '#98989D',
+  blue: '#0A84FF',
+  indigo: '#5E5CE6',
+};
+
+export function useSystemColors() {
+  return useColorScheme() === 'dark' ? SYSTEM_DARK : SYSTEM_LIGHT;
+}
+
 /** Swipe-action backgrounds. Fixed in both appearances (like iOS's own swipe actions); each keeps
  * its white semibold label at 4.5:1 or better. */
 export const SWIPE_COLORS = {

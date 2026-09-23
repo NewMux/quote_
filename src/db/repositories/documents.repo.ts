@@ -32,7 +32,7 @@ export async function listDocuments(filter: DocumentListFilter = {}): Promise<Do
   let query = supabase
     .from('documents')
     .select(
-      'id, doc_type, doc_number, status, viewed_at, client_id, client_name_snapshot, due_date, total_minor, amount_paid_minor, currency_code, converted_to_document_id, created_at, updated_at, clients(display_name)'
+      'id, doc_type, doc_number, status, viewed_at, client_id, client_name_snapshot, issue_date, due_date, total_minor, amount_paid_minor, currency_code, converted_to_document_id, created_at, updated_at, clients(display_name)'
     )
     .eq('owner_id', ownerId);
 
@@ -60,6 +60,7 @@ export async function listDocuments(filter: DocumentListFilter = {}): Promise<Do
     viewed_at: string | null;
     client_id: string | null;
     client_name_snapshot: string | null;
+    issue_date: string | null;
     due_date: string | null;
     total_minor: number;
     amount_paid_minor: number;
@@ -80,6 +81,7 @@ export async function listDocuments(filter: DocumentListFilter = {}): Promise<Do
       viewed_at: d.viewed_at,
       client_id: d.client_id,
       client_name: client?.display_name ?? d.client_name_snapshot,
+      issue_date: d.issue_date,
       due_date: d.due_date,
       total_minor: d.total_minor,
       amount_paid_minor: d.amount_paid_minor,

@@ -21,23 +21,28 @@ interface ActivityLogListProps {
   entries: ActivityLogEntry[];
 }
 
+/** A document's history as a simple timeline: a dot and line joining each event, newest first. */
 export function ActivityLogList({ entries }: ActivityLogListProps) {
   if (entries.length === 0) {
     return <Text className="text-subhead text-secondary">No activity yet.</Text>;
   }
   return (
     <View>
-      {entries.map((entry) => (
-        <View key={entry.id} className="flex-row justify-between py-1.5">
-          <View className="flex-1 pr-2">
+      {entries.map((entry, index) => (
+        <View key={entry.id} className="flex-row gap-3" accessible>
+          <View className="items-center w-3 pt-1.5">
+            <View className={`w-2.5 h-2.5 rounded-full ${index === 0 ? 'bg-tint' : 'bg-field'}`} />
+            {index < entries.length - 1 ? <View className="flex-1 w-px bg-separator mt-1" /> : null}
+          </View>
+          <View className="flex-1 pb-4">
             <Text className="text-subhead text-label" numberOfLines={2}>
               {LABELS[entry.event_type]}
               {entry.event_detail ? ` — ${entry.event_detail}` : ''}
             </Text>
+            <Text className="text-footnote text-secondary">
+              {format(parseISO(entry.created_at), 'MMM d, yyyy · h:mm a')}
+            </Text>
           </View>
-          <Text className="text-subhead text-secondary flex-shrink-0">
-            {format(parseISO(entry.created_at), 'MMM d, h:mm a')}
-          </Text>
         </View>
       ))}
     </View>

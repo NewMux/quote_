@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FormField } from '../../../../../src/components/form/FormField';
+import { FormRow } from '../../../../../src/components/form/FormRow';
 import { FormScrollView } from '../../../../../src/components/form/FormScrollView';
 import { ListRow } from '../../../../../src/components/list/ListRow';
 import { ListSection } from '../../../../../src/components/list/ListSection';
@@ -69,23 +69,23 @@ export default function EditTaxBracketScreen() {
 
   return (
     <FormScrollView>
-      <FormField label="Name" value={name} onChangeText={setName} autoCapitalize="words" maxLength={50} />
-      <FormField label="Rate (%)" keyboardType="decimal-pad" value={rate} onChangeText={setRate} />
-      <View>
-        <ListSection footer="The default rate is applied to new taxable line items.">
-          <ListRow
-            title="Default Rate"
-            switchValue={bracket.is_default === 1}
-            switchDisabled={bracket.is_default === 1}
-            onSwitchChange={(value) => {
-              if (value) setDefault(id);
-            }}
-          />
-        </ListSection>
-        <ListSection>
-          <ListRow title="Archive Tax Rate" onPress={confirmArchive} destructive centered />
-        </ListSection>
-      </View>
+      <ListSection>
+        <FormRow label="Name" value={name} onChangeText={setName} autoCapitalize="words" maxLength={50} />
+        <FormRow label="Rate (%)" keyboardType="decimal-pad" value={rate} onChangeText={setRate} />
+      </ListSection>
+      <ListSection footer="The default rate is applied to new taxable line items.">
+        <ListRow
+          title="Default Rate"
+          switchValue={bracket.is_default === 1}
+          switchDisabled={bracket.is_default === 1}
+          onSwitchChange={(value) => {
+            if (value) setDefault(id);
+          }}
+        />
+      </ListSection>
+      <ListSection>
+        <ListRow title="Archive Tax Rate" onPress={confirmArchive} destructive centered />
+      </ListSection>
     </FormScrollView>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { DateField } from '../../src/components/DateField';
@@ -10,7 +10,6 @@ import { SheetHeader } from '../../src/components/SheetHeader';
 import { getScheduleForDocument, saveSchedule, stopSchedule } from '../../src/db/repositories/recurring.repo';
 import { toStoredDate } from '../../src/lib/format';
 import { FREQUENCY_OPTIONS } from '../../src/lib/recurrence';
-import { BRAND } from '../../src/lib/theme';
 import type { RecurrenceFrequency } from '../../src/types/models';
 
 export default function RecurringModal() {
@@ -83,27 +82,22 @@ export default function RecurringModal() {
         </View>
       ) : (
         <FormScrollView>
-          <Text className="text-body text-secondary">
-            A new draft copy of this invoice is created on each date. You review it and send it
-            yourself — nothing goes to your client automatically.
-          </Text>
-
-          <View>
-            <Text className="text-subhead text-secondary mb-1.5">Repeats</Text>
+          <View className="mb-6">
             <SegmentedControl
               values={FREQUENCY_OPTIONS.map((o) => o.label)}
               selectedIndex={FREQUENCY_OPTIONS.findIndex((o) => o.value === frequency)}
-              tintColor={BRAND.default}
-              activeFontStyle={{ color: '#FFFFFF' }}
               onChange={(e) => setFrequency(FREQUENCY_OPTIONS[e.nativeEvent.selectedSegmentIndex].value)}
+              accessibilityLabel="Repeats"
             />
           </View>
 
-          <DateField
-            label={hasSchedule ? 'Next Draft On' : 'First Draft On'}
-            value={startDate}
-            onChange={setStartDate}
-          />
+          <ListSection footer="A new draft copy of this invoice is created on each date. You review it and send it yourself — nothing goes to your client automatically.">
+            <DateField
+              label={hasSchedule ? 'Next Draft On' : 'First Draft On'}
+              value={startDate}
+              onChange={setStartDate}
+            />
+          </ListSection>
 
           {hasSchedule ? (
             <ListSection>

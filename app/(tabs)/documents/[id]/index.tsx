@@ -4,25 +4,22 @@ import {
   Alert,
   Modal,
   Platform,
-  Pressable,
   ScrollView,
   Text,
   View,
 } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation, type NativeStackHeaderItem } from 'expo-router';
-import { Icon } from '../../../../src/components/Icon';
 import * as Haptics from 'expo-haptics';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import { ActivityLogList } from '../../../../src/components/ActivityLogList';
 import { Avatar } from '../../../../src/components/Avatar';
 import { Button } from '../../../../src/components/Button';
-import { Card } from '../../../../src/components/Card';
 import { FormField } from '../../../../src/components/form/FormField';
+import { GroupedCard } from '../../../../src/components/GroupedCard';
 import { HeaderButton } from '../../../../src/components/HeaderButton';
 import { ListRow } from '../../../../src/components/list/ListRow';
 import { ListSection } from '../../../../src/components/list/ListSection';
 import { DocumentStageIndicator } from '../../../../src/components/DocumentStageIndicator';
-import { LineItemRow } from '../../../../src/components/LineItemRow';
 import { StatusBadge } from '../../../../src/components/StatusBadge';
 import { listActivity } from '../../../../src/db/repositories/activityLog.repo';
 import { getClient } from '../../../../src/db/repositories/clients.repo';
@@ -337,130 +334,127 @@ export default function DocumentDetailScreen() {
     onEmail: () => handleGeneratePdfAnd('email'),
   });
 
+  const clientName = client?.display_name ?? document.client_name_snapshot ?? 'No Client';
+  const balanceMinor = document.total_minor - document.amount_paid_minor;
+  const amountLabel = document.doc_type === 'invoice' ? 'Balance Due' : 'Total';
+  const dueDate = document.doc_type === 'invoice' ? document.due_date : document.expiry_date;
+  const typeLabel = docTypeLabel(document.doc_type);
+
   return (
     <View className="flex-1 bg-grouped">
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 16 }}>
-      <Card>
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-title3 font-bold text-label">{document.doc_number}</Text>
-          <StatusBadge document={document} />
-        </View>
-        <View className="mb-3">
-          <DocumentStageIndicator document={document} />
-        </View>
-        <View className="flex-row items-center gap-3 mb-3">
-          <Avatar
-            name={client?.display_name ?? document.client_name_snapshot ?? 'No Client'}
-            photoUri={client?.photo_uri}
-            seed={client?.id ?? document.id}
-            size={40}
-          />
-          <View className="flex-1">
-            <Text className="text-body text-label">
-              {client?.display_name ?? document.client_name_snapshot ?? 'No Client'}
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+      >
+        {/* Receipt-style header: who, how much, where it stands, and the one thing to do next. */}
+        <View className="items-center pt-2 pb-7 gap-1">
+          <Avatar name={clientName} photoUri={client?.photo_uri} seed={client?.id ?? document.id} size={64} />
+          <Text className="text-title3 font-semibold text-label text-center mt-2" numberOfLines={2}>
+            {clientName}
+          </Text>
+          <Text className="text-subhead text-secondary">
+            {typeLabel} {document.doc_number}
+          </Text>
+          <View
+            className="items-center mt-3"
+            accessible
+            accessibilityLabel={`${amountLabel}: ${formatMinor(balanceMinor, document.currency_code)}`}
+          >
+            <Text className="text-largetitle font-bold text-label" numberOfLines={1} adjustsFontSizeToFit>
+              {formatMinor(balanceMinor, document.currency_code)}
             </Text>
-            {client?.email ? <Text className="text-subhead text-secondary">{client.email}</Text> : null}
+            <Text className="text-footnote text-secondary">{amountLabel}</Text>
           </View>
+          <View className="mt-3 items-center gap-3">
+            <StatusBadge document={document} />
+            <DocumentStageIndicator document={document} />
+          </View>
+          {primaryAction ? (
+            <View className="self-stretch mt-5 gap-2">
+              <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
+              <Text className="text-footnote text-secondary text-center">{primaryAction.caption}</Text>
+            </View>
+          ) : null}
         </View>
-        <View className="flex-row justify-between pt-3 border-t border-separator">
-          <View>
-            <Text className="text-subhead text-secondary">Issued</Text>
-            <Text className="text-body text-label">{document.issue_date ? formatDisplayDate(document.issue_date) : '—'}</Text>
-          </View>
-          <View>
-            <Text className="text-subhead text-secondary text-right">
-              {document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}
-            </Text>
-            <Text className="text-body text-label text-right">
-              {(() => {
-                const date = document.doc_type === 'invoice' ? document.due_date : document.expiry_date;
-                return date ? formatDisplayDate(date) : '—';
-              })()}
-            </Text>
-          </View>
-        </View>
+
         {document.status === 'void' ? (
-          <View className="mt-3 pt-3 border-t border-separator">
-            <Text className="text-subhead text-secondary">
-              Canceled{document.voided_at ? ` on ${formatDisplayDate(document.voided_at)}` : ''}
-            </Text>
-            <Text className="text-body text-label mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
-          </View>
+          <ListSection header="Canceled">
+            <ListRow
+              title={document.void_reason ?? 'No reason given'}
+              subtitle={document.voided_at ? `On ${formatDisplayDate(document.voided_at)}` : undefined}
+            />
+          </ListSection>
         ) : null}
-      </Card>
 
-      {schedule ? (
-        <Pressable
-          onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}
-          accessibilityRole="button"
-          accessibilityLabel={describeSchedule(schedule.frequency, schedule.next_run_date)}
-          accessibilityHint="Edit the repeat schedule"
-        >
-          <Card className="flex-row items-center gap-3">
-            <Icon name="repeat" size={20} color={colors.tint} />
-            <Text className="flex-1 text-body text-label">
-              {describeSchedule(schedule.frequency, schedule.next_run_date)}
-            </Text>
-            <Icon name="chevron.right" size={14} weight="semibold" color={colors.chevron} />
-          </Card>
-        </Pressable>
-      ) : null}
-
-      <Card>
-        <Text className="text-title3 font-semibold text-label mb-2" accessibilityRole="header">
-          Line Items
-        </Text>
-        {lines.length > 0 ? (
-          lines.map((line) => <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />)
-        ) : (
-          <Text className="text-body text-secondary py-2">No line items yet. Tap Edit to add some.</Text>
-        )}
-      </Card>
-
-      <Card className="p-0 overflow-hidden">
-        <View className="p-5 gap-1">
-          <TotalsRow label="Subtotal" valueMinor={document.subtotal_minor} currencyCode={document.currency_code} />
-          {document.discount_amount_minor > 0 ? (
-            <TotalsRow
-              label="Discount"
-              valueMinor={-document.discount_amount_minor}
-              currencyCode={document.currency_code}
+        <ListSection>
+          <ListRow
+            title="Client"
+            value={clientName}
+            onPress={client ? () => router.push(`/clients/${client.id}`) : undefined}
+          />
+          <ListRow title="Issued" value={document.issue_date ? formatDisplayDate(document.issue_date) : 'Not Yet'} />
+          <ListRow
+            title={document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}
+            value={dueDate ? formatDisplayDate(dueDate) : '—'}
+            valueClassName={isOverdue(document) ? 'text-destructive' : undefined}
+          />
+          {schedule ? (
+            <ListRow
+              icon="repeat"
+              title="Repeats"
+              subtitle={describeSchedule(schedule.frequency, schedule.next_run_date)}
+              onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}
+              accessibilityHint="Edit the repeat schedule"
             />
           ) : null}
-          <TotalsRow
-            label={getTaxLabel(lines.map((l) => ({ isTaxable: l.is_taxable === 1, taxName: l.tax_bracket_name_snapshot })))}
-            valueMinor={document.tax_total_minor}
-            currencyCode={document.currency_code}
+        </ListSection>
+
+        <ListSection header="Items">
+          {lines.length > 0 ? (
+            lines.map((line) => (
+              <ListRow
+                key={line.id}
+                title={line.description}
+                subtitle={`${line.quantity}${line.unit_label ? ` ${line.unit_label}` : ''} × ${formatMinor(line.unit_price_minor, document.currency_code)}`}
+                value={formatMinor(line.line_total_minor, document.currency_code)}
+                valueClassName="text-label"
+              />
+            ))
+          ) : (
+            <ListRow title="No items yet" subtitle={canEdit(document) ? 'Tap Edit to add some.' : undefined} />
+          )}
+        </ListSection>
+
+        <ListSection
+          footer={
+            !canEdit(document) && document.status !== 'void'
+              ? `Editing is locked because this ${document.doc_type} has been issued.`
+              : undefined
+          }
+        >
+          <ListRow title="Subtotal" value={formatMinor(document.subtotal_minor, document.currency_code)} />
+          {document.discount_amount_minor > 0 ? (
+            <ListRow title="Discount" value={formatMinor(-document.discount_amount_minor, document.currency_code)} />
+          ) : null}
+          <ListRow
+            title={getTaxLabel(lines.map((l) => ({ isTaxable: l.is_taxable === 1, taxName: l.tax_bracket_name_snapshot })))}
+            value={formatMinor(document.tax_total_minor, document.currency_code)}
           />
           {document.amount_paid_minor > 0 ? (
-            <TotalsRow label="Paid" valueMinor={document.amount_paid_minor} currencyCode={document.currency_code} />
+            <ListRow title="Total" value={formatMinor(document.total_minor, document.currency_code)} />
           ) : null}
-        </View>
-        <View
-          className="flex-row justify-between items-center px-5 py-4 bg-brand-dark"
-          accessible
-          accessibilityLabel={`${document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}: ${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}`}
-        >
-          <Text className="text-white/85 text-body">{document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}</Text>
-          <Text className="text-white text-title3 font-bold">
-            {formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}
-          </Text>
-        </View>
-      </Card>
+          {document.amount_paid_minor > 0 ? (
+            <ListRow title="Paid" value={formatMinor(-document.amount_paid_minor, document.currency_code)} />
+          ) : null}
+          <ListRow title={amountLabel} value={formatMinor(balanceMinor, document.currency_code)} emphasized />
+        </ListSection>
 
-      {!canEdit(document) && document.status !== 'void' ? (
-        <Text className="text-subhead text-secondary text-center">
-          Editing is locked because this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} has been
-          issued.
-        </Text>
-      ) : null}
-
-      {settlements.length > 0 ? (
-        <View>
+        {settlements.length > 0 ? (
           <ListSection header="Payments" footer="Tap a payment to edit or delete it.">
             {settlements.map((s) => (
               <ListRow
                 key={s.id}
+                icon="banknote"
                 title={formatMinor(s.amount_minor, document.currency_code)}
                 subtitle={`${settlementMethodLabel(s.method)} · ${formatDisplayDate(s.settled_date)}`}
                 onPress={() =>
@@ -469,55 +463,40 @@ export default function DocumentDetailScreen() {
               />
             ))}
           </ListSection>
-        </View>
-      ) : null}
+        ) : null}
 
-      <Card>
-        <Text className="text-title3 font-semibold text-label mb-1" accessibilityRole="header">
-          Signatures
-        </Text>
-        {(['merchant', 'client'] as const).map((role) => {
-          const sig = signatures.find((s) => s.signer_role === role);
-          if (sig) {
+        <ListSection header="Signatures">
+          {(['merchant', 'client'] as const).map((role) => {
+            const sig = signatures.find((s) => s.signer_role === role);
+            const who = role === 'merchant' ? 'You' : 'Client';
             return (
-              <View key={role} className="flex-row justify-between items-center gap-3 min-h-[48px]">
-                <Text className="text-body text-label flex-1">
-                  {role === 'merchant' ? 'You' : 'Client'} signed {formatDisplayDate(sig.signed_at)}
-                </Text>
-                <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
-              </View>
-            );
-          }
-          return (
-            <View key={role} className="flex-row justify-between items-center gap-3 min-h-[48px]">
-              <Text className="text-body text-secondary flex-1">
-                {role === 'merchant' ? "You haven't signed" : "Client hasn't signed"}
-              </Text>
-              <Button
-                label={role === 'merchant' ? 'Sign' : 'Get Signature'}
-                variant="tinted"
-                size="small"
-                onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role } })}
+              <ListRow
+                key={role}
+                icon="signature"
+                iconColor={sig ? undefined : colors.secondary}
+                title={who}
+                subtitle={sig ? `Signed ${formatDisplayDate(sig.signed_at)}` : 'Not signed'}
+                trailing={
+                  sig ? (
+                    <Button label="Clear" variant="plain" size="small" onPress={() => handleClearSignature(role)} />
+                  ) : (
+                    <Button
+                      label={role === 'merchant' ? 'Sign' : 'Get Signature'}
+                      variant="tinted"
+                      size="small"
+                      onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role } })}
+                    />
+                  )
+                }
               />
-            </View>
-          );
-        })}
-      </Card>
+            );
+          })}
+        </ListSection>
 
-      <Card>
-        <Text className="text-title3 font-semibold text-label mb-2" accessibilityRole="header">
-          Activity
-        </Text>
-        <ActivityLogList entries={activity} />
-      </Card>
+        <GroupedCard header="Activity">
+          <ActivityLogList entries={activity} />
+        </GroupedCard>
       </ScrollView>
-
-      {primaryAction ? (
-        <View className="p-4 bg-card border-t border-separator gap-1.5">
-          <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
-          <Text className="text-subhead text-secondary text-center">{primaryAction.caption}</Text>
-        </View>
-      ) : null}
 
       {busy ? (
         <View className="absolute inset-0 items-center justify-center bg-card/60">
@@ -527,7 +506,7 @@ export default function DocumentDetailScreen() {
 
       <Modal visible={voidPromptVisible} transparent animationType="fade" onRequestClose={() => setVoidPromptVisible(false)}>
         <View className="flex-1 items-center justify-center bg-black/40 px-6">
-          <View className="bg-card rounded-2xl p-5 w-full gap-3">
+          <View className="bg-card rounded-[26px] p-5 w-full gap-3">
             <Text className="text-title3 font-semibold text-label">
               Cancel This {docTypeLabel(document.doc_type)}?
             </Text>
@@ -582,21 +561,4 @@ function getPrimaryAction(
         caption: `Sends this ${document.doc_type} to the client by email.`,
         onPress: handlers.onEmail,
       };
-}
-
-function TotalsRow({
-  label,
-  valueMinor,
-  currencyCode,
-}: {
-  label: string;
-  valueMinor: number;
-  currencyCode: string;
-}) {
-  return (
-    <View className="flex-row justify-between py-1">
-      <Text className="text-body text-secondary">{label}</Text>
-      <Text className="text-body text-label">{formatMinor(valueMinor, currencyCode)}</Text>
-    </View>
-  );
 }

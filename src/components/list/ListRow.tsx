@@ -24,6 +24,8 @@ interface ListRowProps {
   /** Defaults to a chevron when the row is pressable. */
   accessory?: 'chevron' | 'checkmark' | 'none';
   destructive?: boolean;
+  /** Bold title and value, for a total row. */
+  emphasized?: boolean;
   /** Centered action row, like "Sign Out". */
   centered?: boolean;
   switchValue?: boolean;
@@ -51,6 +53,7 @@ export function ListRow({
   onPress,
   accessory,
   destructive,
+  emphasized,
   centered,
   switchValue,
   onSwitchChange,
@@ -86,11 +89,11 @@ export function ListRow({
           )
         ) : null}
         <View className={`flex-1 ${centered ? 'items-center' : ''}`}>
-          <Text className={`text-body ${titleColor}`}>{title}</Text>
+          <Text className={`text-body ${titleColor} ${emphasized ? 'font-semibold' : ''}`}>{title}</Text>
           {subtitle ? <Text className="text-subhead text-secondary mt-0.5">{subtitle}</Text> : null}
         </View>
         {value ? (
-          <Text className={`text-body max-w-[55%] text-right ${valueClassName ?? 'text-secondary'}`} numberOfLines={1}>
+          <Text className={`text-body max-w-[55%] text-right ${valueClassName ?? (emphasized ? 'text-label font-semibold' : 'text-secondary')}`} numberOfLines={1}>
             {value}
           </Text>
         ) : null}

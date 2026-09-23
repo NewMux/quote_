@@ -3,15 +3,14 @@ import { Alert, FlatList, Platform, Pressable, RefreshControl, Text, View } from
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import Swipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { Avatar } from '../../../src/components/Avatar';
-import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { HeaderButton } from '../../../src/components/HeaderButton';
-import { StatStrip } from '../../../src/components/StatStrip';
+import { Icon } from '../../../src/components/Icon';
+import { GroupedRow } from '../../../src/components/list/GroupedRow';
 import { StatusBadge } from '../../../src/components/StatusBadge';
 import { SwipeAction } from '../../../src/components/SwipeAction';
 import { convertEstimateToInvoice, deleteDocument } from '../../../src/db/repositories/documents.repo';
-import { docTypeLabel } from '../../../src/lib/format';
+import { docTypeLabel, formatShortDate } from '../../../src/lib/format';
 import {
   filterButtonItem,
   newDocumentMenuItem,
@@ -22,10 +21,9 @@ import { generateDocumentPdf } from '../../../src/lib/pdf/generatePdf';
 import { sharePdf } from '../../../src/lib/share';
 import { formatMinor } from '../../../src/lib/money';
 import { canConvertToInvoice, canDelete, canLogSettlement, getDisplayStatus, statusLabel } from '../../../src/lib/statusMachine';
-import { BRAND, SWIPE_COLORS } from '../../../src/lib/theme';
+import { SWIPE_COLORS } from '../../../src/lib/theme';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
-import { useReportsStore } from '../../../src/stores/useReportsStore';
 import type { DocType, DocumentListItem } from '../../../src/types/models';
 
 const TYPE_FILTERS: { label: string; value: DocType | undefined }[] = [
@@ -41,7 +39,6 @@ function openFilters() {
 export default function DocumentsScreen() {
   const navigation = useNavigation();
   const { documents, filter, setFilter, load } = useDocumentsStore();
-  const { breakdown, load: loadReports } = useReportsStore();
   const profile = useBusinessProfileStore((s) => s.profile);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const hasActiveFilter = !!(filter.status || filter.clientId || filter.dateFrom || filter.dateTo);
@@ -83,14 +80,13 @@ export default function DocumentsScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
-      loadReports();
-    }, [load, loadReports])
+    }, [load])
   );
 
   async function handleRefresh() {
     setIsRefreshing(true);
     try {
-      await Promise.all([load(), loadReports()]);
+      await load();
     } finally {
       setIsRefreshing(false);
     }
@@ -120,7 +116,6 @@ export default function DocumentsScreen() {
             try {
               await deleteDocument(item.id);
               load();
-              loadReports();
             } catch (err) {
               Alert.alert('Couldn’t Delete', err instanceof Error ? err.message : 'Something went wrong.');
             }
@@ -136,7 +131,6 @@ export default function DocumentsScreen() {
     try {
       const invoice = await convertEstimateToInvoice(item.id, profile);
       load();
-      loadReports();
       router.push(`/documents/${invoice.id}`);
     } catch (err) {
       Alert.alert('Couldn’t Convert', err instanceof Error ? err.message : 'Something went wrong.');
@@ -159,39 +153,30 @@ export default function DocumentsScreen() {
       keyboardDismissMode="on-drag"
       data={documents}
       keyExtractor={(item) => item.id}
-      contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, flexGrow: 1 }}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       ListHeaderComponent={
-        <View className="gap-4 mb-2">
-          <StatStrip
-            items={[
-              { label: 'Paid', value: String(breakdown.paidCount) },
-              { label: 'Unpaid', value: String(breakdown.unpaidCount) },
-              { label: 'Overdue', value: String(breakdown.overdueCount) },
-              { label: 'Draft', value: String(breakdown.draftCount) },
-            ]}
-          />
-
+        <View className="gap-2 mb-4">
           <SegmentedControl
             values={TYPE_FILTERS.map((f) => f.label)}
             selectedIndex={activeTypeIndex}
-            tintColor={BRAND.default}
-            activeFontStyle={{ color: '#FFFFFF' }}
             onChange={(e) =>
               setFilter({ ...filter, docType: TYPE_FILTERS[e.nativeEvent.selectedSegmentIndex].value })
             }
           />
 
           {hasActiveFilter ? (
-            <View className="flex-row items-center justify-between">
-              <Text className="text-subhead text-secondary">Filters are on</Text>
+            <View className="flex-row items-center justify-between px-1">
+              <Text className="text-footnote text-secondary">
+                {documents.length} {documents.length === 1 ? 'result' : 'results'} · Filtered
+              </Text>
               <Pressable
                 onPress={clearFilters}
                 accessibilityRole="button"
                 hitSlop={8}
                 className="min-h-[44px] justify-center"
               >
-                <Text className="text-body text-tint font-medium">Clear Filters</Text>
+                <Text className="text-subhead text-tint">Clear Filters</Text>
               </Pressable>
             </View>
           ) : null}
@@ -203,17 +188,18 @@ export default function DocumentsScreen() {
         ) : (
           <EmptyState
             icon="doc.text"
-            title="No Documents Yet"
-            subtitle="Create your first estimate or invoice to get started."
+            title="No Documents"
+            subtitle="Estimates and invoices you create appear here."
             actionLabel="New Invoice"
             onAction={() => startNewDocument('invoice')}
           />
         )
       }
-      renderItem={({ item }) => {
+      renderItem={({ item, index }) => {
         const status = statusLabel(getDisplayStatus(item));
         const client = item.client_name ?? 'No Client';
         const total = formatMinor(item.total_minor, item.currency_code);
+        const date = formatShortDate(item.issue_date ?? item.created_at);
         const actions = [
           { name: 'share', label: 'Share PDF', run: () => handleShare(item) },
           ...(canConvertToInvoice(item) ? [{ name: 'convert', label: 'Convert to Invoice', run: () => handleConvert(item) }] : []),
@@ -221,74 +207,83 @@ export default function DocumentsScreen() {
           ...(canDelete(item) ? [{ name: 'delete', label: 'Delete', run: () => handleDelete(item) }] : []),
         ];
         return (
-          <Swipeable
-            containerStyle={{ borderRadius: 24, overflow: 'hidden' }}
-            renderRightActions={(_progress, _translation, swipeable) => (
-              <View className="flex-row">
-                <SwipeAction
-                  label="Share"
-                  icon="square.and.arrow.up"
-                  color={SWIPE_COLORS.share}
-                  onPress={() => handleShare(item, swipeable)}
-                />
-                {canConvertToInvoice(item) ? (
+          <GroupedRow index={index} count={documents.length}>
+            <Swipeable
+              renderRightActions={(_progress, _translation, swipeable) => (
+                <View className="flex-row">
                   <SwipeAction
-                    label="Convert"
-                    icon="arrow.left.arrow.right"
-                    color={SWIPE_COLORS.convert}
-                    onPress={() => handleConvert(item, swipeable)}
+                    label="Share"
+                    icon="square.and.arrow.up"
+                    color={SWIPE_COLORS.share}
+                    onPress={() => handleShare(item, swipeable)}
                   />
-                ) : null}
-                {canLogSettlement(item) ? (
-                  <SwipeAction
-                    label="Payment"
-                    icon="banknote"
-                    color={SWIPE_COLORS.payment}
-                    onPress={() => handleLogPayment(item, swipeable)}
-                  />
-                ) : null}
-                {canDelete(item) ? (
-                  <SwipeAction
-                    label="Delete"
-                    icon="trash"
-                    color={SWIPE_COLORS.delete}
-                    onPress={() => handleDelete(item, swipeable)}
-                  />
-                ) : null}
-              </View>
-            )}
-          >
-            <Pressable
-              onPress={() => router.push(`/documents/${item.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={`${docTypeLabel(item.doc_type)} ${item.doc_number}, ${client}, ${status}, ${total}`}
-              accessibilityActions={actions.map((a) => ({ name: a.name, label: a.label }))}
-              onAccessibilityAction={(e) => actions.find((a) => a.name === e.nativeEvent.actionName)?.run()}
-            >
-              {({ pressed }) => (
-                <Card className={`p-4 ${pressed ? 'opacity-70' : ''}`}>
-                  <View className="flex-row items-center gap-3">
-                    <Avatar name={client} seed={item.client_id ?? item.id} size={40} />
-                    <View className="flex-1">
-                      <Text className="text-body font-semibold text-label" numberOfLines={1}>
-                        {item.doc_number}
-                      </Text>
-                      <Text className="text-subhead text-secondary" numberOfLines={1}>
-                        {client}
-                      </Text>
-                    </View>
-                    <StatusBadge document={item} />
-                  </View>
-                  <View className="flex-row justify-between items-center mt-3 pt-3 border-t border-separator">
-                    <Text className="text-subhead text-secondary">{docTypeLabel(item.doc_type)}</Text>
-                    <Text className="text-body font-semibold text-label" numberOfLines={1}>
-                      {total}
-                    </Text>
-                  </View>
-                </Card>
+                  {canConvertToInvoice(item) ? (
+                    <SwipeAction
+                      label="Convert"
+                      icon="arrow.left.arrow.right"
+                      color={SWIPE_COLORS.convert}
+                      onPress={() => handleConvert(item, swipeable)}
+                    />
+                  ) : null}
+                  {canLogSettlement(item) ? (
+                    <SwipeAction
+                      label="Payment"
+                      icon="banknote"
+                      color={SWIPE_COLORS.payment}
+                      onPress={() => handleLogPayment(item, swipeable)}
+                    />
+                  ) : null}
+                  {canDelete(item) ? (
+                    <SwipeAction
+                      label="Delete"
+                      icon="trash"
+                      color={SWIPE_COLORS.delete}
+                      onPress={() => handleDelete(item, swipeable)}
+                    />
+                  ) : null}
+                </View>
               )}
-            </Pressable>
-          </Swipeable>
+            >
+              <Pressable
+                onPress={() => router.push(`/documents/${item.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${docTypeLabel(item.doc_type)} ${item.doc_number}, ${client}, ${status}, ${total}`}
+                accessibilityActions={actions.map((a) => ({ name: a.name, label: a.label }))}
+                onAccessibilityAction={(e) => actions.find((a) => a.name === e.nativeEvent.actionName)?.run()}
+              >
+                {({ pressed }) => (
+                  <View className={pressed ? 'bg-fill' : 'bg-card'}>
+                    {index > 0 ? <View style={{ marginLeft: 64, height: 0.5 }} className="bg-separator" /> : null}
+                    <View className="flex-row items-center gap-3 px-4 py-3">
+                      <View
+                        className="w-9 h-9 rounded-[10px] bg-secondaryfill items-center justify-center"
+                        style={{ borderCurve: 'continuous' }}
+                      >
+                        <Icon name={item.doc_type === 'invoice' ? 'doc.text.fill' : 'doc.plaintext.fill'} size={18} />
+                      </View>
+                      <View className="flex-1 gap-0.5">
+                        <View className="flex-row items-baseline gap-2">
+                          <Text className="flex-1 text-body font-semibold text-label" numberOfLines={1}>
+                            {client}
+                          </Text>
+                          <Text className="text-body text-label" numberOfLines={1}>
+                            {total}
+                          </Text>
+                        </View>
+                        <View className="flex-row items-center gap-2">
+                          <Text className="flex-1 text-subhead text-secondary" numberOfLines={1}>
+                            {item.doc_number}
+                            {` · ${date}`}
+                          </Text>
+                          <StatusBadge document={item} variant="inline" />
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </Pressable>
+            </Swipeable>
+          </GroupedRow>
         );
       }}
     />

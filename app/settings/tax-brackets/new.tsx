@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { Alert, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { FormField } from '../../../src/components/form/FormField';
+import { FormRow } from '../../../src/components/form/FormRow';
+import { ListSection } from '../../../src/components/list/ListSection';
 import { FormScrollView } from '../../../src/components/form/FormScrollView';
 import { SheetHeader } from '../../../src/components/SheetHeader';
 import { parseRateBp } from '../../../src/lib/money';
@@ -33,25 +34,27 @@ export default function NewTaxBracketScreen() {
     <View className="flex-1 bg-grouped">
       <SheetHeader title="New Tax Rate" actionLabel="Add" onAction={handleAdd} actionDisabled={!canAdd} />
       <FormScrollView>
-        <FormField
-          label="Name"
-          placeholder="e.g. Sales Tax"
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words"
-          returnKeyType="next"
-          onSubmitEditing={() => rateRef.current?.focus()}
-          submitBehavior="submit"
-          maxLength={50}
-        />
-        <FormField
-          ref={rateRef}
-          label="Rate (%)"
-          placeholder="e.g. 8.25"
-          keyboardType="decimal-pad"
-          value={rate}
-          onChangeText={setRate}
-        />
+        <ListSection footer="Use the name your customers know, such as Sales Tax or VAT; it prints on documents.">
+          <FormRow
+            label="Name"
+            placeholder="e.g. Sales Tax"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+            returnKeyType="next"
+            onSubmitEditing={() => rateRef.current?.focus()}
+            submitBehavior="submit"
+            maxLength={50}
+          />
+          <FormRow
+            ref={rateRef}
+            label="Rate (%)"
+            placeholder="e.g. 8.25"
+            keyboardType="decimal-pad"
+            value={rate}
+            onChangeText={setRate}
+          />
+        </ListSection>
       </FormScrollView>
     </View>
   );

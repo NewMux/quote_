@@ -24,6 +24,12 @@ export function formatDisplayDate(isoDateOrTimestamp: string): string {
   return format(parseISO(isoDateOrTimestamp), 'MMM d, yyyy');
 }
 
+/** A compact date for list rows: "Sep 1" this year, "Sep 1, 2025" otherwise. */
+export function formatShortDate(isoDateOrTimestamp: string, now: Date = new Date()): string {
+  const date = parseISO(isoDateOrTimestamp);
+  return format(date, date.getFullYear() === now.getFullYear() ? 'MMM d' : 'MMM d, yyyy');
+}
+
 /** Converts a picked Date to the stored YYYY-MM-DD form using the device's local calendar day.
  * (toISOString() would convert to UTC first and save the previous day east of UTC.) */
 export function toStoredDate(date: Date): string {

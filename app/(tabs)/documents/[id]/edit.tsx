@@ -1,17 +1,15 @@
 import { useEffect } from 'react';
-import { ActivityIndicator, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
-import { Button } from '../../../../src/components/Button';
 import { DateField } from '../../../../src/components/DateField';
-import { FormField } from '../../../../src/components/form/FormField';
+import { FormRow } from '../../../../src/components/form/FormRow';
 import { FormScrollView } from '../../../../src/components/form/FormScrollView';
 import { ListRow } from '../../../../src/components/list/ListRow';
 import { ListSection } from '../../../../src/components/list/ListSection';
 import { LineItemEditor } from '../../../../src/components/LineItemEditor';
 import { computeDocumentTotals, getTaxLabel } from '../../../../src/lib/documentCalculations';
 import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../../src/lib/money';
-import { BRAND } from '../../../../src/lib/theme';
 import { useSaveHeader } from '../../../../src/lib/useSaveHeader';
 import { useDocumentEditorStore } from '../../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
@@ -66,48 +64,44 @@ export default function EditDocumentScreen() {
 
   return (
     <FormScrollView>
-      <Text className="text-subhead text-secondary text-center">Changes save automatically.</Text>
+      <ListSection header="Client" footer="Changes save automatically.">
+        <ListRow
+          icon="person.crop.circle.fill"
+          title={editor.clientNameSnapshot ?? 'Choose Client'}
+          onPress={() => router.push('/modals/client-picker')}
+          accessibilityHint="Opens your client list"
+        />
+      </ListSection>
 
-      <View>
-        <ListSection header="Client">
-          <ListRow
-            title={editor.clientNameSnapshot ?? 'Choose Client'}
-            onPress={() => router.push('/modals/client-picker')}
-            accessibilityHint="Opens your client list"
-          />
-        </ListSection>
-      </View>
-
-      <View className="gap-3">
+      <ListSection header="Dates">
         <DateField label="Issue Date" value={editor.issueDate} onChange={editor.setIssueDate} />
         {editor.docType === 'invoice' ? (
           <DateField label="Due Date" value={editor.dueDate} onChange={editor.setDueDate} />
         ) : (
           <DateField label="Valid Until" value={editor.expiryDate} onChange={editor.setExpiryDate} />
         )}
-      </View>
+      </ListSection>
 
-      <View>
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-title3 font-semibold text-label" accessibilityRole="header">
-            Line Items
-          </Text>
-          <Button label="Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
-        </View>
-        {editor.lines.length === 0 ? (
-          <Text className="text-body text-secondary py-4 text-center">No line items yet.</Text>
-        ) : null}
-        {editor.lines.map((line) => (
-          <LineItemEditor
-            key={line.id}
-            line={line}
-            taxBrackets={taxBrackets}
-            currencyCode={editor.currencyCode}
-            onChange={(patch) => editor.updateLineItem(line.id, patch)}
-            onRemove={() => editor.removeLineItem(line.id)}
-          />
-        ))}
-      </View>
+      {editor.lines.map((line, index) => (
+        <LineItemEditor
+          key={line.id}
+          line={line}
+          position={index + 1}
+          taxBrackets={taxBrackets}
+          currencyCode={editor.currencyCode}
+          onChange={(patch) => editor.updateLineItem(line.id, patch)}
+          onRemove={() => editor.removeLineItem(line.id)}
+        />
+      ))}
+
+      <ListSection footer={editor.lines.length === 0 ? 'Add what you’re billing for from your item catalog or as a one-off.' : undefined}>
+        <ListRow
+          icon="plus.circle.fill"
+          title="Add Item"
+          onPress={() => router.push('/modals/item-picker')}
+          accessory="none"
+        />
+      </ListSection>
 
       <DocumentDiscountEditor
         discountType={editor.discountType}
@@ -116,52 +110,29 @@ export default function EditDocumentScreen() {
         onChange={editor.setDocumentDiscount}
       />
 
-      <View className="bg-card rounded-2xl p-4">
-        <TotalsRow label="Subtotal" valueMinor={totals.subtotalMinor} currencyCode={editor.currencyCode} />
+      <ListSection header="Summary">
+        <ListRow title="Subtotal" value={formatMinor(totals.subtotalMinor, editor.currencyCode)} />
         {totals.discountAmountMinor > 0 ? (
-          <TotalsRow label="Discount" valueMinor={-totals.discountAmountMinor} currencyCode={editor.currencyCode} />
+          <ListRow title="Discount" value={formatMinor(-totals.discountAmountMinor, editor.currencyCode)} />
         ) : null}
-        <TotalsRow
-          label={getTaxLabel(editor.lines.map((l) => ({ isTaxable: l.isTaxable, taxName: l.taxBracketNameSnapshot })))}
-          valueMinor={totals.taxTotalMinor}
-          currencyCode={editor.currencyCode}
+        <ListRow
+          title={getTaxLabel(editor.lines.map((l) => ({ isTaxable: l.isTaxable, taxName: l.taxBracketNameSnapshot })))}
+          value={formatMinor(totals.taxTotalMinor, editor.currencyCode)}
         />
-        <View className="border-t border-separator mt-2 pt-2">
-          <TotalsRow label="Total" valueMinor={totals.totalMinor} currencyCode={editor.currencyCode} bold />
-        </View>
-      </View>
+        <ListRow title="Total" value={formatMinor(totals.totalMinor, editor.currencyCode)} emphasized />
+      </ListSection>
 
-      <FormField label="Notes" hint="Optional. Shown on the document." value={editor.notes} onChangeText={editor.setNotes} multiline />
-
-      <FormField
-        label="Terms for This Document"
-        hint="Optional. Leave blank to use the default terms from Business Profile."
-        value={editor.termsOverride}
-        onChangeText={editor.setTermsOverride}
-        multiline
-      />
+      <ListSection footer="Terms: leave blank to use the default terms from your Business Profile.">
+        <FormRow label="Notes" value={editor.notes} onChangeText={editor.setNotes} placeholder="Shown on the document" multiline />
+        <FormRow
+          label="Terms"
+          value={editor.termsOverride}
+          onChangeText={editor.setTermsOverride}
+          placeholder="Default terms"
+          multiline
+        />
+      </ListSection>
     </FormScrollView>
-  );
-}
-
-function TotalsRow({
-  label,
-  valueMinor,
-  currencyCode,
-  bold,
-}: {
-  label: string;
-  valueMinor: number;
-  currencyCode: string;
-  bold?: boolean;
-}) {
-  return (
-    <View className="flex-row justify-between py-1">
-      <Text className={bold ? 'text-body font-semibold text-label' : 'text-subhead text-secondary'}>{label}</Text>
-      <Text className={bold ? 'text-body font-semibold text-label' : 'text-subhead text-label'}>
-        {formatMinor(valueMinor, currencyCode)}
-      </Text>
-    </View>
   );
 }
 
@@ -178,44 +149,40 @@ function DocumentDiscountEditor({
 }) {
   const enabled = discountType !== null;
   return (
-    <View className="bg-card rounded-2xl p-4 gap-3">
-      <View className="flex-row justify-between items-center min-h-[44px]">
-        <Text className="text-body text-label">Discount</Text>
-        <Switch
-          value={enabled}
-          accessibilityLabel="Discount"
-          trackColor={{ true: BRAND.default }}
-          onValueChange={(value) => onChange(value ? 'fixed' : null, value ? 0 : null)}
-        />
-      </View>
+    <ListSection>
+      <ListRow
+        title="Discount"
+        switchValue={enabled}
+        onSwitchChange={(value) => onChange(value ? 'fixed' : null, value ? 0 : null)}
+      />
       {enabled ? (
-        <View className="gap-3">
+        <View className="px-4 py-2.5">
           <SegmentedControl
             values={['Percent', `Amount (${getCurrencySymbol(currencyCode)})`]}
             selectedIndex={discountType === 'percent' ? 0 : 1}
-            tintColor={BRAND.default}
-            activeFontStyle={{ color: '#FFFFFF' }}
             onChange={(e) => onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', 0)}
-          />
-          <FormField
-            label={discountType === 'percent' ? 'Discount (%)' : 'Discount Amount'}
-            prefix={discountType === 'percent' ? undefined : getCurrencySymbol(currencyCode)}
-            keyboardType="decimal-pad"
-            value={
-              discountType === 'percent'
-                ? String((discountValue ?? 0) / 100)
-                : minorToDecimalString(discountValue ?? 0, currencyCode)
-            }
-            onChangeText={(text) => {
-              const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-              const minorOrBp =
-                discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
-              onChange(discountType, minorOrBp);
-            }}
           />
         </View>
       ) : null}
-    </View>
+      {enabled ? (
+        <FormRow
+          label={discountType === 'percent' ? 'Percent' : 'Amount'}
+          prefix={discountType === 'percent' ? undefined : getCurrencySymbol(currencyCode)}
+          keyboardType="decimal-pad"
+          placeholder="0"
+          value={
+            discountType === 'percent'
+              ? String((discountValue ?? 0) / 100)
+              : minorToDecimalString(discountValue ?? 0, currencyCode)
+          }
+          onChangeText={(text) => {
+            const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
+            const minorOrBp =
+              discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
+            onChange(discountType, minorOrBp);
+          }}
+        />
+      ) : null}
+    </ListSection>
   );
 }
-

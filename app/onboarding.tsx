@@ -3,21 +3,31 @@ import { Alert, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../src/components/Button';
-import { FormField } from '../src/components/form/FormField';
+import { FormRow } from '../src/components/form/FormRow';
+import { Icon } from '../src/components/Icon';
 import { ListRow } from '../src/components/list/ListRow';
 import { ListSection } from '../src/components/list/ListSection';
 import { getCurrencyName } from '../src/lib/currencies';
 import { parseRateBp } from '../src/lib/money';
+import type { SymbolName } from '../src/lib/symbols';
+import { useSystemColors } from '../src/lib/theme';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../src/stores/useTaxBracketsStore';
 
 const TOTAL_STEPS = 4;
+
+const WELCOME_FEATURES: { icon: SymbolName; title: string; detail: string }[] = [
+  { icon: 'doc.text.fill', title: 'Estimates and Invoices', detail: 'Professional PDFs with your logo, ready to send.' },
+  { icon: 'signature', title: 'Signatures', detail: 'Sign and collect your client’s signature on the spot.' },
+  { icon: 'banknote.fill', title: 'Get Paid', detail: 'Track payments and see what’s overdue at a glance.' },
+];
 
 export default function OnboardingScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
   const updateProfile = useBusinessProfileStore((s) => s.update);
   const createTaxRate = useTaxBracketsStore((s) => s.create);
   const setDefaultTaxRate = useTaxBracketsStore((s) => s.setDefault);
+  const system = useSystemColors();
 
   const [step, setStep] = useState(0);
   const [businessName, setBusinessName] = useState('');
@@ -86,33 +96,50 @@ export default function OnboardingScreen() {
 
           <View className="flex-1 justify-center gap-6">
             {step === 0 ? (
-              <View className="gap-3">
-                <Text className="text-title1 font-bold text-label text-center" accessibilityRole="header">
-                  Welcome to Invoice Them
-                </Text>
-                <Text className="text-body text-secondary text-center">
-                  Let&apos;s set up your business. It takes about a minute.
-                </Text>
+              <View className="gap-8">
+                <View className="items-center gap-3">
+                  <View
+                    className="w-20 h-20 rounded-[22px] bg-brand items-center justify-center mb-1"
+                    style={{ borderCurve: 'continuous' }}
+                  >
+                    <Icon name="doc.text.fill" size={40} color="#FFFFFF" />
+                  </View>
+                  <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
+                    Welcome to Invoice Them
+                  </Text>
+                </View>
+                {/* Apple's welcome-screen pattern: three tinted symbols, each with a one-line promise. */}
+                <View className="gap-5 px-2">
+                  {WELCOME_FEATURES.map((feature) => (
+                    <View key={feature.title} className="flex-row items-center gap-4">
+                      <Icon name={feature.icon} size={30} />
+                      <View className="flex-1">
+                        <Text className="text-headline font-semibold text-label">{feature.title}</Text>
+                        <Text className="text-subhead text-secondary">{feature.detail}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
               </View>
             ) : null}
 
             {step === 1 ? (
               <View className="gap-5">
-                <Text className="text-title1 font-bold text-label" accessibilityRole="header">
+                <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
                   Your Business
                 </Text>
-                <FormField
-                  label="Business Name"
-                  value={businessName}
-                  onChangeText={setBusinessName}
-                  placeholder="e.g. Sam's Plumbing"
-                  textContentType="organizationName"
-                  autoCapitalize="words"
-                  maxLength={100}
-                  returnKeyType="done"
-                  autoFocus
-                />
-                <ListSection footer="Used for new documents. You can change it later in Settings.">
+                <ListSection footer="Your business name appears on every document. The currency is used for new documents; you can change both later in Settings.">
+                  <FormRow
+                    label="Name"
+                    value={businessName}
+                    onChangeText={setBusinessName}
+                    placeholder="e.g. Sam's Plumbing"
+                    textContentType="organizationName"
+                    autoCapitalize="words"
+                    maxLength={100}
+                    returnKeyType="done"
+                    autoFocus
+                  />
                   <ListRow
                     title="Currency"
                     value={`${getCurrencyName(currencyCode)} (${currencyCode})`}
@@ -124,7 +151,7 @@ export default function OnboardingScreen() {
 
             {step === 2 ? (
               <View className="gap-5">
-                <Text className="text-title1 font-bold text-label" accessibilityRole="header">
+                <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
                   Sales Tax
                 </Text>
                 <Text className="text-body text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
@@ -134,27 +161,24 @@ export default function OnboardingScreen() {
                   <ListRow title="I Charge Sales Tax or VAT" switchValue={chargesTax} onSwitchChange={setChargesTax} />
                 </ListSection>
                 {chargesTax ? (
-                  <View className="flex-row gap-3">
-                    <View style={{ flex: 2 }}>
-                      <FormField label="Name" placeholder="e.g. Sales Tax" value={taxName} onChangeText={setTaxName} />
-                    </View>
-                    <View className="flex-1">
-                      <FormField
-                        label="Rate (%)"
-                        placeholder="8.25"
-                        keyboardType="decimal-pad"
-                        value={taxRate}
-                        onChangeText={setTaxRate}
-                      />
-                    </View>
-                  </View>
+                  <ListSection>
+                    <FormRow label="Name" placeholder="e.g. Sales Tax" value={taxName} onChangeText={setTaxName} />
+                    <FormRow
+                      label="Rate (%)"
+                      placeholder="8.25"
+                      keyboardType="decimal-pad"
+                      value={taxRate}
+                      onChangeText={setTaxRate}
+                    />
+                  </ListSection>
                 ) : null}
               </View>
             ) : null}
 
             {step === 3 ? (
-              <View className="gap-3">
-                <Text className="text-title1 font-bold text-label text-center" accessibilityRole="header">
+              <View className="gap-3 items-center">
+                <Icon name="checkmark.circle.fill" size={72} color={system.green} />
+                <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
                   You&apos;re All Set
                 </Text>
                 <Text className="text-body text-secondary text-center">

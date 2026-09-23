@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, FlatList, Platform, Pressable, RefreshControl, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, RefreshControl, SectionList, Text, View } from 'react-native';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import Swipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { Avatar } from '../../../src/components/Avatar';
-import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { HeaderButton } from '../../../src/components/HeaderButton';
+import { GroupedRow } from '../../../src/components/list/GroupedRow';
 import { SwipeAction } from '../../../src/components/SwipeAction';
+import { groupByInitial } from '../../../src/lib/alphabetSections';
 import { addButtonItem, filterButtonItem } from '../../../src/lib/headerItems';
 import { SWIPE_COLORS } from '../../../src/lib/theme';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
@@ -101,90 +102,105 @@ export default function ClientsScreen() {
   }
 
   const isNarrowed = hasActiveFilter || !!search.trim();
+  // Contacts-style letter sections when sorted by name; one unlabeled group for "Recently Added".
+  const sections =
+    sortBy === 'name'
+      ? groupByInitial(clients, (c) => c.display_name)
+      : clients.length > 0
+        ? [{ title: '', data: clients }]
+        : [];
 
   return (
-    <FlatList
+    <SectionList
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
       keyboardDismissMode="on-drag"
-      data={clients}
+      sections={sections}
       keyExtractor={(item) => item.id}
-      contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
+      stickySectionHeadersEnabled={false}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, flexGrow: 1 }}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+      renderSectionHeader={({ section }) =>
+        section.title ? (
+          <Text className="text-footnote font-semibold text-secondary px-4 pt-4 pb-2" accessibilityRole="header">
+            {section.title}
+          </Text>
+        ) : null
+      }
       ListEmptyComponent={
         isNarrowed ? (
           <EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a different search or filter." />
         ) : (
           <EmptyState
             icon="person.2"
-            title="No Clients Yet"
+            title="No Clients"
             subtitle="Add the people and businesses you bill."
             actionLabel="Add Client"
             onAction={addClient}
           />
         )
       }
-      renderItem={({ item }) => {
+      renderItem={({ item, index, section }) => {
         const actions = [
           { name: 'edit', label: 'Edit', run: () => handleEdit(item) },
           { name: 'archive', label: 'Archive', run: () => handleArchive(item) },
           { name: 'delete', label: 'Delete', run: () => handleDelete(item) },
         ];
+        const detail = item.email ?? item.phone ?? item.contact_name;
         return (
-          <Swipeable
-            containerStyle={{ borderRadius: 24, overflow: 'hidden' }}
-            renderRightActions={(_progress, _translation, swipeable) => (
-              <View className="flex-row">
-                <SwipeAction
-                  label="Edit"
-                  icon="pencil"
-                  color={SWIPE_COLORS.edit}
-                  onPress={() => handleEdit(item, swipeable)}
-                />
-                <SwipeAction
-                  label="Archive"
-                  icon="archivebox"
-                  color={SWIPE_COLORS.archive}
-                  onPress={() => handleArchive(item, swipeable)}
-                />
-                <SwipeAction
-                  label="Delete"
-                  icon="trash"
-                  color={SWIPE_COLORS.delete}
-                  onPress={() => handleDelete(item, swipeable)}
-                />
-              </View>
-            )}
-          >
-            <Pressable
-              onPress={() => router.push(`/clients/${item.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={[item.display_name, item.email, item.phone].filter(Boolean).join(', ')}
-              accessibilityActions={actions.map((a) => ({ name: a.name, label: a.label }))}
-              onAccessibilityAction={(e) => actions.find((a) => a.name === e.nativeEvent.actionName)?.run()}
-            >
-              {({ pressed }) => (
-                <Card className={`p-4 flex-row items-center gap-3 ${pressed ? 'opacity-70' : ''}`}>
-                  <Avatar name={item.display_name} photoUri={item.photo_uri} seed={item.id} size={44} />
-                  <View className="flex-1">
-                    <Text className="text-body font-semibold text-label" numberOfLines={1}>
-                      {item.display_name}
-                    </Text>
-                    {item.email ? (
-                      <Text className="text-subhead text-secondary" numberOfLines={1}>
-                        {item.email}
-                      </Text>
-                    ) : null}
-                    {item.phone ? (
-                      <Text className="text-subhead text-secondary" numberOfLines={1}>
-                        {item.phone}
-                      </Text>
-                    ) : null}
-                  </View>
-                </Card>
+          <GroupedRow index={index} count={section.data.length}>
+            <Swipeable
+              renderRightActions={(_progress, _translation, swipeable) => (
+                <View className="flex-row">
+                  <SwipeAction
+                    label="Edit"
+                    icon="pencil"
+                    color={SWIPE_COLORS.edit}
+                    onPress={() => handleEdit(item, swipeable)}
+                  />
+                  <SwipeAction
+                    label="Archive"
+                    icon="archivebox"
+                    color={SWIPE_COLORS.archive}
+                    onPress={() => handleArchive(item, swipeable)}
+                  />
+                  <SwipeAction
+                    label="Delete"
+                    icon="trash"
+                    color={SWIPE_COLORS.delete}
+                    onPress={() => handleDelete(item, swipeable)}
+                  />
+                </View>
               )}
-            </Pressable>
-          </Swipeable>
+            >
+              <Pressable
+                onPress={() => router.push(`/clients/${item.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={[item.display_name, detail].filter(Boolean).join(', ')}
+                accessibilityActions={actions.map((a) => ({ name: a.name, label: a.label }))}
+                onAccessibilityAction={(e) => actions.find((a) => a.name === e.nativeEvent.actionName)?.run()}
+              >
+                {({ pressed }) => (
+                  <View className={pressed ? 'bg-fill' : 'bg-card'}>
+                    {index > 0 ? <View style={{ marginLeft: 64, height: 0.5 }} className="bg-separator" /> : null}
+                    <View className="flex-row items-center gap-3 px-4 py-2.5 min-h-[56px]">
+                      <Avatar name={item.display_name} photoUri={item.photo_uri} seed={item.id} size={36} />
+                      <View className="flex-1">
+                        <Text className="text-body text-label" numberOfLines={1}>
+                          {item.display_name}
+                        </Text>
+                        {detail ? (
+                          <Text className="text-subhead text-secondary" numberOfLines={1}>
+                            {detail}
+                          </Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </Pressable>
+            </Swipeable>
+          </GroupedRow>
         );
       }}
     />

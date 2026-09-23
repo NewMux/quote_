@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, ScrollView } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { Avatar } from '../../../src/components/Avatar';
+import { Icon } from '../../../src/components/Icon';
 import { ListRow } from '../../../src/components/list/ListRow';
-import { ListSection } from '../../../src/components/list/ListSection';
+import { GROUPED_RADIUS, ListSection } from '../../../src/components/list/ListSection';
 import { exportBackup } from '../../../src/lib/backup';
 import { disableReminders, enableReminders, isRemindersEnabled } from '../../../src/lib/notifications';
+import { useThemeColors } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
 /** iOS Settings-style icon backgrounds (white glyphs on system colors). */
 const ICON_COLORS = {
-  account: '#8E8E93',
   subscription: '#FF9500',
-  business: '#007AFF',
   catalog: '#34C759',
   tax: '#5856D6',
   numbers: '#FF2D55',
@@ -26,6 +27,8 @@ export default function SettingsScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
   const signOut = useAuthStore((s) => s.signOut);
   const email = useAuthStore((s) => s.session?.user.email);
+  const colors = useThemeColors();
+  const businessName = profile?.business_name?.trim() || 'Your Business';
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [isTogglingReminders, setIsTogglingReminders] = useState(false);
 
@@ -89,26 +92,44 @@ export default function SettingsScreen() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ padding: 16, paddingTop: 8 }}
     >
-      <ListSection header="Account">
-        {email ? (
-          <ListRow icon="person.fill" iconBackground={ICON_COLORS.account} title={email} subtitle="Signed In" />
-        ) : null}
+      {/* Apple Account-style header: the business this app is set up for, and who's signed in. */}
+      <View className="mb-8">
+        <Pressable
+          onPress={() => router.push('/settings/business-profile')}
+          accessibilityRole="button"
+          accessibilityLabel={`${businessName}, ${email ?? 'Business Profile'}`}
+          accessibilityHint="Edit your business profile"
+        >
+          {({ pressed }) => (
+            <View
+              className={`flex-row items-center gap-4 px-4 py-3 ${pressed ? 'bg-fill' : 'bg-card'}`}
+              style={{ borderRadius: GROUPED_RADIUS, borderCurve: 'continuous' }}
+            >
+              <Avatar name={businessName} photoUri={profile?.logo_uri} seed={businessName} size={60} />
+              <View className="flex-1">
+                <Text className="text-title3 font-semibold text-label" numberOfLines={1}>
+                  {businessName}
+                </Text>
+                <Text className="text-subhead text-secondary" numberOfLines={1}>
+                  {email ? `${email} · Business Profile` : 'Business Profile'}
+                </Text>
+              </View>
+              <Icon name="chevron.right" size={14} weight="semibold" color={colors.chevron} />
+            </View>
+          )}
+        </Pressable>
+      </View>
+
+      <ListSection>
         <ListRow
-          icon="star.fill"
+          icon="crown.fill"
           iconBackground={ICON_COLORS.subscription}
-          title="Subscription"
+          title="Invoice Them Pro"
           onPress={() => router.push('/settings/subscription')}
         />
       </ListSection>
 
       <ListSection header="Business">
-        <ListRow
-          icon="building.2.fill"
-          iconBackground={ICON_COLORS.business}
-          title="Business Profile"
-          value={profile?.business_name || undefined}
-          onPress={() => router.push('/settings/business-profile')}
-        />
         <ListRow
           icon="tag.fill"
           iconBackground={ICON_COLORS.catalog}

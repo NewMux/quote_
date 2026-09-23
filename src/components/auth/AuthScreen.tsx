@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Icon } from '../Icon';
 
 interface AuthScreenProps {
   title: string;
@@ -23,8 +24,15 @@ export function AuthScreen({ title, subtitle, children, actions }: AuthScreenPro
         keyboardDismissMode="interactive"
       >
         <View className="w-full max-w-[440px] self-center gap-7">
-          <View className="gap-2">
-            <Text className="text-title1 font-bold text-label text-center" accessibilityRole="header">
+          <View className="gap-2 items-center">
+            {/* The app's mark, the way Apple's own sign-in screens lead with the product's icon. */}
+            <View
+              className="w-16 h-16 rounded-[18px] bg-brand items-center justify-center mb-3"
+              style={{ borderCurve: 'continuous' }}
+            >
+              <Icon name="doc.text.fill" size={32} color="#FFFFFF" />
+            </View>
+            <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
               {title}
             </Text>
             {subtitle ? <Text className="text-body text-secondary text-center">{subtitle}</Text> : null}

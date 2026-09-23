@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { View } from 'react-native';
-import { FormField } from './form/FormField';
+import { FormRow } from './form/FormRow';
 import { FormScrollView } from './form/FormScrollView';
 import { useReportFormState, type FormState } from './form/useFormState';
 import { ListRow } from './list/ListRow';
@@ -48,61 +47,53 @@ export function ItemForm({ initial, onStateChange, footer }: ItemFormProps) {
 
   return (
     <FormScrollView>
-      <FormField
-        label="Name"
-        value={name}
-        onChangeText={setName}
-        placeholder="e.g. Consultation"
-        autoCapitalize="words"
-        maxLength={100}
-      />
-      <FormField
-        label="Description"
-        hint="Optional. Appears under the item on invoices."
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        maxLength={200}
-      />
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <MoneyInput
-            label="Default Price"
-            valueMinor={priceMinor}
-            currencyCode={currencyCode}
-            onChangeMinor={setPriceMinor}
-          />
-        </View>
-        <View className="flex-1">
-          <FormField
-            label="Unit"
-            value={unitLabel}
-            onChangeText={setUnitLabel}
-            placeholder="hour, item"
-            autoCapitalize="none"
-            maxLength={20}
-          />
-        </View>
-      </View>
+      <ListSection footer="The description appears under the item on invoices.">
+        <FormRow
+          label="Name"
+          value={name}
+          onChangeText={setName}
+          placeholder="e.g. Consultation"
+          autoCapitalize="words"
+          maxLength={100}
+        />
+        <FormRow
+          label="Description"
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Optional"
+          multiline
+          maxLength={200}
+        />
+      </ListSection>
 
-      <View>
-        <ListSection
-          footer={isTaxable ? 'Choose the tax rate applied when you add this item to a document.' : undefined}
-        >
-          <ListRow title="Taxable" switchValue={isTaxable} onSwitchChange={setIsTaxable} />
-          {isTaxable
-            ? taxBrackets.map((bracket) => (
-                <ListRow
-                  key={bracket.id}
-                  title={bracket.name}
-                  value={formatRateBp(bracket.rate_bp)}
-                  onPress={() => setTaxBracketId(bracket.id)}
-                  accessory={bracket.id === taxBracketId ? 'checkmark' : 'none'}
-                />
-              ))
-            : null}
-        </ListSection>
-      </View>
+      <ListSection footer="The price and unit fill in when you add this item to a document; you can change them there.">
+        <MoneyInput label="Price" valueMinor={priceMinor} currencyCode={currencyCode} onChangeMinor={setPriceMinor} />
+        <FormRow
+          label="Unit"
+          value={unitLabel}
+          onChangeText={setUnitLabel}
+          placeholder="hour, item"
+          autoCapitalize="none"
+          maxLength={20}
+        />
+      </ListSection>
+
+      <ListSection
+        footer={isTaxable ? 'Choose the tax rate applied when you add this item to a document.' : undefined}
+      >
+        <ListRow title="Taxable" switchValue={isTaxable} onSwitchChange={setIsTaxable} />
+        {isTaxable
+          ? taxBrackets.map((bracket) => (
+              <ListRow
+                key={bracket.id}
+                title={bracket.name}
+                value={formatRateBp(bracket.rate_bp)}
+                onPress={() => setTaxBracketId(bracket.id)}
+                accessory={bracket.id === taxBracketId ? 'checkmark' : 'none'}
+              />
+            ))
+          : null}
+      </ListSection>
       {footer}
     </FormScrollView>
   );

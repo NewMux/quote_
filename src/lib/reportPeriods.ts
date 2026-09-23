@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 export type ReportPeriod =
   | { kind: 'month' }
   | { kind: 'last90' }
@@ -42,6 +44,6 @@ export function formatPeriodLabel(period: ReportPeriod): string {
     case 'year':
       return String(now.getFullYear());
     case 'custom':
-      return `${period.startIso.slice(0, 10)} – ${period.endIso.slice(0, 10)}`;
+      return `${format(new Date(period.startIso), 'MMM d')} – ${format(new Date(period.endIso), 'MMM d, yyyy')}`;
   }
 }

@@ -1,10 +1,8 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { ListRow } from '../../src/components/list/ListRow';
 import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
-import { BRAND } from '../../src/lib/theme';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 
 const SORT_OPTIONS: { label: string; value: 'name' | 'recent' }[] = [
@@ -31,19 +29,17 @@ export default function ClientFilterModal() {
         actionLabel="Done"
         onAction={() => router.back()}
       />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
-        <View>
-          <Text className="text-subhead text-secondary px-4 mb-1.5" accessibilityRole="header">
-            Sort By
-          </Text>
-          <SegmentedControl
-            values={SORT_OPTIONS.map((o) => o.label)}
-            selectedIndex={SORT_OPTIONS.findIndex((o) => o.value === sortBy)}
-            tintColor={BRAND.default}
-            activeFontStyle={{ color: '#FFFFFF' }}
-            onChange={(e) => setSortBy(SORT_OPTIONS[e.nativeEvent.selectedSegmentIndex].value)}
-          />
-        </View>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
+        <ListSection header="Sort By">
+          {SORT_OPTIONS.map((option) => (
+            <ListRow
+              key={option.value}
+              title={option.label}
+              onPress={() => setSortBy(option.value)}
+              accessory={sortBy === option.value ? 'checkmark' : 'none'}
+            />
+          ))}
+        </ListSection>
         <ListSection footer="Only show clients who owe you money on an issued invoice.">
           <ListRow title="Outstanding Balance Only" switchValue={hasBalanceOnly} onSwitchChange={setHasBalanceOnly} />
         </ListSection>

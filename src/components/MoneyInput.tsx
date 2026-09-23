@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FormField } from './form/FormField';
+import { FormRow } from './form/FormRow';
 import { getCurrencySymbol, minorToDecimalString, parseToMinor } from '../lib/money';
 
 interface MoneyInputProps {
@@ -7,18 +7,21 @@ interface MoneyInputProps {
   onChangeMinor: (minor: number) => void;
   currencyCode: string;
   label: string;
-  hint?: string;
+  error?: string | null;
+  /** Set by ListSection. */
+  showSeparator?: boolean;
 }
 
-/** Amount entry. Reports the parsed value on every keystroke (so a Save tapped mid-edit uses what's
- * on screen) and tidies the formatting when editing ends. */
-export function MoneyInput({ valueMinor, onChangeMinor, currencyCode, label, hint }: MoneyInputProps) {
+/** An amount row for a grouped form. Reports the parsed value on every keystroke (so a Save tapped
+ * mid-edit uses what's on screen) and tidies the formatting when editing ends. */
+export function MoneyInput({ valueMinor, onChangeMinor, currencyCode, label, error, showSeparator }: MoneyInputProps) {
   const [text, setText] = useState(minorToDecimalString(valueMinor, currencyCode));
 
   return (
-    <FormField
+    <FormRow
       label={label}
-      hint={hint}
+      error={error}
+      showSeparator={showSeparator}
       prefix={getCurrencySymbol(currencyCode)}
       keyboardType="decimal-pad"
       value={text}

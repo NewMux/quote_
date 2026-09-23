@@ -11,8 +11,9 @@ export interface FormFieldProps extends TextInputProps {
   prefix?: string;
 }
 
-/** A labeled text field: 44pt+ tall, 17pt text, and its visible label doubles as the VoiceOver
- * label so the two can never disagree. */
+/** A standalone labeled text field (sign-in, onboarding, confirmations): a borderless grouped card
+ * 50pt tall with 17pt text, whose visible label doubles as the VoiceOver label. Grouped forms use
+ * FormRow instead. */
 export const FormField = forwardRef<TextInput, FormFieldProps>(function FormField(
   { label, hint, error, prefix, multiline, style, ...inputProps },
   ref
@@ -27,17 +28,18 @@ export const FormField = forwardRef<TextInput, FormFieldProps>(function FormFiel
       inputProps.keyboardType === 'phone-pad');
   return (
     <View>
-      <Text className="text-subhead text-secondary mb-1.5">{label}</Text>
+      <Text className="text-footnote text-secondary px-4 mb-1.5">{label}</Text>
       <View
-        className={`flex-row items-center bg-card rounded-xl border px-3 ${
-          error ? 'border-destructive' : 'border-field'
+        className={`flex-row items-center bg-card rounded-[14px] border px-4 ${
+          error ? 'border-destructive' : 'border-transparent'
         }`}
+        style={{ borderCurve: 'continuous' }}
       >
         {prefix ? <Text className="text-body text-secondary mr-1">{prefix}</Text> : null}
         <TextInput
           ref={ref}
           className="flex-1 text-body text-label py-2.5"
-          style={[{ minHeight: multiline ? 88 : 44, textAlignVertical: multiline ? 'top' : 'center' }, style]}
+          style={[{ minHeight: multiline ? 88 : 50, textAlignVertical: multiline ? 'top' : 'center' }, style]}
           placeholderTextColor={colors.placeholder}
           multiline={multiline}
           accessibilityLabel={label}
@@ -60,9 +62,9 @@ export const FormField = forwardRef<TextInput, FormFieldProps>(function FormFiel
         </InputAccessoryView>
       ) : null}
       {error ? (
-        <Text className="text-subhead text-destructive mt-1.5">{error}</Text>
+        <Text className="text-footnote text-destructive px-4 mt-1.5">{error}</Text>
       ) : hint ? (
-        <Text className="text-subhead text-secondary mt-1.5">{hint}</Text>
+        <Text className="text-footnote text-secondary px-4 mt-1.5">{hint}</Text>
       ) : null}
     </View>
   );

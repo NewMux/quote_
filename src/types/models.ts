@@ -194,6 +194,7 @@ export interface DocumentListItem {
   viewed_at: string | null;
   client_id: string | null;
   client_name: string | null;
+  issue_date: string | null;
   due_date: string | null;
   total_minor: number;
   amount_paid_minor: number;

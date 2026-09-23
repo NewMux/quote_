@@ -61,28 +61,29 @@ export default function DocumentFilterModal() {
           ))}
         </ListSection>
 
-        <ListSection header="Client">
+        <ListSection>
           <ListRow
+            icon="person.crop.circle.fill"
             title="Client"
             value={clientName ?? 'All Clients'}
             onPress={() => router.push({ pathname: '/modals/client-picker', params: { mode: 'filter' } })}
           />
         </ListSection>
 
-        <View className="gap-3">
+        <ListSection header="Issue Date">
           <DateField
-            label="Issued From"
+            label="From"
             value={filter.dateFrom ?? null}
             emptyLabel="Any Date"
             onChange={(d) => setFilter({ ...filter, dateFrom: d })}
           />
           <DateField
-            label="Issued To"
+            label="To"
             value={filter.dateTo ?? null}
             emptyLabel="Any Date"
             onChange={(d) => setFilter({ ...filter, dateTo: d })}
           />
-        </View>
+        </ListSection>
       </ScrollView>
     </View>
   );

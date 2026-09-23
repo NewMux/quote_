@@ -42,7 +42,7 @@ export default function DeleteAccountScreen() {
   }
 
   return (
-    <FormScrollView>
+    <FormScrollView contentContainerStyle={{ gap: 24, paddingTop: 16 }}>
       <View className="items-center gap-2 pt-2">
         <Icon name="exclamationmark.triangle.fill" size={48} color={colors.destructive} />
         <Text className="text-title2 font-semibold text-label text-center" accessibilityRole="header">

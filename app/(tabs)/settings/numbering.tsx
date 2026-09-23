@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { FormField } from '../../../src/components/form/FormField';
+import { FormRow } from '../../../src/components/form/FormRow';
 import { FormScrollView } from '../../../src/components/form/FormScrollView';
 import { ListRow } from '../../../src/components/list/ListRow';
 import { ListSection } from '../../../src/components/list/ListSection';
@@ -68,59 +68,50 @@ export default function NumberingScreen() {
 
   return (
     <FormScrollView>
-      <View>
-        <ListSection header="Preview" footer="How the next new numbers will look.">
-          <ListRow title="Estimate" value={estimatePreview} />
-          <ListRow title="Invoice" value={invoicePreview} />
-        </ListSection>
-      </View>
+      <ListSection header="Preview" footer="How the next new numbers will look.">
+        <ListRow title="Next Estimate" value={estimatePreview} />
+        <ListRow title="Next Invoice" value={invoicePreview} />
+      </ListSection>
 
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <FormField
-            label="Estimate Prefix"
-            value={estimatePrefix}
-            onChangeText={setEstimatePrefix}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            maxLength={10}
-          />
-        </View>
-        <View className="flex-1">
-          <FormField
-            label="Invoice Prefix"
-            value={invoicePrefix}
-            onChangeText={setInvoicePrefix}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            maxLength={10}
-          />
-        </View>
-      </View>
+      <ListSection header="Format" footer="Minimum digits pads numbers with zeros: 3 gives 001.">
+        <FormRow
+          label="Estimate Prefix"
+          value={estimatePrefix}
+          onChangeText={setEstimatePrefix}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={10}
+        />
+        <FormRow
+          label="Invoice Prefix"
+          value={invoicePrefix}
+          onChangeText={setInvoicePrefix}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={10}
+        />
+        <FormRow
+          label="Minimum Digits"
+          value={padding}
+          onChangeText={setPadding}
+          keyboardType="number-pad"
+          maxLength={1}
+        />
+      </ListSection>
 
-      <FormField
-        label="Minimum Digits"
-        hint="3 gives numbers like 001."
-        value={padding}
-        onChangeText={setPadding}
-        keyboardType="number-pad"
-        maxLength={1}
-      />
+      <ListSection footer="Numbering restarts at 1 every January, and the year is added, like INV-2026-001.">
+        <ListRow title="Start Over Each Year" switchValue={resetYearly} onSwitchChange={setResetYearly} />
+      </ListSection>
 
-      <View>
-        <ListSection footer="Numbering restarts at 1 every January, and the year is added, like INV-2026-001.">
-          <ListRow title="Start Over Each Year" switchValue={resetYearly} onSwitchChange={setResetYearly} />
-        </ListSection>
-      </View>
-
-      <FormField
-        label="Payment Due After (Days)"
-        hint="Sets the due date on new invoices."
-        value={paymentTermsDays}
-        onChangeText={setPaymentTermsDays}
-        keyboardType="number-pad"
-        maxLength={3}
-      />
+      <ListSection footer="Sets the due date on new invoices.">
+        <FormRow
+          label="Due After (Days)"
+          value={paymentTermsDays}
+          onChangeText={setPaymentTermsDays}
+          keyboardType="number-pad"
+          maxLength={3}
+        />
+      </ListSection>
     </FormScrollView>
   );
 }

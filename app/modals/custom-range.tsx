@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { DateField } from '../../src/components/DateField';
 import { FormScrollView } from '../../src/components/form/FormScrollView';
+import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { toStoredDate } from '../../src/lib/format';
 import { useReportsStore } from '../../src/stores/useReportsStore';
@@ -34,11 +35,15 @@ export default function CustomRangeModal() {
   return (
     <View className="flex-1 bg-grouped">
       <SheetHeader title="Custom Range" actionLabel="Apply" onAction={apply} actionDisabled={!canApply} />
-      <FormScrollView contentContainerStyle={{ gap: 12 }}>
-        <DateField label="Start Date" value={startDate} onChange={setStartDate} />
-        <DateField label="End Date" value={endDate} onChange={setEndDate} />
+      <FormScrollView>
+        <ListSection footer={isBackwards ? undefined : 'The summary covers every day from the start date through the end date.'}>
+          <DateField label="Start Date" value={startDate} onChange={setStartDate} />
+          <DateField label="End Date" value={endDate} onChange={setEndDate} />
+        </ListSection>
         {isBackwards ? (
-          <Text className="text-subhead text-destructive">The start date needs to be on or before the end date.</Text>
+          <Text className="text-footnote text-destructive px-4 -mt-6">
+            The start date needs to be on or before the end date.
+          </Text>
         ) : null}
       </FormScrollView>
     </View>

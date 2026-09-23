@@ -69,7 +69,7 @@ export default function ItemPickerModal() {
               />
             </ListSection>
             {filtered.length > 0 ? (
-              <Text className="text-subhead text-secondary px-4 mb-1.5" accessibilityRole="header">
+              <Text className="text-footnote text-secondary px-4 mb-2" accessibilityRole="header">
                 Item Catalog
               </Text>
             ) : null}

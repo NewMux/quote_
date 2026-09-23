@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { Alert, Image, Text, View } from 'react-native';
+import { Alert, Image, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
-import { Button } from './Button';
 import { DateField } from './DateField';
-import { FormField } from './form/FormField';
+import { FormRow } from './form/FormRow';
 import { useReportFormState, type FormState } from './form/useFormState';
+import { ListRow } from './list/ListRow';
+import { ListSection } from './list/ListSection';
 import { MoneyInput } from './MoneyInput';
 import { persistPickedFile } from '../lib/fileStorage';
 import { toStoredDate } from '../lib/format';
 import { useSignedUrl } from '../lib/useSignedUrl';
 import { newId } from '../lib/id';
-import { BRAND } from '../lib/theme';
 import type { Settlement, SettlementMethod } from '../types/models';
 
 const METHODS: { value: SettlementMethod; label: string }[] = [
@@ -75,51 +75,55 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
 
   return (
     <>
-      <View>
-        <Text className="text-subhead text-secondary mb-1.5">Method</Text>
+      <View className="mb-6">
         <SegmentedControl
           values={METHODS.map((m) => m.label)}
           selectedIndex={METHODS.findIndex((m) => m.value === method)}
-          tintColor={BRAND.default}
-          activeFontStyle={{ color: '#FFFFFF' }}
           onChange={(e) => setMethod(METHODS[e.nativeEvent.selectedSegmentIndex].value)}
+          accessibilityLabel="Payment method"
         />
       </View>
 
-      <MoneyInput
-        label="Amount"
-        valueMinor={amountMinor}
-        currencyCode={currencyCode}
-        onChangeMinor={setAmountMinor}
-        hint={amountMinor > 0 ? undefined : 'Enter an amount greater than zero.'}
-      />
+      <ListSection>
+        <MoneyInput
+          label="Amount"
+          valueMinor={amountMinor}
+          currencyCode={currencyCode}
+          onChangeMinor={setAmountMinor}
+          error={amountMinor > 0 ? null : 'Enter an amount greater than zero.'}
+        />
+        <DateField label="Date" value={settledDate} onChange={setSettledDate} />
+      </ListSection>
 
-      <DateField label="Date" value={settledDate} onChange={setSettledDate} />
+      <ListSection footer="Optional, such as a check number or transaction ID.">
+        <FormRow
+          label="Reference"
+          value={referenceNumber}
+          onChangeText={setReferenceNumber}
+          placeholder="Optional"
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={60}
+        />
+        <FormRow label="Notes" value={notes} onChangeText={setNotes} placeholder="Optional" multiline maxLength={500} />
+      </ListSection>
 
-      <FormField
-        label="Reference Number"
-        hint="Optional, such as a check number or transaction ID."
-        value={referenceNumber}
-        onChangeText={setReferenceNumber}
-        autoCapitalize="characters"
-        autoCorrect={false}
-        maxLength={60}
-      />
-
-      <FormField label="Notes" hint="Optional" value={notes} onChangeText={setNotes} multiline maxLength={500} />
-
-      <View>
-        <Text className="text-subhead text-secondary mb-1.5">Receipt Photo</Text>
+      <ListSection header="Receipt">
         {signedReceiptUrl ? (
           <Image
             source={{ uri: signedReceiptUrl }}
-            className="w-full h-40 rounded-xl mb-2"
+            className="w-full h-44"
             resizeMode="cover"
             accessibilityLabel="Receipt photo"
           />
         ) : null}
-        <Button label={receiptUri ? 'Change Photo' : 'Attach Photo'} variant="tinted" onPress={pickReceiptPhoto} />
-      </View>
+        <ListRow
+          icon="photo"
+          title={receiptUri ? 'Change Photo' : 'Attach Photo'}
+          onPress={pickReceiptPhoto}
+          accessory="none"
+        />
+      </ListSection>
     </>
   );
 }

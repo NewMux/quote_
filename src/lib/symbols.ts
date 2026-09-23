@@ -28,6 +28,7 @@ export const SYMBOL_FALLBACKS = {
   archivebox: 'archive-outline',
   'archivebox.fill': 'archive',
   'minus.circle.fill': 'remove-circle',
+  xmark: 'close',
   'xmark.circle.fill': 'close-circle',
   magnifyingglass: 'search',
   'line.3.horizontal.decrease.circle': 'filter-circle-outline',
@@ -49,6 +50,8 @@ export const SYMBOL_FALLBACKS = {
   'pencil.circle.fill': 'create',
   'xmark.octagon.fill': 'close-circle',
   'arrow.triangle.2.circlepath': 'sync',
+  'paperplane.fill': 'paper-plane',
+  'circle.lefthalf.filled': 'contrast',
 
   // Objects
   'doc.plaintext': 'document-outline',

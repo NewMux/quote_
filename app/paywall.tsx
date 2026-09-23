@@ -1,80 +1,31 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { Button } from '../src/components/Button';
+import { GlassBar } from '../src/components/GlassBar';
+import { Icon } from '../src/components/Icon';
+import { ListRow } from '../src/components/list/ListRow';
+import { ListSection } from '../src/components/list/ListSection';
 import { APPLE_EULA_URL, annualSavingsPercent, trialLabel } from '../src/lib/subscription';
-import { BRAND, useThemeColors } from '../src/lib/theme';
+import type { SymbolName } from '../src/lib/symbols';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
 
-const BENEFITS: { icon: keyof typeof Ionicons.glyphMap; text: string }[] = [
-  { icon: 'document-text-outline', text: 'Unlimited invoices and estimates' },
-  { icon: 'create-outline', text: 'PDFs with your logo and signatures' },
-  { icon: 'cash-outline', text: 'Payment tracking and overdue reminders' },
-  { icon: 'repeat-outline', text: 'Recurring invoices' },
+const BENEFITS: { icon: SymbolName; title: string; detail: string }[] = [
+  { icon: 'doc.on.doc.fill', title: 'Unlimited Documents', detail: 'Estimates and invoices, as many as you need' },
+  { icon: 'signature', title: 'Your Brand', detail: 'PDFs with your logo and signatures' },
+  { icon: 'banknote.fill', title: 'Get Paid', detail: 'Payment tracking and overdue reminders' },
+  { icon: 'repeat', title: 'Recurring Invoices', detail: 'Drafts created for you on schedule' },
 ];
 
 type PlanKind = 'annual' | 'monthly';
 
-function PlanCard({
-  title,
-  price,
-  detail,
-  badge,
-  selected,
-  onPress,
-}: {
-  title: string;
-  price: string;
-  detail: string | null;
-  badge: string | null;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const colors = useThemeColors();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ checked: selected }}
-      accessibilityLabel={`${title}, ${price}${detail ? `, ${detail}` : ''}`}
-    >
-      <View
-        className={`bg-card rounded-2xl p-4 flex-row items-center gap-3 border-2 ${
-          selected ? 'border-brand' : 'border-separator'
-        }`}
-      >
-        <Ionicons
-          name={selected ? 'checkmark-circle' : 'ellipse-outline'}
-          size={24}
-          color={selected ? colors.tint : colors.chevron}
-        />
-        <View className="flex-1">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-body font-semibold text-label">{title}</Text>
-            {badge ? (
-              <View className="bg-brand/10 rounded-full px-2 py-0.5">
-                <Text className="text-subhead font-semibold text-tint">{badge}</Text>
-              </View>
-            ) : null}
-          </View>
-          {detail ? <Text className="text-subhead text-secondary mt-0.5">{detail}</Text> : null}
-        </View>
-        <Text className="text-body font-semibold text-label">{price}</Text>
-      </View>
-    </Pressable>
-  );
-}
-
 function FooterLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="link" className="min-h-[44px] justify-center px-1">
-      <Text className="text-subhead text-tint">{label}</Text>
+      <Text className="text-footnote text-tint">{label}</Text>
     </Pressable>
   );
 }
@@ -86,7 +37,6 @@ export default function PaywallScreen() {
   const purchase = useSubscriptionStore((s) => s.purchase);
   const restore = useSubscriptionStore((s) => s.restore);
   const signOut = useAuthStore((s) => s.signOut);
-  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
 
   const [loadError, setLoadError] = useState(false);
@@ -160,87 +110,105 @@ export default function PaywallScreen() {
 
   return (
     <View className="flex-1 bg-grouped">
-      <StatusBar style="light" />
-      <LinearGradient colors={[BRAND.default, BRAND.darker]}>
-        <SafeAreaView edges={['top']}>
-          <View className="px-6 pt-6 pb-8 items-center gap-2">
-            <View className="w-14 h-14 rounded-2xl bg-white/15 items-center justify-center mb-1">
-              <Ionicons name="receipt" size={28} color="white" />
-            </View>
-            <Text className="text-title1 font-bold text-white text-center">Invoice Them Pro</Text>
-            <Text className="text-subhead text-white/80 text-center">
-              Everything you need to quote, invoice, and get paid.
-            </Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-
       <ScrollView
-        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 20 + insets.bottom, maxWidth: 560, width: '100%', alignSelf: 'center' }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 180,
+          maxWidth: 560,
+          width: '100%',
+          alignSelf: 'center',
+        }}
       >
-        <View className="gap-3">
-          {BENEFITS.map((benefit) => (
-            <View key={benefit.text} className="flex-row items-center gap-3">
-              <Ionicons name={benefit.icon} size={20} color={colors.tint} />
-              <Text className="text-body text-label flex-1">{benefit.text}</Text>
-            </View>
-          ))}
+        {/* Apple's subscription-sheet layout: app mark, name, promise, then what you get. */}
+        <View className="items-center gap-2 mb-8 px-4">
+          <View
+            className="w-20 h-20 rounded-[22px] bg-brand items-center justify-center mb-2"
+            style={{ borderCurve: 'continuous' }}
+          >
+            <Icon name="doc.text.fill" size={40} color="#FFFFFF" />
+          </View>
+          <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
+            Invoice Them Pro
+          </Text>
+          <Text className="text-body text-secondary text-center">
+            Everything you need to quote, invoice, and get paid.
+          </Text>
         </View>
 
+        <ListSection>
+          {BENEFITS.map((benefit) => (
+            <ListRow key={benefit.title} icon={benefit.icon} title={benefit.title} subtitle={benefit.detail} />
+          ))}
+        </ListSection>
+
         {loadError ? (
-          <View className="bg-card rounded-2xl p-4 gap-3 items-center border border-separator">
-            <Text className="text-subhead text-label text-center">
-              Couldn&apos;t load subscription options. Check your connection and try again.
-            </Text>
-            <Button label="Try Again" variant="tinted" onPress={fetchOffering} />
-          </View>
+          <ListSection footer="Couldn’t load subscription options. Check your connection and try again.">
+            <ListRow title="Try Again" onPress={fetchOffering} centered />
+          </ListSection>
         ) : !offering ? (
-          <ActivityIndicator style={{ paddingVertical: 24 }} />
+          <ActivityIndicator style={{ paddingVertical: 24 }} accessibilityLabel="Loading plans" />
         ) : (
-          <View className="gap-3" accessibilityRole="radiogroup">
+          <ListSection header="Choose a Plan">
             {annual ? (
-              <PlanCard
+              <ListRow
                 title="Yearly"
-                price={annual.product.priceString}
-                detail={annual.product.pricePerMonthString ? `${annual.product.pricePerMonthString}/month` : null}
-                badge={savings ? `Save ${savings}%` : null}
-                selected={selectedKind === 'annual'}
+                subtitle={[
+                  savings ? `Save ${savings}%` : null,
+                  annual.product.pricePerMonthString ? `${annual.product.pricePerMonthString}/month` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || undefined}
+                value={annual.product.priceString}
+                valueClassName="text-label font-semibold"
                 onPress={() => setPlan('annual')}
+                accessory={selectedKind === 'annual' ? 'checkmark' : 'none'}
               />
             ) : null}
             {monthly ? (
-              <PlanCard
+              <ListRow
                 title="Monthly"
-                price={monthly.product.priceString}
-                detail={null}
-                badge={null}
-                selected={selectedKind === 'monthly'}
+                value={monthly.product.priceString}
+                valueClassName="text-label font-semibold"
                 onPress={() => setPlan('monthly')}
+                accessory={selectedKind === 'monthly' ? 'checkmark' : 'none'}
               />
             ) : null}
-          </View>
+          </ListSection>
         )}
 
-        <View className="gap-2">
-          {trial ? <Text className="text-body text-secondary text-center">{`${trial}, then ${selected?.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}</Text> : null}
-          <Button
-            label={trial ? 'Start Free Trial' : 'Subscribe'}
-            size="large"
-            onPress={handlePurchase}
-            disabled={!selected}
-            loading={isWorking}
-          />
-          <Button label="Restore Purchases" variant="plain" onPress={handleRestore} disabled={isWorking} />
-        </View>
+        {renewalText ? <Text className="text-footnote text-secondary px-4">{renewalText}</Text> : null}
 
-        {renewalText ? <Text className="text-subhead text-secondary leading-5">{renewalText}</Text> : null}
-
-        <View className="flex-row flex-wrap justify-center gap-x-4">
+        <View className="flex-row flex-wrap justify-center gap-x-4 mt-3">
           <FooterLink label="Privacy Policy" onPress={() => router.push('/privacy-policy')} />
           <FooterLink label="Terms of Use" onPress={() => Linking.openURL(APPLE_EULA_URL)} />
           <FooterLink label="Sign Out" onPress={handleSignOut} />
         </View>
       </ScrollView>
+
+      <View
+        className="absolute left-0 right-0 bottom-0 px-4"
+        style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+        pointerEvents="box-none"
+      >
+        <View style={{ maxWidth: 560, width: '100%', alignSelf: 'center' }}>
+          <GlassBar>
+            {trial && selected ? (
+              <Text className="text-footnote text-secondary text-center pt-1">
+                {`${trial}, then ${selected.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}
+              </Text>
+            ) : null}
+            <Button
+              label={trial ? 'Start Free Trial' : 'Subscribe'}
+              size="large"
+              onPress={handlePurchase}
+              disabled={!selected}
+              loading={isWorking}
+            />
+            <Button label="Restore Purchases" variant="plain" size="small" onPress={handleRestore} disabled={isWorking} />
+          </GlassBar>
+        </View>
+      </View>
     </View>
   );
 }

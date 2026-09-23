@@ -16,7 +16,7 @@ export function FormScrollView({ children, contentContainerStyle, ...rest }: For
       automaticallyAdjustKeyboardInsets
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
-      contentContainerStyle={[{ padding: 16, gap: 20, paddingBottom: 40 }, contentContainerStyle]}
+      contentContainerStyle={[{ padding: 16, paddingTop: 8, paddingBottom: 40 }, contentContainerStyle]}
       {...rest}
     >
       {children}

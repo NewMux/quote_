@@ -18,7 +18,7 @@ export const SignaturePad = forwardRef<SignatureViewRef, SignaturePadProps>(func
   return (
     <View className="flex-1 gap-2">
       <View
-        className="flex-1 border border-field rounded-2xl overflow-hidden"
+        className="flex-1 border border-field rounded-[26px] overflow-hidden"
         style={{ backgroundColor: '#FFFFFF' }}
         accessibilityLabel="Signature area. Draw your signature with your finger."
       >

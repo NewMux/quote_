@@ -12,12 +12,14 @@ interface DateFieldProps {
   onChange: (isoDate: string) => void;
   /** Shown instead of a date when `value` is null (tapping it picks today). */
   emptyLabel?: string;
+  /** Set by ListSection; draws the hairline above every row but the first. */
+  showSeparator?: boolean;
 }
 
-/** A labeled date row. iOS uses the system compact date picker (a date button that opens the
+/** A date row for a grouped form (put it in a ListSection). iOS uses the system compact date picker (a date button that opens the
  * calendar popover); Android opens the system date dialog. Dates are saved as the local calendar
  * day, so the day picked is the day stored in every timezone. */
-export function DateField({ label, value, onChange, emptyLabel = 'Add Date' }: DateFieldProps) {
+export function DateField({ label, value, onChange, emptyLabel = 'Add Date', showSeparator }: DateFieldProps) {
   const colors = useThemeColors();
   const [showAndroidDialog, setShowAndroidDialog] = useState(false);
 
@@ -53,9 +55,12 @@ export function DateField({ label, value, onChange, emptyLabel = 'Add Date' }: D
   );
 
   return (
-    <View className="flex-row items-center justify-between gap-3 bg-card rounded-xl border border-field pl-3 pr-2 min-h-[50px]">
-      <Text className="text-body text-label flex-shrink">{label}</Text>
-      {trailing}
+    <View>
+      {showSeparator ? <View style={{ marginLeft: 16, height: 0.5 }} className="bg-separator" /> : null}
+      <View className="flex-row items-center justify-between gap-3 pl-4 pr-3 min-h-[50px]">
+        <Text className="text-body text-label flex-shrink">{label}</Text>
+        {trailing}
+      </View>
       {showAndroidDialog && value ? (
         <DateTimePicker
           value={parseISO(value)}

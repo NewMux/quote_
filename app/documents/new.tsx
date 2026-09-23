@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { ListRow } from '../../src/components/list/ListRow';
+import { ListSection } from '../../src/components/list/ListSection';
 import { createDraftDocument } from '../../src/db/repositories/documents.repo';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
@@ -43,18 +45,28 @@ export default function NewDocumentScreen() {
   }
 
   return (
-    <View className="flex-1 bg-grouped p-6 justify-center gap-4">
-      <Text className="text-title2 font-semibold text-label text-center mb-4" accessibilityRole="header">
+    <ScrollView
+      className="flex-1 bg-grouped"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 16, paddingTop: 24 }}
+    >
+      <Text className="text-title2 font-bold text-label text-center mb-6" accessibilityRole="header">
         What Would You Like to Create?
       </Text>
-      <Pressable onPress={() => handleChoose('estimate')} accessibilityRole="button" className="bg-card border border-separator rounded-2xl p-6 items-center">
-        <Text className="text-title3 font-semibold text-label">Estimate</Text>
-        <Text className="text-body text-secondary mt-1 text-center">A quote you can convert to an invoice later</Text>
-      </Pressable>
-      <Pressable onPress={() => handleChoose('invoice')} accessibilityRole="button" className="bg-card border border-separator rounded-2xl p-6 items-center">
-        <Text className="text-title3 font-semibold text-label">Invoice</Text>
-        <Text className="text-body text-secondary mt-1 text-center">A bill your client can pay</Text>
-      </Pressable>
-    </View>
+      <ListSection>
+        <ListRow
+          icon="doc.plaintext.fill"
+          title="Estimate"
+          subtitle="A quote you can convert to an invoice later"
+          onPress={() => handleChoose('estimate')}
+        />
+        <ListRow
+          icon="doc.text.fill"
+          title="Invoice"
+          subtitle="A bill your client can pay"
+          onPress={() => handleChoose('invoice')}
+        />
+      </ListSection>
+    </ScrollView>
   );
 }

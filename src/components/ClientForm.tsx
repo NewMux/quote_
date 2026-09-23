@@ -3,9 +3,10 @@ import { Alert, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
-import { FormField } from './form/FormField';
+import { FormRow } from './form/FormRow';
 import { FormScrollView } from './form/FormScrollView';
 import { useReportFormState, type FormState } from './form/useFormState';
+import { ListSection } from './list/ListSection';
 import { persistPickedFile } from '../lib/fileStorage';
 import { newId } from '../lib/id';
 import type { ClientInput } from '../db/repositories/clients.repo';
@@ -61,81 +62,92 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
 
   return (
     <FormScrollView>
-      <View className="items-center gap-1">
-        <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={80} />
-        <Button label={photoUri ? 'Change Photo' : 'Add Photo'} variant="plain" onPress={pickPhoto} />
+      <View className="items-center gap-1 pb-4">
+        <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={96} />
+        <Button label={photoUri ? 'Edit Photo' : 'Add Photo'} variant="plain" size="small" onPress={pickPhoto} />
       </View>
 
-      <FormField
-        label="Name"
-        value={displayName}
-        onChangeText={setDisplayName}
-        placeholder="Business or person"
-        maxLength={100}
-        textContentType="organizationName"
-        autoCapitalize="words"
-        returnKeyType="next"
-        onSubmitEditing={() => contactRef.current?.focus()}
-        submitBehavior="submit"
-      />
-      <FormField
-        ref={contactRef}
-        label="Contact Name"
-        hint="Optional"
-        value={contactName}
-        onChangeText={setContactName}
-        maxLength={100}
-        textContentType="name"
-        autoComplete="name"
-        autoCapitalize="words"
-        returnKeyType="next"
-        onSubmitEditing={() => emailRef.current?.focus()}
-        submitBehavior="submit"
-      />
-      <FormField
-        ref={emailRef}
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        textContentType="emailAddress"
-        autoComplete="email"
-        autoCapitalize="none"
-        autoCorrect={false}
-        maxLength={150}
-        returnKeyType="next"
-        onSubmitEditing={() => phoneRef.current?.focus()}
-        submitBehavior="submit"
-      />
-      <FormField
-        ref={phoneRef}
-        label="Phone"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        textContentType="telephoneNumber"
-        autoComplete="tel"
-        maxLength={30}
-      />
-      <FormField
-        label="Address"
-        value={address}
-        onChangeText={setAddress}
-        multiline
-        textContentType="fullStreetAddress"
-        autoComplete="street-address"
-        maxLength={500}
-      />
-      <FormField
-        label="Tax / VAT Registration Number"
-        hint="Optional"
-        value={taxRegNumber}
-        onChangeText={setTaxRegNumber}
-        autoCapitalize="characters"
-        autoCorrect={false}
-        maxLength={50}
-      />
-      <FormField label="Notes" hint="Only you see these." value={notes} onChangeText={setNotes} multiline maxLength={500} />
+      <ListSection>
+        <FormRow
+          label="Name"
+          value={displayName}
+          onChangeText={setDisplayName}
+          placeholder="Business or person"
+          maxLength={100}
+          textContentType="organizationName"
+          autoCapitalize="words"
+          returnKeyType="next"
+          onSubmitEditing={() => contactRef.current?.focus()}
+          submitBehavior="submit"
+        />
+        <FormRow
+          ref={contactRef}
+          label="Contact"
+          value={contactName}
+          onChangeText={setContactName}
+          placeholder="Optional"
+          maxLength={100}
+          textContentType="name"
+          autoComplete="name"
+          autoCapitalize="words"
+          returnKeyType="next"
+          onSubmitEditing={() => emailRef.current?.focus()}
+          submitBehavior="submit"
+        />
+      </ListSection>
+
+      <ListSection>
+        <FormRow
+          ref={emailRef}
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="name@example.com"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          autoComplete="email"
+          autoCapitalize="none"
+          autoCorrect={false}
+          maxLength={150}
+          returnKeyType="next"
+          onSubmitEditing={() => phoneRef.current?.focus()}
+          submitBehavior="submit"
+        />
+        <FormRow
+          ref={phoneRef}
+          label="Phone"
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="Optional"
+          keyboardType="phone-pad"
+          textContentType="telephoneNumber"
+          autoComplete="tel"
+          maxLength={30}
+        />
+        <FormRow
+          label="Address"
+          value={address}
+          onChangeText={setAddress}
+          placeholder="Optional"
+          multiline
+          textContentType="fullStreetAddress"
+          autoComplete="street-address"
+          maxLength={500}
+        />
+      </ListSection>
+
+      <ListSection footer="Notes are only for you; they never appear on documents.">
+        <FormRow
+          label="Tax / VAT No."
+          value={taxRegNumber}
+          onChangeText={setTaxRegNumber}
+          placeholder="Optional"
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={50}
+        />
+        <FormRow label="Notes" value={notes} onChangeText={setNotes} placeholder="Optional" multiline maxLength={500} />
+      </ListSection>
       {footer}
     </FormScrollView>
   );
