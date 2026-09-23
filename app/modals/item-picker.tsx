@@ -1,8 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Button } from '../../src/components/Button';
 import { EmptyState } from '../../src/components/EmptyState';
+import { GroupedRow } from '../../src/components/list/GroupedRow';
+import { ListRow } from '../../src/components/list/ListRow';
+import { ListSection } from '../../src/components/list/ListSection';
+import { SearchField } from '../../src/components/SearchField';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { formatMinor } from '../../src/lib/money';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
@@ -33,55 +36,67 @@ export default function ItemPickerModal() {
 
   return (
     <View className="flex-1 bg-grouped">
-      <SheetHeader title="Select Item" />
+      <SheetHeader title="Add Item" />
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 4, flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
-          <View className="-mx-4 -mt-4 mb-4 p-4 bg-card border-b border-separator">
-            <TextInput
-              className="border border-field rounded-lg px-3 py-2 text-base text-label"
-              placeholder="Search items…"
-              value={query}
-              onChangeText={setQuery}
-            />
+          <View>
+            <View className="mb-4">
+              <SearchField value={query} onChangeText={setQuery} placeholder="Search Items" />
+            </View>
+            <ListSection>
+              <ListRow
+                icon="create-outline"
+                title="Custom Item"
+                subtitle="Type a one-time item on this document"
+                onPress={() => {
+                  addBlankLineItem();
+                  router.back();
+                }}
+                accessory="none"
+              />
+              <ListRow
+                icon="add-circle-outline"
+                title="New Catalog Item"
+                subtitle="Save an item to reuse on future documents"
+                onPress={() => router.push('/items/new')}
+                accessory="none"
+              />
+            </ListSection>
+            {filtered.length > 0 ? (
+              <Text className="text-sm text-secondary px-4 mb-1.5" accessibilityRole="header">
+                Item Catalog
+              </Text>
+            ) : null}
           </View>
         }
-        ListEmptyComponent={<EmptyState title="No items found" />}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => {
-              const taxBracket = taxBrackets.find((b) => b.id === item.default_tax_bracket_id) ?? null;
-              addLineItemFromCatalog(item, taxBracket);
-              router.back();
-            }}
-            className="bg-card rounded-xl p-4 mb-3 border border-separator flex-row justify-between items-center"
-          >
-            <Text className="text-base text-label">{item.name}</Text>
-            <Text className="text-sm text-secondary">{formatMinor(item.default_unit_price_minor, currencyCode)}</Text>
-          </Pressable>
-        )}
-        ListFooterComponent={
-          <View className="gap-2">
-            <Button
-              label="+ Add one-off item (not saved)"
-              variant="tinted"
-              size="large"
+        ListEmptyComponent={
+          <EmptyState
+            icon="pricetags-outline"
+            title={query.trim() ? 'No Results' : 'No Saved Items'}
+            subtitle={query.trim() ? undefined : 'Items you save to your catalog appear here.'}
+          />
+        }
+        renderItem={({ item, index }) => (
+          <GroupedRow index={index} count={filtered.length}>
+            <ListRow
+              title={item.name}
+              value={formatMinor(item.default_unit_price_minor, currencyCode)}
               onPress={() => {
-                addBlankLineItem();
+                const taxBracket = taxBrackets.find((b) => b.id === item.default_tax_bracket_id) ?? null;
+                addLineItemFromCatalog(item, taxBracket);
                 router.back();
               }}
+              accessory="none"
+              showSeparator={index > 0}
             />
-            <Button
-              label="+ Add to My Item Catalog"
-              variant="plain"
-              size="large"
-              onPress={() => router.push('/items/new')}
-            />
-          </View>
-        }
+          </GroupedRow>
+        )}
       />
     </View>
   );

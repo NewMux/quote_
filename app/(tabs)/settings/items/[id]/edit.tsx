@@ -31,7 +31,7 @@ export default function EditItemScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Could Not Save Item', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Save Item', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 

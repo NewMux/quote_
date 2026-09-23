@@ -7,7 +7,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation, type NativeStackHeaderItem } from 'expo-router';
@@ -18,7 +17,10 @@ import { ActivityLogList } from '../../../../src/components/ActivityLogList';
 import { Avatar } from '../../../../src/components/Avatar';
 import { Button } from '../../../../src/components/Button';
 import { Card } from '../../../../src/components/Card';
+import { FormField } from '../../../../src/components/form/FormField';
 import { HeaderButton } from '../../../../src/components/HeaderButton';
+import { ListRow } from '../../../../src/components/list/ListRow';
+import { ListSection } from '../../../../src/components/list/ListSection';
 import { DocumentStageIndicator } from '../../../../src/components/DocumentStageIndicator';
 import { LineItemRow } from '../../../../src/components/LineItemRow';
 import { StatusBadge } from '../../../../src/components/StatusBadge';
@@ -41,6 +43,7 @@ import { emailPdf, sharePdf } from '../../../../src/lib/share';
 import { getTaxLabel } from '../../../../src/lib/documentCalculations';
 import { formatMinor } from '../../../../src/lib/money';
 import { describeSchedule } from '../../../../src/lib/recurrence';
+import { docTypeLabel, formatDisplayDate, settlementMethodLabel } from '../../../../src/lib/format';
 import {
   canConvertToInvoice,
   canDelete,
@@ -51,7 +54,7 @@ import {
   canVoid,
   isOverdue,
 } from '../../../../src/lib/statusMachine';
-import { BRAND } from '../../../../src/lib/theme';
+import { useThemeColors } from '../../../../src/lib/theme';
 import { useBusinessProfileStore } from '../../../../src/stores/useBusinessProfileStore';
 import type {
   ActivityLogEntry,
@@ -88,6 +91,7 @@ export default function DocumentDetailScreen() {
   // the loading early-return); refs hand the effect the latest versions without reordering them.
   const menuActionsRef = useRef<() => MenuAction[]>(() => []);
   const openActionsMenuRef = useRef<() => void>(() => {});
+  const colors = useThemeColors();
 
   const reload = useCallback(async () => {
     const doc = await getDocument(id);
@@ -241,7 +245,7 @@ export default function DocumentDetailScreen() {
               await deleteDocument(id);
               router.replace('/(tabs)/documents');
             } catch (err) {
-              Alert.alert('Could Not Delete', err instanceof Error ? err.message : 'Something went wrong.');
+              Alert.alert('Couldn’t Delete', err instanceof Error ? err.message : 'Something went wrong.');
             }
           },
         },
@@ -346,56 +350,70 @@ export default function DocumentDetailScreen() {
         </View>
         <View className="flex-row items-center gap-3 mb-3">
           <Avatar
-            name={client?.display_name ?? document.client_name_snapshot ?? 'No client'}
+            name={client?.display_name ?? document.client_name_snapshot ?? 'No Client'}
             photoUri={client?.photo_uri}
             seed={client?.id ?? document.id}
             size={40}
           />
           <View className="flex-1">
             <Text className="text-base text-label">
-              {client?.display_name ?? document.client_name_snapshot ?? 'No client'}
+              {client?.display_name ?? document.client_name_snapshot ?? 'No Client'}
             </Text>
             {client?.email ? <Text className="text-sm text-secondary">{client.email}</Text> : null}
           </View>
         </View>
         <View className="flex-row justify-between pt-3 border-t border-separator">
           <View>
-            <Text className="text-xs text-secondary">Issued</Text>
-            <Text className="text-sm text-label">{document.issue_date ?? '—'}</Text>
+            <Text className="text-sm text-secondary">Issued</Text>
+            <Text className="text-base text-label">{document.issue_date ? formatDisplayDate(document.issue_date) : '—'}</Text>
           </View>
           <View>
-            <Text className="text-xs text-secondary">{document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}</Text>
-            <Text className="text-sm text-label">
-              {document.doc_type === 'invoice' ? document.due_date ?? '—' : document.expiry_date ?? '—'}
+            <Text className="text-sm text-secondary text-right">
+              {document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}
+            </Text>
+            <Text className="text-base text-label text-right">
+              {(() => {
+                const date = document.doc_type === 'invoice' ? document.due_date : document.expiry_date;
+                return date ? formatDisplayDate(date) : '—';
+              })()}
             </Text>
           </View>
         </View>
         {document.status === 'void' ? (
           <View className="mt-3 pt-3 border-t border-separator">
-            <Text className="text-xs text-secondary">Canceled{document.voided_at ? ` on ${document.voided_at.slice(0, 10)}` : ''}</Text>
-            <Text className="text-sm text-label mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
+            <Text className="text-sm text-secondary">
+              Canceled{document.voided_at ? ` on ${formatDisplayDate(document.voided_at)}` : ''}
+            </Text>
+            <Text className="text-base text-label mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
           </View>
         ) : null}
       </Card>
 
       {schedule ? (
-        <Pressable onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}>
+        <Pressable
+          onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}
+          accessibilityRole="button"
+          accessibilityLabel={describeSchedule(schedule.frequency, schedule.next_run_date)}
+          accessibilityHint="Edit the repeat schedule"
+        >
           <Card className="flex-row items-center gap-3">
-            <Ionicons name="repeat" size={20} color={BRAND.default} />
-            <Text className="flex-1 text-sm text-label" numberOfLines={2}>
+            <Ionicons name="repeat" size={20} color={colors.tint} />
+            <Text className="flex-1 text-base text-label">
               {describeSchedule(schedule.frequency, schedule.next_run_date)}
             </Text>
-            <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={17} color={colors.chevron} />
           </Card>
         </Pressable>
       ) : null}
 
       <Card>
-        <Text className="text-sm font-semibold text-label mb-2">Line Items</Text>
+        <Text className="text-lg font-semibold text-label mb-2" accessibilityRole="header">
+          Line Items
+        </Text>
         {lines.length > 0 ? (
           lines.map((line) => <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />)
         ) : (
-          <Text className="text-sm text-secondary py-2">No line items yet — tap Edit to add some.</Text>
+          <Text className="text-base text-secondary py-2">No line items yet. Tap Edit to add some.</Text>
         )}
       </Card>
 
@@ -418,8 +436,12 @@ export default function DocumentDetailScreen() {
             <TotalsRow label="Paid" valueMinor={document.amount_paid_minor} currencyCode={document.currency_code} />
           ) : null}
         </View>
-        <View style={{ backgroundColor: BRAND.dark }} className="flex-row justify-between items-center px-5 py-4">
-          <Text className="text-white/70 text-sm">Amount</Text>
+        <View
+          className="flex-row justify-between items-center px-5 py-4 bg-brand-dark"
+          accessible
+          accessibilityLabel={`${document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}: ${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}`}
+        >
+          <Text className="text-white/85 text-base">{document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}</Text>
           <Text className="text-white text-lg font-bold">
             {formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}
           </Text>
@@ -427,54 +449,52 @@ export default function DocumentDetailScreen() {
       </Card>
 
       {!canEdit(document) && document.status !== 'void' ? (
-        <Text className="text-xs text-secondary">
+        <Text className="text-sm text-secondary text-center">
           Editing is locked because this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} has been
           issued.
         </Text>
       ) : null}
 
       {settlements.length > 0 ? (
-        <Card>
-          <Text className="text-sm font-semibold text-label mb-2">Payments</Text>
-          {settlements.map((s) => (
-            <Pressable
-              key={s.id}
-              onPress={() =>
-                router.push({ pathname: `/documents/${id}/settlement-new`, params: { settlementId: s.id } })
-              }
-            >
-              <View className="flex-row justify-between py-2 border-b border-separator">
-                <Text className="text-sm text-label">
-                  {s.method} — {s.settled_date}
-                </Text>
-                <Text className="text-sm text-label">{formatMinor(s.amount_minor, document.currency_code)}</Text>
-              </View>
-            </Pressable>
-          ))}
-        </Card>
+        <View>
+          <ListSection header="Payments" footer="Tap a payment to edit or delete it.">
+            {settlements.map((s) => (
+              <ListRow
+                key={s.id}
+                title={formatMinor(s.amount_minor, document.currency_code)}
+                subtitle={`${settlementMethodLabel(s.method)} · ${formatDisplayDate(s.settled_date)}`}
+                onPress={() =>
+                  router.push({ pathname: `/documents/${id}/settlement-new`, params: { settlementId: s.id } })
+                }
+              />
+            ))}
+          </ListSection>
+        </View>
       ) : null}
 
       <Card>
-        <Text className="text-sm font-semibold text-label mb-2">Signatures</Text>
+        <Text className="text-lg font-semibold text-label mb-1" accessibilityRole="header">
+          Signatures
+        </Text>
         {(['merchant', 'client'] as const).map((role) => {
           const sig = signatures.find((s) => s.signer_role === role);
           if (sig) {
             return (
-              <View key={role} className="flex-row justify-between items-center py-1">
-                <Text className="text-sm text-label">
-                  {role === 'merchant' ? 'You' : 'Client'} signed {sig.signed_at.slice(0, 10)}
+              <View key={role} className="flex-row justify-between items-center gap-3 min-h-[48px]">
+                <Text className="text-base text-label flex-1">
+                  {role === 'merchant' ? 'You' : 'Client'} signed {formatDisplayDate(sig.signed_at)}
                 </Text>
                 <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
               </View>
             );
           }
           return (
-            <View key={role} className="flex-row justify-between items-center py-1">
-              <Text className="text-sm text-secondary">
+            <View key={role} className="flex-row justify-between items-center gap-3 min-h-[48px]">
+              <Text className="text-base text-secondary flex-1">
                 {role === 'merchant' ? "You haven't signed" : "Client hasn't signed"}
               </Text>
               <Button
-                label={role === 'merchant' ? 'Sign as Me' : 'Get Signature'}
+                label={role === 'merchant' ? 'Sign' : 'Get Signature'}
                 variant="tinted"
                 size="small"
                 onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role } })}
@@ -485,7 +505,9 @@ export default function DocumentDetailScreen() {
       </Card>
 
       <Card>
-        <Text className="text-sm font-semibold text-label mb-2">Activity</Text>
+        <Text className="text-lg font-semibold text-label mb-2" accessibilityRole="header">
+          Activity
+        </Text>
         <ActivityLogList entries={activity} />
       </Card>
       </ScrollView>
@@ -493,36 +515,29 @@ export default function DocumentDetailScreen() {
       {primaryAction ? (
         <View className="p-4 bg-card border-t border-separator gap-1.5">
           <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
-          <Text className="text-xs text-secondary text-center">{primaryAction.caption}</Text>
+          <Text className="text-sm text-secondary text-center">{primaryAction.caption}</Text>
         </View>
       ) : null}
 
       {busy ? (
         <View className="absolute inset-0 items-center justify-center bg-card/60">
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" accessibilityLabel="Working" />
         </View>
       ) : null}
 
       <Modal visible={voidPromptVisible} transparent animationType="fade" onRequestClose={() => setVoidPromptVisible(false)}>
         <View className="flex-1 items-center justify-center bg-black/40 px-6">
           <View className="bg-card rounded-2xl p-5 w-full gap-3">
-            <Text className="text-base font-semibold text-label">
-              Cancel this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'}?
+            <Text className="text-lg font-semibold text-label">
+              Cancel This {docTypeLabel(document.doc_type)}?
             </Text>
-            <Text className="text-sm text-secondary">
-              This {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} will be canceled. It stays on
-              record but can&apos;t be edited, sent, or paid anymore.
+            <Text className="text-base text-secondary">
+              It stays on record but can&apos;t be edited, sent, or paid anymore.
             </Text>
-            <TextInput
-              className="border border-field rounded-lg px-3 py-2 text-base text-label"
-              placeholder="Reason (optional)"
-              value={voidReason}
-              onChangeText={setVoidReason}
-              autoFocus
-            />
+            <FormField label="Reason" hint="Optional" value={voidReason} onChangeText={setVoidReason} autoFocus />
             <View className="flex-row gap-2 justify-end mt-1">
-              <Button label="Back" variant="plain" onPress={() => setVoidPromptVisible(false)} />
-              <Button label="Cancel It" variant="destructive" onPress={confirmVoid} />
+              <Button label="Don't Cancel" variant="plain" onPress={() => setVoidPromptVisible(false)} />
+              <Button label={`Cancel ${docTypeLabel(document.doc_type)}`} variant="destructive" onPress={confirmVoid} />
             </View>
           </View>
         </View>
@@ -562,7 +577,11 @@ function getPrimaryAction(
   if (document.status === 'void') return null;
   return isOverdue(document)
     ? { label: 'Send Reminder', caption: 'Emails the client a payment reminder.', onPress: handlers.onEmail }
-    : { label: 'Email Invoice', caption: 'Sends this invoice to the client by email.', onPress: handlers.onEmail };
+    : {
+        label: `Email ${docTypeLabel(document.doc_type)}`,
+        caption: `Sends this ${document.doc_type} to the client by email.`,
+        onPress: handlers.onEmail,
+      };
 }
 
 function TotalsRow({
@@ -576,8 +595,8 @@ function TotalsRow({
 }) {
   return (
     <View className="flex-row justify-between py-1">
-      <Text className="text-sm text-secondary">{label}</Text>
-      <Text className="text-sm text-label">{formatMinor(valueMinor, currencyCode)}</Text>
+      <Text className="text-base text-secondary">{label}</Text>
+      <Text className="text-base text-label">{formatMinor(valueMinor, currencyCode)}</Text>
     </View>
   );
 }

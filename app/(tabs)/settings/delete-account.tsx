@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Text, View, Linking } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../../src/components/Button';
+import { FormField } from '../../../src/components/form/FormField';
+import { FormScrollView } from '../../../src/components/form/FormScrollView';
+import { useThemeColors } from '../../../src/lib/theme';
+import { ListRow } from '../../../src/components/list/ListRow';
+import { ListSection } from '../../../src/components/list/ListSection';
 import { deleteAccount } from '../../../src/db/repositories/account.repo';
 import { APPLE_MANAGE_SUBSCRIPTIONS_URL } from '../../../src/lib/subscription';
 import { supabase } from '../../../src/lib/supabase';
@@ -12,6 +18,7 @@ const CONFIRM_WORD = 'DELETE';
 
 export default function DeleteAccountScreen() {
   const [confirmText, setConfirmText] = useState('');
+  const colors = useThemeColors();
   const [isDeleting, setIsDeleting] = useState(false);
   const canDelete = confirmText === CONFIRM_WORD && !isDeleting;
 
@@ -30,50 +37,53 @@ export default function DeleteAccountScreen() {
       router.replace('/(auth)/sign-in');
     } catch (err) {
       setIsDeleting(false);
-      Alert.alert('Could not delete account', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Delete Account', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 
   return (
-    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <View className="bg-card rounded-xl p-4 border border-destructive/30">
-        <Text className="text-base font-semibold text-label mb-2">This can&apos;t be undone</Text>
-        <Text className="text-sm text-label leading-5">
+    <FormScrollView>
+      <View className="items-center gap-2 pt-2">
+        <Ionicons name="warning" size={44} color={colors.destructive} />
+        <Text className="text-xl font-semibold text-label text-center" accessibilityRole="header">
+          This Can’t Be Undone
+        </Text>
+        <Text className="text-base text-secondary text-center">
           This permanently deletes your account and everything in it — every client, invoice,
-          estimate, item, tax rate, signature, photo, and payment record — and signs you out for
-          good. There&apos;s no backup and no way to get this back. If you just want to clear your
-          data and keep your account, use &quot;Delete All Data&quot; instead.
+          estimate, item, tax rate, signature, photo, and payment record — and signs you out. To
+          clear your data but keep your account, use Delete All Data instead.
         </Text>
-      </View>
-
-      <View className="bg-card rounded-xl p-4 border border-separator">
-        <Text className="text-sm text-label leading-5">
-          Deleting your account doesn&apos;t cancel a Invoice Them Pro subscription — Apple bills it
-          separately. Cancel it first so you aren&apos;t charged again.
-        </Text>
-        <Pressable onPress={() => Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL)} hitSlop={8}>
-          <Text className="text-sm text-tint font-medium mt-2">Manage Subscription</Text>
-        </Pressable>
       </View>
 
       <View>
-        <Text className="text-xs text-secondary mb-1">Type {CONFIRM_WORD} to confirm</Text>
-        <TextInput
-          className="border border-field rounded-lg px-3 py-2 text-base text-label bg-card"
-          value={confirmText}
-          onChangeText={setConfirmText}
-          autoCapitalize="characters"
-          autoCorrect={false}
-        />
+        <ListSection footer="Deleting your account doesn't cancel an Invoice Them Pro subscription — Apple bills it separately. Cancel it first so you aren't charged again.">
+          <ListRow
+            title="Manage Subscription"
+            onPress={() => Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL)}
+            accessory="none"
+            accessibilityHint="Opens your App Store subscriptions"
+          />
+        </ListSection>
       </View>
 
+      <FormField
+        label={`Type ${CONFIRM_WORD} to Confirm`}
+        value={confirmText}
+        onChangeText={setConfirmText}
+        autoCapitalize="characters"
+        autoCorrect={false}
+        spellCheck={false}
+        returnKeyType="done"
+      />
+
       <Button
-        label={isDeleting ? 'Deleting…' : 'Delete Account'}
+        label="Delete Account"
         variant="destructive"
         size="large"
         disabled={!canDelete}
+        loading={isDeleting}
         onPress={handleDelete}
       />
-    </ScrollView>
+    </FormScrollView>
   );
 }

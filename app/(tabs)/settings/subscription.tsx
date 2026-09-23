@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Alert, Linking, ScrollView, Text, View } from 'react-native';
-import { format } from 'date-fns';
+import { Alert, Linking, ScrollView } from 'react-native';
 import Purchases from 'react-native-purchases';
-import { Button } from '../../../src/components/Button';
-import { Card } from '../../../src/components/Card';
+import { ListRow } from '../../../src/components/list/ListRow';
+import { ListSection } from '../../../src/components/list/ListSection';
+import { formatDisplayDate } from '../../../src/lib/format';
 import { APPLE_MANAGE_SUBSCRIPTIONS_URL, ENTITLEMENT_ID } from '../../../src/lib/subscription';
 import { useSubscriptionStore } from '../../../src/stores/useSubscriptionStore';
 
@@ -20,9 +20,6 @@ export default function SubscriptionScreen() {
   const [isRestoring, setIsRestoring] = useState(false);
 
   const entitlement = customerInfo?.entitlements.active[ENTITLEMENT_ID] ?? null;
-  const dateText = entitlement?.expirationDate
-    ? `${entitlement.willRenew ? 'Renews' : 'Ends'} ${format(new Date(entitlement.expirationDate), 'MMM d, yyyy')}`
-    : null;
 
   async function handleManage() {
     try {
@@ -32,7 +29,7 @@ export default function SubscriptionScreen() {
         await Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL);
       }
     } catch {
-      await Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL);
+      await Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL).catch(() => {});
     }
   }
 
@@ -41,59 +38,55 @@ export default function SubscriptionScreen() {
     try {
       const restored = await restore();
       Alert.alert(
-        restored ? 'Purchases restored' : 'Nothing to restore',
+        restored ? 'Purchases Restored' : 'Nothing to Restore',
         restored
           ? 'Your subscription is active on this account.'
-          : 'No active subscription was found for the Apple ID signed in on this device.'
+          : 'No active subscription was found for the Apple Account signed in on this device.'
       );
     } catch (err) {
-      Alert.alert('Could not restore', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Restore Purchases', err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setIsRestoring(false);
     }
   }
 
   return (
-    <ScrollView className="flex-1 bg-grouped" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <Card className="gap-1">
-        {!isAvailable ? (
-          <>
-            <Text className="text-base font-semibold text-label">Development build</Text>
-            <Text className="text-sm text-secondary">
-              Subscriptions aren&apos;t set up in this build, so every feature is unlocked.
-            </Text>
-          </>
-        ) : entitlement ? (
-          <>
-            <Text className="text-base font-semibold text-label">
-              Invoice Them Pro · {planName(entitlement.productIdentifier)}
-            </Text>
-            <Text className="text-sm text-secondary">
-              {entitlement.periodType === 'TRIAL' ? 'Free trial' : 'Active'}
-              {dateText ? ` · ${dateText}` : ''}
-            </Text>
-          </>
-        ) : (
-          <Text className="text-base text-label">No active subscription</Text>
-        )}
-      </Card>
+    <ScrollView
+      className="flex-1 bg-grouped"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 16 }}
+    >
+      {!isAvailable ? (
+        <ListSection footer="Subscriptions aren't set up in this build, so every feature is unlocked.">
+          <ListRow title="Plan" value="All Features" />
+        </ListSection>
+      ) : entitlement ? (
+        <ListSection header="Invoice Them Pro">
+          <ListRow title="Plan" value={planName(entitlement.productIdentifier)} />
+          <ListRow title="Status" value={entitlement.periodType === 'TRIAL' ? 'Free Trial' : 'Active'} />
+          {entitlement.expirationDate ? (
+            <ListRow
+              title={entitlement.willRenew ? 'Renews On' : 'Ends On'}
+              value={formatDisplayDate(entitlement.expirationDate)}
+            />
+          ) : null}
+        </ListSection>
+      ) : (
+        <ListSection>
+          <ListRow title="Status" value="Not Subscribed" />
+        </ListSection>
+      )}
 
-      <View className="gap-2">
-        <Button label="Manage Subscription" variant="tinted" size="large" onPress={handleManage} />
+      <ListSection footer="Your subscription is billed through your Apple Account. To change plans or cancel, use Manage Subscription — if you cancel, Invoice Them Pro stays active until the end of the current period.">
+        <ListRow title="Manage Subscription" onPress={handleManage} accessory="none" />
         {isAvailable ? (
-          <Button
-            label={isRestoring ? 'Restoring…' : 'Restore Purchases'}
-            variant="plain"
-            onPress={handleRestore}
-            disabled={isRestoring}
+          <ListRow
+            title={isRestoring ? 'Restoring…' : 'Restore Purchases'}
+            onPress={isRestoring ? undefined : handleRestore}
+            accessory="none"
           />
         ) : null}
-      </View>
-
-      <Text className="text-xs text-secondary leading-4">
-        Your subscription is billed through your Apple ID. To change plans or cancel, use Manage
-        Subscription — cancelling keeps Invoice Them Pro active until the end of the current period.
-      </Text>
+      </ListSection>
     </ScrollView>
   );
 }

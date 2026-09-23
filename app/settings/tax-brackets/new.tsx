@@ -25,7 +25,7 @@ export default function NewTaxBracketScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Could Not Add Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Add Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 

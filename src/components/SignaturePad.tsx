@@ -1,29 +1,43 @@
-import { useRef } from 'react';
-import { View } from 'react-native';
+import { forwardRef } from 'react';
+import { Text, View } from 'react-native';
 import SignatureView, { type SignatureViewRef } from 'react-native-signature-canvas';
 import { Button } from './Button';
 
 interface SignaturePadProps {
   onSave: (dataUrl: string) => void;
+  /** Called when "Done" is tapped before anything was drawn. */
+  onEmpty: () => void;
 }
 
-export function SignaturePad({ onSave }: SignaturePadProps) {
-  const ref = useRef<SignatureViewRef>(null);
-
+/** A drawing surface for a signature. The canvas is deliberately white in both appearances — it's
+ * the paper the signature is printed on. The hosting sheet triggers saving via the ref. */
+export const SignaturePad = forwardRef<SignatureViewRef, SignaturePadProps>(function SignaturePad(
+  { onSave, onEmpty },
+  ref
+) {
   return (
-    <View className="flex-1">
-      <View className="flex-1 border border-field rounded-xl overflow-hidden bg-card">
+    <View className="flex-1 gap-2">
+      <View
+        className="flex-1 border border-field rounded-2xl overflow-hidden"
+        style={{ backgroundColor: '#FFFFFF' }}
+        accessibilityLabel="Signature area. Draw your signature with your finger."
+      >
         <SignatureView
           ref={ref}
           onOK={onSave}
+          onEmpty={onEmpty}
           descriptionText=""
           webStyle=".m-signature-pad--footer { display: none; margin: 0; }"
         />
       </View>
-      <View className="flex-row justify-between mt-4">
-        <Button label="Clear" variant="tinted" onPress={() => ref.current?.clearSignature()} />
-        <Button label="Save Signature" variant="filled" onPress={() => ref.current?.readSignature()} />
+      <View className="flex-row items-center justify-between">
+        <Text className="text-sm text-secondary">Sign above with your finger.</Text>
+        <Button
+          label="Clear"
+          variant="plain"
+          onPress={() => (ref && typeof ref !== 'function' ? ref.current?.clearSignature() : undefined)}
+        />
       </View>
     </View>
   );
-}
+});

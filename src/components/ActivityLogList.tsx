@@ -35,7 +35,7 @@ export function ActivityLogList({ entries }: ActivityLogListProps) {
               {entry.event_detail ? ` — ${entry.event_detail}` : ''}
             </Text>
           </View>
-          <Text className="text-xs text-secondary flex-shrink-0">
+          <Text className="text-sm text-secondary flex-shrink-0">
             {format(parseISO(entry.created_at), 'MMM d, h:mm a')}
           </Text>
         </View>

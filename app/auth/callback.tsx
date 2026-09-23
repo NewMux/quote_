@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Button } from '../../src/components/Button';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
@@ -16,40 +17,49 @@ export default function AuthCallbackScreen() {
 
   useEffect(() => {
     (async () => {
-      if (!code) {
-        setError('This link is missing required information. Request a new one and try again.');
-        return;
-      }
+      try {
+        if (!code) {
+          setError('This link is missing required information. Request a new one and try again.');
+          return;
+        }
 
-      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-      if (exchangeError || !data.session) {
-        setError(exchangeError?.message ?? 'This link is invalid or has expired. Request a new one and try again.');
-        return;
-      }
-      useAuthStore.setState({ session: data.session });
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (exchangeError || !data.session) {
+          setError(exchangeError?.message ?? 'This link is invalid or has expired. Request a new one and try again.');
+          return;
+        }
+        useAuthStore.setState({ session: data.session });
 
-      if (type === 'recovery') {
-        router.replace('/(auth)/reset-password');
-        return;
-      }
+        if (type === 'recovery') {
+          router.replace('/(auth)/reset-password');
+          return;
+        }
 
-      await useBusinessProfileStore.getState().load();
-      const profile = useBusinessProfileStore.getState().profile;
-      router.replace(profile?.business_name?.trim() ? '/(tabs)/home' : '/onboarding');
+        await useBusinessProfileStore.getState().load();
+        const profile = useBusinessProfileStore.getState().profile;
+        router.replace(profile?.business_name?.trim() ? '/(tabs)/home' : '/onboarding');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      }
     })();
   }, [code, type]);
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-grouped px-6">
-        <Text className="text-base text-label text-center">{error}</Text>
+      <View className="flex-1 items-center justify-center bg-grouped px-6 gap-4">
+        <Text className="text-xl font-semibold text-label text-center" accessibilityRole="header">
+          This Link Didn’t Work
+        </Text>
+        <Text className="text-base text-secondary text-center">{error}</Text>
+        <Button label="Back to Sign In" variant="tinted" onPress={() => router.replace('/(auth)/sign-in')} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 items-center justify-center bg-grouped">
+    <View className="flex-1 items-center justify-center bg-grouped gap-3">
       <ActivityIndicator size="large" />
+      <Text className="text-base text-secondary">Signing You In…</Text>
     </View>
   );
 }

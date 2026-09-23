@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { Pressable, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../src/components/Button';
+import { FormField } from '../src/components/form/FormField';
+import { ListRow } from '../src/components/list/ListRow';
+import { ListSection } from '../src/components/list/ListSection';
 import { getCurrencyName } from '../src/lib/currencies';
 import { parseRateBp } from '../src/lib/money';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
@@ -28,16 +31,27 @@ export default function OnboardingScreen() {
   async function handleContinueBusinessBasics() {
     if (!businessName.trim()) return;
     setIsSaving(true);
-    await updateProfile({ business_name: businessName.trim() });
-    setIsSaving(false);
-    setStep(2);
+    try {
+      await updateProfile({ business_name: businessName.trim() });
+      setStep(2);
+    } catch (err) {
+      Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   async function handleContinueTaxRate() {
     if (chargesTax && taxName.trim()) {
       setIsSaving(true);
-      const bracket = await createTaxRate({ name: taxName.trim(), rate_bp: parseRateBp(taxRate) });
-      await setDefaultTaxRate(bracket.id);
+      try {
+        const bracket = await createTaxRate({ name: taxName.trim(), rate_bp: parseRateBp(taxRate) });
+        await setDefaultTaxRate(bracket.id);
+      } catch (err) {
+        setIsSaving(false);
+        Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
+        return;
+      }
       setIsSaving(false);
     }
     setStep(3);
@@ -53,121 +67,138 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-grouped">
-      <View className="px-6 pt-4">
-        <Text className="text-xs text-secondary text-center">
-          Step {step + 1} of {TOTAL_STEPS}
-        </Text>
-      </View>
-
-      <View className="flex-1 px-6 justify-center gap-6">
-        {step === 0 ? (
-          <View className="gap-3">
-            <Text className="text-2xl font-bold text-label text-center">Welcome!</Text>
-            <Text className="text-base text-secondary text-center">
-              Let&apos;s get your business set up — this takes about a minute.
-            </Text>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 24, gap: 24 }}
+        automaticallyAdjustKeyboardInsets
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+      >
+        <View className="w-full max-w-[480px] self-center flex-1 gap-6">
+          <View
+            className="flex-row gap-1.5 justify-center"
+            accessible
+            accessibilityLabel={`Step ${step + 1} of ${TOTAL_STEPS}`}
+          >
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <View key={i} className={`h-1.5 w-8 rounded-full ${i <= step ? 'bg-brand' : 'bg-fill'}`} />
+            ))}
           </View>
-        ) : null}
 
-        {step === 1 ? (
-          <View className="gap-4">
-            <Text className="text-2xl font-bold text-label">Your Business</Text>
-            <View>
-              <Text className="text-xs text-secondary mb-1">Business Name</Text>
-              <TextInput
-                className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-                value={businessName}
-                onChangeText={setBusinessName}
-                placeholder="e.g. Sam's Plumbing"
-                autoFocus
-              />
-            </View>
-            <View>
-              <Text className="text-xs text-secondary mb-1">Currency</Text>
-              <Pressable
-                onPress={() => router.push('/modals/currency-picker')}
-                className="border border-field rounded-lg px-3 py-2 bg-card flex-row justify-between items-center"
-              >
-                <Text className="text-base text-label">
-                  {getCurrencyName(currencyCode)} ({currencyCode})
+          <View className="flex-1 justify-center gap-6">
+            {step === 0 ? (
+              <View className="gap-3">
+                <Text className="text-[28px] font-bold text-label text-center" accessibilityRole="header">
+                  Welcome to Invoice Them
                 </Text>
-                <Text className="text-secondary">›</Text>
-              </Pressable>
-            </View>
-          </View>
-        ) : null}
-
-        {step === 2 ? (
-          <View className="gap-4">
-            <Text className="text-2xl font-bold text-label">Sales Tax</Text>
-            <Text className="text-base text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
-            <View className="flex-row items-center justify-between bg-card rounded-lg border border-field px-3 py-3">
-              <Text className="text-base text-label">I charge sales tax or VAT</Text>
-              <Switch value={chargesTax} onValueChange={setChargesTax} />
-            </View>
-            {chargesTax ? (
-              <View className="flex-row gap-2">
-                <TextInput
-                  className="flex-1 border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-                  placeholder="e.g. Sales Tax"
-                  value={taxName}
-                  onChangeText={setTaxName}
-                />
-                <TextInput
-                  className="w-24 border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-                  placeholder="Rate %"
-                  keyboardType="decimal-pad"
-                  value={taxRate}
-                  onChangeText={setTaxRate}
-                />
+                <Text className="text-[17px] text-secondary text-center">
+                  Let&apos;s set up your business. It takes about a minute.
+                </Text>
               </View>
-            ) : (
-              <Text className="text-xs text-secondary">No problem — you can add this anytime in Settings.</Text>
-            )}
-          </View>
-        ) : null}
+            ) : null}
 
-        {step === 3 ? (
-          <View className="gap-3">
-            <Text className="text-2xl font-bold text-label text-center">You&apos;re all set!</Text>
-            <Text className="text-base text-secondary text-center">
-              You can customize invoice numbering and tax rates anytime in Settings.
-            </Text>
-          </View>
-        ) : null}
-      </View>
+            {step === 1 ? (
+              <View className="gap-5">
+                <Text className="text-[28px] font-bold text-label" accessibilityRole="header">
+                  Your Business
+                </Text>
+                <FormField
+                  label="Business Name"
+                  value={businessName}
+                  onChangeText={setBusinessName}
+                  placeholder="e.g. Sam's Plumbing"
+                  textContentType="organizationName"
+                  autoCapitalize="words"
+                  maxLength={100}
+                  returnKeyType="done"
+                  autoFocus
+                />
+                <ListSection footer="Used for new documents. You can change it later in Settings.">
+                  <ListRow
+                    title="Currency"
+                    value={`${getCurrencyName(currencyCode)} (${currencyCode})`}
+                    onPress={() => router.push('/modals/currency-picker')}
+                  />
+                </ListSection>
+              </View>
+            ) : null}
 
-      <View className="px-6 pb-6 gap-3">
-        {step === 0 ? <Button label="Get Started" size="large" onPress={() => setStep(1)} /> : null}
-        {step === 1 ? (
-          <>
-            <Button
-              label={isSaving ? 'Saving…' : 'Continue'}
-              size="large"
-              disabled={!businessName.trim() || isSaving}
-              onPress={handleContinueBusinessBasics}
-            />
-            <Button label="Back" variant="plain" onPress={() => setStep(0)} />
-          </>
-        ) : null}
-        {step === 2 ? (
-          <>
-            <Button
-              label={isSaving ? 'Saving…' : chargesTax ? 'Continue' : 'Skip'}
-              size="large"
-              disabled={isSaving || (chargesTax && !taxName.trim())}
-              onPress={handleContinueTaxRate}
-            />
-            <Button label="Back" variant="plain" onPress={() => setStep(1)} />
-          </>
-        ) : null}
-        {step === 3 ? (
-          <>
-            <Button label="Create Your First Invoice" size="large" onPress={() => finish('invoice')} />
-            <Button label="Explore the App" variant="plain" onPress={() => finish('home')} />
-          </>
-        ) : null}
-      </View>
+            {step === 2 ? (
+              <View className="gap-5">
+                <Text className="text-[28px] font-bold text-label" accessibilityRole="header">
+                  Sales Tax
+                </Text>
+                <Text className="text-[17px] text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
+                <ListSection
+                  footer={chargesTax ? undefined : 'No problem — you can add tax rates anytime in Settings.'}
+                >
+                  <ListRow title="I Charge Sales Tax or VAT" switchValue={chargesTax} onSwitchChange={setChargesTax} />
+                </ListSection>
+                {chargesTax ? (
+                  <View className="flex-row gap-3">
+                    <View style={{ flex: 2 }}>
+                      <FormField label="Name" placeholder="e.g. Sales Tax" value={taxName} onChangeText={setTaxName} />
+                    </View>
+                    <View className="flex-1">
+                      <FormField
+                        label="Rate (%)"
+                        placeholder="8.25"
+                        keyboardType="decimal-pad"
+                        value={taxRate}
+                        onChangeText={setTaxRate}
+                      />
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
+            {step === 3 ? (
+              <View className="gap-3">
+                <Text className="text-[28px] font-bold text-label text-center" accessibilityRole="header">
+                  You&apos;re All Set
+                </Text>
+                <Text className="text-[17px] text-secondary text-center">
+                  You can change numbering and tax rates anytime in Settings.
+                </Text>
+              </View>
+            ) : null}
+          </View>
+
+          <View className="gap-2">
+            {step === 0 ? <Button label="Get Started" size="large" onPress={() => setStep(1)} /> : null}
+            {step === 1 ? (
+              <>
+                <Button
+                  label="Continue"
+                  size="large"
+                  disabled={!businessName.trim()}
+                  loading={isSaving}
+                  onPress={handleContinueBusinessBasics}
+                />
+                <Button label="Back" variant="plain" onPress={() => setStep(0)} />
+              </>
+            ) : null}
+            {step === 2 ? (
+              <>
+                <Button
+                  label={chargesTax ? 'Continue' : 'Skip'}
+                  size="large"
+                  disabled={chargesTax && !taxName.trim()}
+                  loading={isSaving}
+                  onPress={handleContinueTaxRate}
+                />
+                <Button label="Back" variant="plain" onPress={() => setStep(1)} />
+              </>
+            ) : null}
+            {step === 3 ? (
+              <>
+                <Button label="Create Your First Invoice" size="large" onPress={() => finish('invoice')} />
+                <Button label="Explore the App" variant="plain" onPress={() => finish('home')} />
+              </>
+            ) : null}
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

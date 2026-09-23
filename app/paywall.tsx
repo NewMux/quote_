@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import type { PurchasesPackage } from 'react-native-purchases';
@@ -40,7 +41,7 @@ function PlanCard({
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
+      accessibilityState={{ checked: selected }}
       accessibilityLabel={`${title}, ${price}${detail ? `, ${detail}` : ''}`}
     >
       <View
@@ -58,14 +59,22 @@ function PlanCard({
             <Text className="text-base font-semibold text-label">{title}</Text>
             {badge ? (
               <View className="bg-brand/10 rounded-full px-2 py-0.5">
-                <Text className="text-xs font-semibold text-tint">{badge}</Text>
+                <Text className="text-sm font-semibold text-tint">{badge}</Text>
               </View>
             ) : null}
           </View>
-          {detail ? <Text className="text-xs text-secondary mt-0.5">{detail}</Text> : null}
+          {detail ? <Text className="text-sm text-secondary mt-0.5">{detail}</Text> : null}
         </View>
         <Text className="text-base font-semibold text-label">{price}</Text>
       </View>
+    </Pressable>
+  );
+}
+
+function FooterLink({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="link" className="min-h-[44px] justify-center px-1">
+      <Text className="text-sm text-tint">{label}</Text>
     </Pressable>
   );
 }
@@ -78,6 +87,7 @@ export default function PaywallScreen() {
   const restore = useSubscriptionStore((s) => s.restore);
   const signOut = useAuthStore((s) => s.signOut);
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
 
   const [loadError, setLoadError] = useState(false);
   const [plan, setPlan] = useState<PlanKind>('annual');
@@ -110,7 +120,7 @@ export default function PaywallScreen() {
     try {
       await purchase(selected);
     } catch (err) {
-      Alert.alert('Purchase failed', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Purchase Didn’t Go Through', err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setIsWorking(false);
     }
@@ -122,12 +132,12 @@ export default function PaywallScreen() {
       const restored = await restore();
       if (!restored) {
         Alert.alert(
-          'Nothing to restore',
+          'Nothing to Restore',
           'No active subscription was found for the Apple ID signed in on this device.'
         );
       }
     } catch (err) {
-      Alert.alert('Could not restore', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Restore Purchases', err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setIsWorking(false);
     }
@@ -138,7 +148,7 @@ export default function PaywallScreen() {
       await signOut();
       router.replace('/(auth)/sign-in');
     } catch (err) {
-      Alert.alert('Could not sign out', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Sign Out', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 
@@ -150,6 +160,7 @@ export default function PaywallScreen() {
 
   return (
     <View className="flex-1 bg-grouped">
+      <StatusBar style="light" />
       <LinearGradient colors={[BRAND.default, BRAND.darker]}>
         <SafeAreaView edges={['top']}>
           <View className="px-6 pt-6 pb-8 items-center gap-2">
@@ -164,7 +175,9 @@ export default function PaywallScreen() {
         </SafeAreaView>
       </LinearGradient>
 
-      <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 20 + insets.bottom, maxWidth: 560, width: '100%', alignSelf: 'center' }}
+      >
         <View className="gap-3">
           {BENEFITS.map((benefit) => (
             <View key={benefit.text} className="flex-row items-center gap-3">
@@ -209,27 +222,23 @@ export default function PaywallScreen() {
         )}
 
         <View className="gap-2">
+          {trial ? <Text className="text-base text-secondary text-center">{`${trial}, then ${selected?.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}</Text> : null}
           <Button
-            label={isWorking ? 'Please wait…' : trial ? `Start ${trial}` : 'Subscribe'}
+            label={trial ? 'Start Free Trial' : 'Subscribe'}
             size="large"
             onPress={handlePurchase}
-            disabled={!selected || isWorking}
+            disabled={!selected}
+            loading={isWorking}
           />
           <Button label="Restore Purchases" variant="plain" onPress={handleRestore} disabled={isWorking} />
         </View>
 
-        {renewalText ? <Text className="text-xs text-secondary leading-4">{renewalText}</Text> : null}
+        {renewalText ? <Text className="text-sm text-secondary leading-5">{renewalText}</Text> : null}
 
-        <View className="flex-row justify-center gap-6">
-          <Pressable onPress={() => router.push('/privacy-policy')} hitSlop={8}>
-            <Text className="text-xs text-tint">Privacy Policy</Text>
-          </Pressable>
-          <Pressable onPress={() => Linking.openURL(APPLE_EULA_URL)} hitSlop={8}>
-            <Text className="text-xs text-tint">Terms of Use</Text>
-          </Pressable>
-          <Pressable onPress={handleSignOut} hitSlop={8}>
-            <Text className="text-xs text-secondary">Sign Out</Text>
-          </Pressable>
+        <View className="flex-row flex-wrap justify-center gap-x-4">
+          <FooterLink label="Privacy Policy" onPress={() => router.push('/privacy-policy')} />
+          <FooterLink label="Terms of Use" onPress={() => Linking.openURL(APPLE_EULA_URL)} />
+          <FooterLink label="Sign Out" onPress={handleSignOut} />
         </View>
       </ScrollView>
     </View>

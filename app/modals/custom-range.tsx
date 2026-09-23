@@ -1,23 +1,31 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button } from '../../src/components/Button';
 import { DateField } from '../../src/components/DateField';
+import { FormScrollView } from '../../src/components/form/FormScrollView';
 import { SheetHeader } from '../../src/components/SheetHeader';
+import { toStoredDate } from '../../src/lib/format';
 import { useReportsStore } from '../../src/stores/useReportsStore';
+
+function firstOfThisMonth(): string {
+  const now = new Date();
+  return toStoredDate(new Date(now.getFullYear(), now.getMonth(), 1));
+}
 
 export default function CustomRangeModal() {
   const setPeriod = useReportsStore((s) => s.setPeriod);
-  const [startDate, setStartDate] = useState<string | null>(null);
-  const [endDate, setEndDate] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<string | null>(firstOfThisMonth());
+  const [endDate, setEndDate] = useState<string | null>(toStoredDate(new Date()));
 
-  const canApply = !!startDate && !!endDate && startDate <= endDate;
+  const isBackwards = !!startDate && !!endDate && startDate > endDate;
+  const canApply = !!startDate && !!endDate && !isBackwards;
 
   async function apply() {
     if (!startDate || !endDate) return;
+    // Both ends are the local calendar day: midnight at the start, the last millisecond at the end.
     await setPeriod({
       kind: 'custom',
-      startIso: new Date(startDate).toISOString(),
+      startIso: new Date(`${startDate}T00:00:00`).toISOString(),
       endIso: new Date(`${endDate}T23:59:59.999`).toISOString(),
     });
     router.back();
@@ -25,15 +33,14 @@ export default function CustomRangeModal() {
 
   return (
     <View className="flex-1 bg-grouped">
-      <SheetHeader title="Custom Range" />
-      <View className="p-4 gap-4">
+      <SheetHeader title="Custom Range" actionLabel="Apply" onAction={apply} actionDisabled={!canApply} />
+      <FormScrollView contentContainerStyle={{ gap: 12 }}>
         <DateField label="Start Date" value={startDate} onChange={setStartDate} />
         <DateField label="End Date" value={endDate} onChange={setEndDate} />
-        {startDate && endDate && startDate > endDate ? (
-          <Text className="text-xs text-destructive">Start date must be before end date.</Text>
+        {isBackwards ? (
+          <Text className="text-sm text-destructive">The start date needs to be on or before the end date.</Text>
         ) : null}
-        <Button label="Apply" size="large" disabled={!canApply} onPress={apply} />
-      </View>
+      </FormScrollView>
     </View>
   );
 }

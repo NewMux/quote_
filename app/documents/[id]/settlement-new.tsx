@@ -46,7 +46,7 @@ export default function SettlementFormScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSubmitting(false);
-      Alert.alert('Could Not Save Payment', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Save Payment', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 
@@ -62,7 +62,7 @@ export default function SettlementFormScreen() {
             await deleteSettlement(settlementId, id);
             leave(() => router.back());
           } catch (err) {
-            Alert.alert('Could Not Delete Payment', err instanceof Error ? err.message : 'Something went wrong.');
+            Alert.alert('Couldn’t Delete Payment', err instanceof Error ? err.message : 'Something went wrong.');
           }
         },
       },

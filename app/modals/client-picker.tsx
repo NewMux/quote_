@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Button } from '../../src/components/Button';
 import { EmptyState } from '../../src/components/EmptyState';
+import { GroupedRow } from '../../src/components/list/GroupedRow';
+import { ListRow } from '../../src/components/list/ListRow';
+import { ListSection } from '../../src/components/list/ListSection';
+import { SearchField } from '../../src/components/SearchField';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
@@ -12,10 +15,12 @@ export default function ClientPickerModal() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
   const isFilterMode = mode === 'filter';
   const { clients, load, create } = useClientsStore();
+  const currentClientId = useDocumentEditorStore((s) => s.clientId);
   const setClient = useDocumentEditorStore((s) => s.setClient);
   const { filter, setFilter } = useDocumentsStore();
   const [query, setQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const selectedId = isFilterMode ? filter.clientId : currentClientId;
 
   useEffect(() => {
     load();
@@ -27,76 +32,89 @@ export default function ClientPickerModal() {
     return clients.filter((c) => c.display_name.toLowerCase().includes(q));
   }, [clients, query]);
 
-  function selectClient(clientId: string, clientName: string) {
+  const trimmedQuery = query.trim();
+  const canQuickAdd =
+    !isFilterMode &&
+    !!trimmedQuery &&
+    !filtered.some((c) => c.display_name.toLowerCase() === trimmedQuery.toLowerCase());
+
+  function selectClient(clientId: string | undefined, clientName?: string) {
     if (isFilterMode) {
       setFilter({ ...filter, clientId });
-    } else {
+    } else if (clientId && clientName) {
       setClient(clientId, clientName);
     }
     router.back();
   }
 
   async function quickAddClient() {
-    if (!query.trim()) return;
+    if (!trimmedQuery || isCreating) return;
     setIsCreating(true);
-    const client = await create({ display_name: query.trim() });
-    setIsCreating(false);
-    selectClient(client.id, client.display_name);
+    try {
+      const client = await create({ display_name: trimmedQuery });
+      selectClient(client.id, client.display_name);
+    } catch (err) {
+      setIsCreating(false);
+      Alert.alert('Couldn’t Add Client', err instanceof Error ? err.message : 'Something went wrong.');
+    }
   }
 
   return (
     <View className="flex-1 bg-grouped">
-      <SheetHeader title={isFilterMode ? 'Filter by Client' : 'Select Client'} />
+      <SheetHeader title={isFilterMode ? 'Filter by Client' : 'Choose Client'} />
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 4, flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View>
-            <View className="-mx-4 -mt-4 mb-4 p-4 bg-card border-b border-separator">
-              <TextInput
-                className="border border-field rounded-lg px-3 py-2 text-base text-label"
-                placeholder="Search clients…"
-                value={query}
-                onChangeText={setQuery}
-              />
+            <View className="mb-4">
+              <SearchField value={query} onChangeText={setQuery} placeholder="Search Clients" />
             </View>
+            {canQuickAdd ? (
+              <ListSection footer="Adds a client with just this name. You can fill in their details later.">
+                <ListRow
+                  icon="person-add"
+                  title={`Add “${trimmedQuery}”`}
+                  onPress={quickAddClient}
+                  accessory="none"
+                />
+              </ListSection>
+            ) : null}
             {isFilterMode ? (
-              <Pressable
-                onPress={() => {
-                  setFilter({ ...filter, clientId: undefined });
-                  router.back();
-                }}
-                className="bg-card rounded-xl p-4 mb-3 border border-separator"
-              >
-                <Text className="text-base text-tint font-medium">All Clients</Text>
-              </Pressable>
+              <ListSection>
+                <ListRow
+                  title="All Clients"
+                  onPress={() => selectClient(undefined)}
+                  accessory={!filter.clientId ? 'checkmark' : 'none'}
+                />
+              </ListSection>
             ) : null}
           </View>
         }
-        ListEmptyComponent={<EmptyState title="No clients found" />}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => selectClient(item.id, item.display_name)}
-            className="bg-card rounded-xl p-4 mb-3 border border-separator"
-          >
-            <Text className="text-base text-label">{item.display_name}</Text>
-          </Pressable>
-        )}
-        ListFooterComponent={
-          !isFilterMode &&
-          query.trim() &&
-          !filtered.some((c) => c.display_name.toLowerCase() === query.trim().toLowerCase()) ? (
-            <Button
-              label={`+ Add "${query.trim()}" as new client`}
-              variant="tinted"
-              size="large"
-              disabled={isCreating}
-              onPress={quickAddClient}
+        ListEmptyComponent={
+          canQuickAdd ? null : (
+            <EmptyState
+              icon="people-outline"
+              title={trimmedQuery ? 'No Results' : 'No Clients Yet'}
+              subtitle={trimmedQuery ? undefined : 'Type a name above to add your first client.'}
             />
-          ) : null
+          )
         }
+        renderItem={({ item, index }) => (
+          <GroupedRow index={index} count={filtered.length}>
+            <ListRow
+              title={item.display_name}
+              subtitle={item.email ?? undefined}
+              onPress={() => selectClient(item.id, item.display_name)}
+              accessory={item.id === selectedId ? 'checkmark' : 'none'}
+              showSeparator={index > 0}
+            />
+          </GroupedRow>
+        )}
       />
     </View>
   );

@@ -39,7 +39,7 @@ export default function EditTaxBracketScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Could Not Save Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Save Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 

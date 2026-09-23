@@ -102,7 +102,7 @@ export default function DocumentsScreen() {
       const pdfUri = await generateDocumentPdf(item.id);
       await sharePdf(item.id, pdfUri);
     } catch (err) {
-      Alert.alert('Could Not Share', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Share', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 
@@ -122,7 +122,7 @@ export default function DocumentsScreen() {
               load();
               loadReports();
             } catch (err) {
-              Alert.alert('Could Not Delete', err instanceof Error ? err.message : 'Something went wrong.');
+              Alert.alert('Couldn’t Delete', err instanceof Error ? err.message : 'Something went wrong.');
             }
           },
         },
@@ -139,7 +139,7 @@ export default function DocumentsScreen() {
       loadReports();
       router.push(`/documents/${invoice.id}`);
     } catch (err) {
-      Alert.alert('Could Not Convert', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Convert', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 

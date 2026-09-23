@@ -1,15 +1,16 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Button } from '../../src/components/Button';
 import { DateField } from '../../src/components/DateField';
+import { ListRow } from '../../src/components/list/ListRow';
+import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { getClient } from '../../src/db/repositories/clients.repo';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
 import type { DocStatus } from '../../src/types/models';
 
 const STATUS_OPTIONS: { label: string; value: DocStatus | 'overdue' | undefined }[] = [
-  { label: 'All', value: undefined },
+  { label: 'All Statuses', value: undefined },
   { label: 'Draft', value: 'draft' },
   { label: 'Issued', value: 'issued' },
   { label: 'Paid', value: 'paid' },
@@ -17,9 +18,8 @@ const STATUS_OPTIONS: { label: string; value: DocStatus | 'overdue' | undefined 
   { label: 'Canceled', value: 'void' },
 ];
 
-/** Every control here commits straight to useDocumentsStore's live filter — matching how the
- * search box and Estimates/Invoices toggle on the list screen already behave — so "Done" (not
- * "Cancel") is the right label for the way out. */
+/** Every control applies immediately to the Documents list (like its search field and type
+ * switcher), so the sheet offers Reset and Done rather than Cancel. */
 export default function DocumentFilterModal() {
   const { filter, setFilter } = useDocumentsStore();
   const [clientName, setClientName] = useState<string | null>(null);
@@ -35,64 +35,54 @@ export default function DocumentFilterModal() {
     }, [])
   );
 
-  function clearAll() {
+  function reset() {
     setFilter({ ...filter, status: undefined, clientId: undefined, dateFrom: undefined, dateTo: undefined });
+    setClientName(null);
   }
-
-  const hasActiveFilter = !!(filter.status || filter.clientId || filter.dateFrom || filter.dateTo);
 
   return (
     <View className="flex-1 bg-grouped">
-      <SheetHeader title="Filter Documents" closeLabel="Done" />
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
-        <View>
-          <Text className="text-xs text-secondary mb-2">Status</Text>
-          <View className="flex-row flex-wrap gap-2">
-            {STATUS_OPTIONS.map((opt) => {
-              const selected = filter.status === opt.value;
-              return (
-                <Pressable
-                  key={opt.label}
-                  onPress={() => setFilter({ ...filter, status: opt.value })}
-                  className={`px-3 py-2 rounded-full border ${
-                    selected ? 'bg-brand border-brand' : 'border-field'
-                  }`}
-                >
-                  <Text className={selected ? 'text-white text-sm' : 'text-label text-sm'}>{opt.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
+      <SheetHeader
+        title="Filter Documents"
+        closeLabel="Reset"
+        onClose={reset}
+        actionLabel="Done"
+        onAction={() => router.back()}
+      />
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <ListSection header="Status">
+          {STATUS_OPTIONS.map((opt) => (
+            <ListRow
+              key={opt.label}
+              title={opt.label}
+              onPress={() => setFilter({ ...filter, status: opt.value })}
+              accessory={filter.status === opt.value ? 'checkmark' : 'none'}
+            />
+          ))}
+        </ListSection>
 
-        <View>
-          <Text className="text-xs text-secondary mb-2">Client</Text>
-          <Pressable
+        <ListSection header="Client">
+          <ListRow
+            title="Client"
+            value={clientName ?? 'All Clients'}
             onPress={() => router.push({ pathname: '/modals/client-picker', params: { mode: 'filter' } })}
-            className="border border-field rounded-lg px-3 py-2 bg-card"
-          >
-            <Text className={clientName ? 'text-label' : 'text-secondary'}>{clientName ?? 'All Clients'}</Text>
-          </Pressable>
-        </View>
+          />
+        </ListSection>
 
-        <View className="flex-row gap-3">
-          <View className="flex-1">
-            <DateField
-              label="From"
-              value={filter.dateFrom ?? null}
-              onChange={(d) => setFilter({ ...filter, dateFrom: d })}
-            />
-          </View>
-          <View className="flex-1">
-            <DateField
-              label="To"
-              value={filter.dateTo ?? null}
-              onChange={(d) => setFilter({ ...filter, dateTo: d })}
-            />
-          </View>
+        <View className="gap-3">
+          <DateField
+            label="Issued From"
+            value={filter.dateFrom ?? null}
+            emptyLabel="Any Date"
+            onChange={(d) => setFilter({ ...filter, dateFrom: d })}
+          />
+          <DateField
+            label="Issued To"
+            value={filter.dateTo ?? null}
+            emptyLabel="Any Date"
+            onChange={(d) => setFilter({ ...filter, dateTo: d })}
+          />
         </View>
-
-        {hasActiveFilter ? <Button label="Clear All" variant="plain" onPress={clearAll} /> : null}
       </ScrollView>
     </View>
   );

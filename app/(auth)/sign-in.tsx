@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Alert, TextInput } from 'react-native';
 import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthScreen, TextLink } from '../../src/components/auth/AuthScreen';
 import { Button } from '../../src/components/Button';
+import { FormField } from '../../src/components/form/FormField';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 
@@ -11,8 +12,12 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
+
+  const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
 
   async function handleSignIn() {
+    if (!canSubmit) return;
     setIsSubmitting(true);
     try {
       await signIn(email.trim(), password);
@@ -20,65 +25,50 @@ export default function SignInScreen() {
       const profile = useBusinessProfileStore.getState().profile;
       router.replace(profile?.business_name?.trim() ? '/(tabs)/home' : '/onboarding');
     } catch (err) {
-      Alert.alert('Could not sign in', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Sign In', err instanceof Error ? err.message : 'Check your email and password, then try again.');
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
-
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-grouped">
-      <View className="flex-1 px-6 justify-center gap-6">
-        <View className="gap-2">
-          <Text className="text-2xl font-bold text-label text-center">Welcome back</Text>
-          <Text className="text-base text-secondary text-center">Sign in to your account</Text>
-        </View>
-
-        <View className="gap-4">
-          <View>
-            <Text className="text-xs text-secondary mb-1">Email</Text>
-            <TextInput
-              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              autoComplete="email"
-            />
-          </View>
-          <View>
-            <Text className="text-xs text-secondary mb-1">Password</Text>
-            <TextInput
-              className="border border-field rounded-lg px-3 py-2 bg-card text-base text-label"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Your password"
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="password"
-            />
-          </View>
-          <Pressable onPress={() => router.push('/(auth)/forgot-password')} className="self-end">
-            <Text className="text-tint text-sm font-medium">Forgot password?</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <View className="px-6 pb-6 gap-3">
-        <Button
-          label={isSubmitting ? 'Signing in…' : 'Sign In'}
-          size="large"
-          disabled={!canSubmit}
-          onPress={handleSignIn}
-        />
-        <Pressable onPress={() => router.push('/(auth)/sign-up')} className="items-center py-2">
-          <Text className="text-tint text-sm font-medium">Don&apos;t have an account? Sign Up</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+    <AuthScreen
+      title="Welcome Back"
+      subtitle="Sign in to Invoice Them"
+      actions={
+        <>
+          <Button label="Sign In" size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSignIn} />
+          <TextLink label="Forgot Password?" onPress={() => router.push('/(auth)/forgot-password')} />
+          <TextLink label="New to Invoice Them? Create an Account" onPress={() => router.replace('/(auth)/sign-up')} />
+        </>
+      }
+    >
+      <FormField
+        label="Email"
+        value={email}
+        onChangeText={setEmail}
+        placeholder="you@example.com"
+        keyboardType="email-address"
+        textContentType="username"
+        autoComplete="email"
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="next"
+        onSubmitEditing={() => passwordRef.current?.focus()}
+        submitBehavior="submit"
+      />
+      <FormField
+        ref={passwordRef}
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        textContentType="password"
+        autoComplete="current-password"
+        autoCapitalize="none"
+        returnKeyType="go"
+        onSubmitEditing={handleSignIn}
+      />
+    </AuthScreen>
   );
 }

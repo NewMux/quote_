@@ -29,14 +29,20 @@ export function Avatar({ name, photoUri, seed, size = 40 }: AvatarProps) {
   const signedUrl = useSignedUrl(photoUri);
 
   if (signedUrl) {
-    return <Image source={{ uri: signedUrl }} style={dimension} />;
+    return <Image source={{ uri: signedUrl }} style={dimension} accessibilityIgnoresInvertColors accessible={false} />;
   }
 
   const color = AVATAR_PALETTE[hashToIndex(seed ?? name, AVATAR_PALETTE.length)];
 
   return (
-    <View style={[dimension, { backgroundColor: color }]} className="items-center justify-center">
-      <Text style={{ fontSize: size * 0.38 }} className="text-white font-semibold">
+    // Decorative: the name always appears next to the avatar, so VoiceOver skips the initials.
+    <View
+      style={[dimension, { backgroundColor: color }]}
+      className="items-center justify-center"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      <Text style={{ fontSize: size * 0.38 }} className="text-white font-semibold" allowFontScaling={false}>
         {getInitials(name)}
       </Text>
     </View>

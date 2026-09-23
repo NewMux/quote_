@@ -51,7 +51,7 @@ export default function SettingsScreen() {
         setRemindersEnabled(false);
       }
     } catch (err) {
-      Alert.alert('Could Not Update Reminders', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Update Reminders', err instanceof Error ? err.message : 'Something went wrong.');
     } finally {
       setIsTogglingReminders(false);
     }
@@ -61,7 +61,7 @@ export default function SettingsScreen() {
     try {
       await exportBackup(profile?.business_name ?? null);
     } catch (err) {
-      Alert.alert('Could Not Export Data', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Export Data', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 
@@ -76,7 +76,7 @@ export default function SettingsScreen() {
             await signOut();
             router.replace('/(auth)/sign-in');
           } catch (err) {
-            Alert.alert('Could Not Sign Out', err instanceof Error ? err.message : 'Something went wrong.');
+            Alert.alert('Couldn’t Sign Out', err instanceof Error ? err.message : 'Something went wrong.');
           }
         },
       },

@@ -22,7 +22,7 @@ export default function NewItemScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Could Not Add Item', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Add Item', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 

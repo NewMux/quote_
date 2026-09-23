@@ -22,7 +22,7 @@ export default function NewClientScreen() {
       leave(() => router.replace(`/clients/${client.id}`));
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Could Not Add Client', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert('Couldn’t Add Client', err instanceof Error ? err.message : 'Something went wrong.');
     }
   }
 

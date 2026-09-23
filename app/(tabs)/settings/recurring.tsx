@@ -1,12 +1,11 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Card } from '../../../src/components/Card';
 import { EmptyState } from '../../../src/components/EmptyState';
+import { ListRow } from '../../../src/components/list/ListRow';
+import { ListSection } from '../../../src/components/list/ListSection';
 import { listSchedules } from '../../../src/db/repositories/recurring.repo';
 import { formatScheduleDate, frequencyLabel } from '../../../src/lib/recurrence';
-import { BRAND } from '../../../src/lib/theme';
 import type { RecurringScheduleListItem } from '../../../src/types/models';
 
 export default function RecurringInvoicesScreen() {
@@ -23,39 +22,36 @@ export default function RecurringInvoicesScreen() {
   if (!schedules) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator />
+        <ActivityIndicator accessibilityLabel="Loading" />
       </View>
     );
   }
 
   return (
-    <FlatList
+    <ScrollView
       className="flex-1 bg-grouped"
-      contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
-      data={schedules}
-      keyExtractor={(item) => item.id}
-      ListEmptyComponent={
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+    >
+      {schedules.length === 0 ? (
         <EmptyState
-          title="No recurring invoices"
-          subtitle="Open an invoice, tap the ••• menu, and choose Make Recurring."
+          icon="repeat"
+          title="No Recurring Invoices"
+          subtitle="Open an invoice, tap More, and choose Make Recurring to bill a client on a schedule."
         />
-      }
-      renderItem={({ item }) => (
-        <Pressable onPress={() => router.push(`/documents/${item.template_document_id}`)}>
-          <Card className="flex-row items-center gap-3">
-            <Ionicons name="repeat" size={20} color={BRAND.default} />
-            <View className="flex-1">
-              <Text className="text-base text-label" numberOfLines={1}>
-                {item.client_name ?? 'No client'} · {item.template_doc_number}
-              </Text>
-              <Text className="text-xs text-secondary" numberOfLines={1}>
-                {frequencyLabel(item.frequency)} · next {formatScheduleDate(item.next_run_date)}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-          </Card>
-        </Pressable>
+      ) : (
+        <ListSection footer="A new draft is created on each date for you to review and send.">
+          {schedules.map((item) => (
+            <ListRow
+              key={item.id}
+              icon="repeat"
+              title={`${item.client_name ?? 'No Client'} · ${item.template_doc_number}`}
+              subtitle={`${frequencyLabel(item.frequency)} · Next ${formatScheduleDate(item.next_run_date)}`}
+              onPress={() => router.push(`/documents/${item.template_document_id}`)}
+            />
+          ))}
+        </ListSection>
       )}
-    />
+    </ScrollView>
   );
 }

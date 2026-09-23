@@ -34,7 +34,7 @@ export function DocumentStageIndicator({ document }: { document: DocumentRecord 
       {stages.map((stage, index) => (
         <View key={stage} className="flex-row items-center">
           <Text
-            className={`text-xs ${index <= current ? 'text-tint font-semibold' : 'text-secondary'}`}
+            className={`text-sm ${index <= current ? 'text-tint font-semibold' : 'text-secondary'}`}
           >
             {stage}
           </Text>
