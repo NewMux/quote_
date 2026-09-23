@@ -26,6 +26,10 @@ npm install
 npx expo start
 ```
 
+The repo's `.npmrc` sets `legacy-peer-deps=true`, so a plain `npm install`
+(and EAS Build's `npm ci`) resolve the toolchain's conflicting peer ranges
+the same way `package-lock.json` was generated — no extra flag needed.
+
 Scan the QR code with the **Expo Go** app on your phone (iOS or Android), or
 press `i` / `a` in the terminal to launch an iOS Simulator / Android
 emulator.
