@@ -6,6 +6,7 @@ import { Stack } from 'expo-router';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { refreshAllReminders } from '../src/lib/notifications';
+import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -31,6 +32,9 @@ export default function RootLayout() {
       // this resyncs every scheduled reminder against the current data on each sign-in/launch.
       // Non-critical — never blocks the app from becoming ready.
       refreshAllReminders().catch(() => {});
+      // The server creates due recurring drafts daily; this just means they appear on launch
+      // without waiting for that job. Also non-critical.
+      generateDueRecurringInvoices().catch(() => {});
     })();
   }, [isAuthLoading, session, loadProfile]);
 
@@ -147,6 +151,16 @@ export default function RootLayout() {
             headerShown: false,
             presentation: 'formSheet',
             sheetAllowedDetents: [0.5, 1.0],
+            sheetGrabberVisible: true,
+            sheetCornerRadius: 20,
+          }}
+        />
+        <Stack.Screen
+          name="modals/recurring"
+          options={{
+            headerShown: false,
+            presentation: 'formSheet',
+            sheetAllowedDetents: [0.7, 1.0],
             sheetGrabberVisible: true,
             sheetCornerRadius: 20,
           }}

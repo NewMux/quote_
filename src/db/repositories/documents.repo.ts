@@ -5,7 +5,6 @@ import { deleteFileIfExists } from '../../lib/fileStorage';
 import { cancelOverdueReminder, scheduleOverdueReminder } from '../../lib/notifications';
 import { requireOwnerId } from '../ownerId';
 import { reserveNextDocNumber } from './docCounters.repo';
-import { replaceLineItems } from './lineItems.repo';
 import { logActivity } from './activityLog.repo';
 import { listSignatures } from './signatures.repo';
 import { listSettlements } from './settlements.repo';
@@ -28,9 +27,6 @@ export interface DocumentListFilter {
   search?: string;
 }
 
-/** Signature images/receipt photos/PDFs are still local-only (Round 23 will move them to
- * Supabase Storage), so a document's own PDF/signatures/settlements files stay untouched here —
- * only the structured row data moved to Supabase this round. */
 export async function listDocuments(filter: DocumentListFilter = {}): Promise<DocumentListItem[]> {
   const ownerId = requireOwnerId();
   let query = supabase
@@ -128,7 +124,7 @@ export async function createDraftDocument(
   const now = nowIso();
   const dueDate = docType === 'invoice' ? addDays(now, profile.default_payment_terms_days) : null;
 
-  const docNumber = await reserveNextDocNumber(docType, profile);
+  const docNumber = await reserveNextDocNumber(docType);
   const { error } = await supabase.from('documents').insert({
     id,
     owner_id: ownerId,
@@ -169,10 +165,10 @@ export async function saveDocumentEdit(
 ): Promise<void> {
   const totals = computeDocumentTotals(lines, header.discountType, header.discountValue);
 
-  await replaceLineItems(documentId, totals.lines);
-  const { error } = await supabase
-    .from('documents')
-    .update({
+  // The line replacement, header/totals update and activity entry land in one transaction.
+  const { error } = await supabase.rpc('save_document_edit', {
+    p_document_id: documentId,
+    p_header: {
       client_id: header.clientId,
       client_name_snapshot: header.clientNameSnapshot,
       issue_date: header.issueDate,
@@ -186,12 +182,28 @@ export async function saveDocumentEdit(
       discount_amount_minor: totals.discountAmountMinor,
       tax_total_minor: totals.taxTotalMinor,
       total_minor: totals.totalMinor,
-      updated_at: nowIso(),
-    })
-    .eq('id', documentId);
+    },
+    p_lines: totals.lines.map((line, index) => ({
+      id: line.id,
+      catalog_item_id: line.catalogItemId,
+      position: index,
+      description: line.description,
+      quantity: line.quantity,
+      unit_label: line.unitLabel,
+      unit_price_minor: line.unitPriceMinor,
+      discount_type: line.discountType,
+      discount_value: line.discountValue,
+      is_taxable: line.isTaxable ? 1 : 0,
+      tax_bracket_id: line.taxBracketId,
+      tax_bracket_name_snapshot: line.taxBracketNameSnapshot,
+      tax_rate_bp: line.taxRateBp,
+      line_subtotal_minor: line.lineSubtotalMinor,
+      line_discount_minor: line.lineDiscountMinor,
+      line_tax_minor: line.lineTaxMinor,
+      line_total_minor: line.lineTotalMinor,
+    })),
+  });
   if (error) throw error;
-
-  await logActivity(documentId, 'edited');
 }
 
 export async function issueDocument(id: string): Promise<void> {
@@ -254,84 +266,15 @@ export async function convertEstimateToInvoice(
   estimateId: string,
   profile: BusinessProfile
 ): Promise<DocumentRecord> {
-  const ownerId = requireOwnerId();
-  const estimate = await getDocument(estimateId);
-  if (!estimate) throw new Error('Estimate not found');
-  if (estimate.doc_type !== 'estimate') throw new Error('Document is not an estimate');
-
-  const { data: lines, error: linesError } = await supabase
-    .from('line_items')
-    .select(
-      'catalog_item_id, description, quantity, unit_label, unit_price_minor, discount_type, discount_value, is_taxable, tax_bracket_id, tax_bracket_name_snapshot, tax_rate_bp'
-    )
-    .eq('document_id', estimateId)
-    .order('position', { ascending: true });
-  if (linesError) throw linesError;
-
-  const invoiceId = newId();
-  const now = nowIso();
-  const dueDate = addDays(now, profile.default_payment_terms_days);
-
-  const docNumber = await reserveNextDocNumber('invoice', profile);
-  const { error: insertError } = await supabase.from('documents').insert({
-    id: invoiceId,
-    owner_id: ownerId,
-    doc_type: 'invoice',
-    doc_number: docNumber,
-    status: 'draft',
-    client_id: estimate.client_id,
-    client_name_snapshot: estimate.client_name_snapshot,
-    due_date: dueDate,
-    currency_code: estimate.currency_code,
-    notes: estimate.notes,
-    terms_override: estimate.terms_override,
-    converted_from_document_id: estimateId,
-    created_at: now,
-    updated_at: now,
+  // One transaction: locks the estimate (so a double-tap can't convert it twice), reserves the
+  // invoice number, copies header/totals/lines, links both documents and logs both sides.
+  const { data: invoiceId, error } = await supabase.rpc('convert_estimate_to_invoice', {
+    p_estimate_id: estimateId,
+    p_due_date: addDays(nowIso(), profile.default_payment_terms_days),
   });
-  if (insertError) throw insertError;
+  if (error) throw error;
 
-  const editableLines: LineItemEditable[] = (lines ?? []).map((l) => ({
-    id: newId(),
-    catalogItemId: l.catalog_item_id,
-    description: l.description,
-    quantity: l.quantity,
-    unitLabel: l.unit_label,
-    unitPriceMinor: l.unit_price_minor,
-    discountType: l.discount_type,
-    discountValue: l.discount_value,
-    isTaxable: l.is_taxable === 1,
-    taxBracketId: l.tax_bracket_id,
-    taxBracketNameSnapshot: l.tax_bracket_name_snapshot,
-    taxRateBp: l.tax_rate_bp,
-  }));
-  const totals = computeDocumentTotals(editableLines, estimate.discount_type, estimate.discount_value);
-  await replaceLineItems(invoiceId, totals.lines);
-
-  const { error: totalsError } = await supabase
-    .from('documents')
-    .update({
-      discount_type: estimate.discount_type,
-      discount_value: estimate.discount_value,
-      subtotal_minor: totals.subtotalMinor,
-      discount_amount_minor: totals.discountAmountMinor,
-      tax_total_minor: totals.taxTotalMinor,
-      total_minor: totals.totalMinor,
-      updated_at: nowIso(),
-    })
-    .eq('id', invoiceId);
-  if (totalsError) throw totalsError;
-
-  const { error: linkError } = await supabase
-    .from('documents')
-    .update({ converted_to_document_id: invoiceId, updated_at: nowIso() })
-    .eq('id', estimateId);
-  if (linkError) throw linkError;
-
-  await logActivity(estimateId, 'converted_to_invoice', docNumber);
-  await logActivity(invoiceId, 'created', `Converted from estimate ${estimate.doc_number}`);
-
-  const created = await getDocument(invoiceId);
+  const created = await getDocument(invoiceId as string);
   if (!created) throw new Error('Failed to convert estimate to invoice');
   return created;
 }

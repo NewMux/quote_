@@ -110,6 +110,7 @@ export async function createClient(input: ClientInput): Promise<Client> {
 }
 
 export async function updateClient(id: string, input: ClientInput): Promise<void> {
+  const { data: previous } = await supabase.from('clients').select('photo_uri').eq('id', id).maybeSingle();
   const { error } = await supabase
     .from('clients')
     .update({
@@ -125,6 +126,9 @@ export async function updateClient(id: string, input: ClientInput): Promise<void
     })
     .eq('id', id);
   if (error) throw error;
+  if (previous?.photo_uri && previous.photo_uri !== (input.photo_uri ?? null)) {
+    await deleteFileIfExists(previous.photo_uri);
+  }
 }
 
 export async function setClientArchived(id: string, archived: boolean): Promise<void> {

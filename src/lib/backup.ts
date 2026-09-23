@@ -17,12 +17,12 @@ const OWNER_SCOPED_TABLES = [
   'signatures',
   'settlements',
   'activity_logs',
+  'recurring_schedules',
 ] as const;
 
 /** Fetches every table this business owns from Supabase and hands the result to the OS share
- * sheet as a JSON file. Signatures/receipt photos/PDFs/logo aren't included — those are still
- * local-only files (Round 23 will move them to Supabase Storage), referenced by URI rather than
- * bundled here. */
+ * sheet as a JSON file. Signatures/receipt photos/PDFs/logo live in Supabase Storage and appear
+ * here only as their storage paths, not as bundled file contents. */
 export async function exportBackup(businessName: string | null): Promise<void> {
   const available = await Sharing.isAvailableAsync();
   if (!available) {

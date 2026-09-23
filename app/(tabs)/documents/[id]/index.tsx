@@ -31,12 +31,14 @@ import {
   voidDocument,
 } from '../../../../src/db/repositories/documents.repo';
 import { listLineItems } from '../../../../src/db/repositories/lineItems.repo';
+import { getScheduleForDocument } from '../../../../src/db/repositories/recurring.repo';
 import { listSettlements } from '../../../../src/db/repositories/settlements.repo';
 import { deleteSignature, listSignatures } from '../../../../src/db/repositories/signatures.repo';
 import { generateDocumentPdf } from '../../../../src/lib/pdf/generatePdf';
 import { emailPdf, sharePdf } from '../../../../src/lib/share';
 import { getTaxLabel } from '../../../../src/lib/documentCalculations';
 import { formatMinor } from '../../../../src/lib/money';
+import { describeSchedule } from '../../../../src/lib/recurrence';
 import {
   canConvertToInvoice,
   canDelete,
@@ -54,6 +56,7 @@ import type {
   Client,
   DocumentRecord,
   LineItem,
+  RecurringSchedule,
   Settlement,
   SignatureRecord,
 } from '../../../../src/types/models';
@@ -68,6 +71,7 @@ export default function DocumentDetailScreen() {
   const [signatures, setSignatures] = useState<SignatureRecord[]>([]);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [activity, setActivity] = useState<ActivityLogEntry[]>([]);
+  const [schedule, setSchedule] = useState<RecurringSchedule | null>(null);
   const [busy, setBusy] = useState(false);
   const [voidPromptVisible, setVoidPromptVisible] = useState(false);
   const [voidReason, setVoidReason] = useState('');
@@ -81,6 +85,7 @@ export default function DocumentDetailScreen() {
     setSignatures(await listSignatures(id));
     setSettlements(await listSettlements(id));
     setActivity(await listActivity(id));
+    setSchedule(doc?.doc_type === 'invoice' ? await getScheduleForDocument(id).catch(() => null) : null);
   }, [id]);
 
   useFocusEffect(
@@ -108,7 +113,7 @@ export default function DocumentDetailScreen() {
       ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigation, document]);
+  }, [navigation, document, schedule]);
 
   if (!document) {
     return (
@@ -200,6 +205,12 @@ export default function DocumentDetailScreen() {
     ];
     if (canMarkViewed(document)) {
       options.push({ label: 'Mark as Viewed', onPress: handleMarkViewed });
+    }
+    if (document.doc_type === 'invoice' && document.status !== 'void') {
+      options.push({
+        label: schedule ? 'Edit Recurring' : 'Make Recurring',
+        onPress: () => router.push({ pathname: '/modals/recurring', params: { documentId: id } }),
+      });
     }
     if (canVoid(document)) {
       options.push({
@@ -330,6 +341,18 @@ export default function DocumentDetailScreen() {
           </View>
         ) : null}
       </Card>
+
+      {schedule ? (
+        <Pressable onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}>
+          <Card className="flex-row items-center gap-3">
+            <Ionicons name="repeat" size={20} color={BRAND.default} />
+            <Text className="flex-1 text-sm text-gray-900" numberOfLines={2}>
+              {describeSchedule(schedule.frequency, schedule.next_run_date)}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+          </Card>
+        </Pressable>
+      ) : null}
 
       <Card>
         <Text className="text-sm font-semibold text-gray-900 mb-2">Line Items</Text>

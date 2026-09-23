@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Button } from '../../../src/components/Button';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { persistPickedFile } from '../../../src/lib/fileStorage';
+import { newId } from '../../../src/lib/id';
 import { useSignedUrl } from '../../../src/lib/useSignedUrl';
 import { getCurrencyName } from '../../../src/lib/currencies';
 
@@ -50,7 +51,9 @@ export default function BusinessProfileScreen() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
     if (result.canceled || !result.assets[0]) return;
-    const persistedUri = await persistPickedFile(result.assets[0].uri, 'branding', 'logo.jpg');
+    // A unique name per upload, so replacing the logo gets a new path — the old file is deleted on
+    // save, and no cached signed URL or image can keep showing the previous logo.
+    const persistedUri = await persistPickedFile(result.assets[0].uri, 'branding', `logo-${newId()}.jpg`);
     setLogoUri(persistedUri);
   }
 

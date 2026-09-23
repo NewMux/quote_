@@ -36,6 +36,12 @@ const ROWS: { label: string; subtitle: string; href: string; icon: keyof typeof 
     icon: 'list-outline',
   },
   {
+    label: 'Recurring Invoices',
+    subtitle: 'Invoices that repeat on a schedule',
+    href: '/settings/recurring',
+    icon: 'repeat-outline',
+  },
+  {
     label: 'Privacy Policy',
     subtitle: 'What this app stores and how it uses it',
     href: '/settings/privacy-policy',

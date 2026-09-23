@@ -202,3 +202,24 @@ export interface DocumentListItem {
   created_at: string;
   updated_at: string;
 }
+
+export type RecurrenceFrequency = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+export interface RecurringSchedule {
+  id: string;
+  owner_id: string;
+  template_document_id: string;
+  frequency: RecurrenceFrequency;
+  start_date: string;
+  next_run_date: string;
+  runs_count: number;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** A schedule plus the template invoice's number and client, for the Recurring Invoices list. */
+export interface RecurringScheduleListItem extends RecurringSchedule {
+  template_doc_number: string;
+  client_name: string | null;
+}

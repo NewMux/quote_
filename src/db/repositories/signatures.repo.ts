@@ -18,6 +18,12 @@ export async function upsertSignature(
 ): Promise<void> {
   const ownerId = requireOwnerId();
   const now = nowIso();
+  const { data: previous } = await supabase
+    .from('signatures')
+    .select('signature_image_uri')
+    .eq('document_id', documentId)
+    .eq('signer_role', role)
+    .maybeSingle();
   const { error } = await supabase.from('signatures').upsert(
     {
       id: newId(),
@@ -32,6 +38,9 @@ export async function upsertSignature(
     { onConflict: 'document_id,signer_role' }
   );
   if (error) throw error;
+  if (previous?.signature_image_uri && previous.signature_image_uri !== imageUri) {
+    await deleteFileIfExists(previous.signature_image_uri);
+  }
 }
 
 export async function deleteSignature(documentId: string, role: SignerRole): Promise<void> {
