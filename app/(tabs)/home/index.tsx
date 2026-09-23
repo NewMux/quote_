@@ -50,7 +50,7 @@ export default function HomeScreen() {
       headerRight:
         Platform.OS === 'ios'
           ? undefined
-          : () => <HeaderButton icon="add" label="New Document" onPress={showNewDocumentChooser} />,
+          : () => <HeaderButton icon="plus" label="New Document" onPress={showNewDocumentChooser} />,
     });
   }, [navigation]);
 
@@ -113,10 +113,10 @@ export default function HomeScreen() {
         end={{ x: 1, y: 1 }}
         style={{ borderRadius: 24, padding: 20 }}
       >
-        <Text className="text-white text-lg font-bold mb-1" accessibilityRole="header">
+        <Text className="text-white text-title3 font-bold mb-1" accessibilityRole="header">
           {formatPeriodLabel(period)} Report
         </Text>
-        <Text className="text-white/85 text-sm mb-4">Overview of your invoices</Text>
+        <Text className="text-white/85 text-subhead mb-4">Overview of your invoices</Text>
         <StatStrip
           items={[
             { label: 'Paid', value: formatMinor(breakdown.paidMinor, currencyCode) },
@@ -129,12 +129,12 @@ export default function HomeScreen() {
       <Card>
         <View className="flex-row justify-between items-start mb-2">
           <View>
-            <Text className="text-sm text-secondary">Paid This Month</Text>
-            <Text className="text-2xl font-bold text-label">
+            <Text className="text-subhead text-secondary">Paid This Month</Text>
+            <Text className="text-title1 font-bold text-label">
               {formatMinor(receivedThisMonth, currencyCode)}
             </Text>
           </View>
-          <Text className="text-sm text-secondary mt-1">Last 6 Months</Text>
+          <Text className="text-subhead text-secondary mt-1">Last 6 Months</Text>
         </View>
         <LineChart
           data={revenueByMonth}
@@ -144,7 +144,7 @@ export default function HomeScreen() {
 
       <Card>
         <View className="gap-3 mb-3">
-          <Text className="text-base font-semibold text-label" accessibilityRole="header">
+          <Text className="text-body font-semibold text-label" accessibilityRole="header">
             Paid by Period
           </Text>
           <View>

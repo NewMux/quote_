@@ -31,7 +31,7 @@ export function SheetHeader({
           <HeaderTextButton label={closeLabel} onPress={onClose ?? (() => router.back())} />
         </View>
         <Text
-          className="text-[17px] font-semibold text-label text-center flex-shrink"
+          className="text-body font-semibold text-label text-center flex-shrink"
           numberOfLines={1}
           accessibilityRole="header"
         >

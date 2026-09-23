@@ -12,7 +12,7 @@ export function StatusBadge({ document }: StatusBadgeProps) {
   const colors = useStatusColors()[status];
   return (
     <View style={{ backgroundColor: colors.bg }} className="rounded-full px-3 py-1 self-start">
-      <Text style={{ color: colors.fg }} className="text-xs font-semibold">
+      <Text style={{ color: colors.fg }} className="text-caption font-semibold">
         {statusLabel(status)}
       </Text>
     </View>

@@ -1,6 +1,6 @@
 import { Pressable, Switch, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from './Icon';
 import { computeLineItem } from '../lib/documentCalculations';
 import { formatMinor } from '../lib/money';
 import { BRAND, useThemeColors } from '../lib/theme';
@@ -39,7 +39,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
           hitSlop={4}
           className="w-11 h-11 items-center justify-center -mr-1"
         >
-          <Ionicons name="remove-circle" size={24} color={colors.destructive} />
+          <Icon name="minus.circle.fill" size={22} color={colors.destructive} />
         </Pressable>
       </View>
 
@@ -76,7 +76,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
       </View>
 
       <View className="flex-row items-center justify-between min-h-[44px]">
-        <Text className="text-[17px] text-label">Taxable</Text>
+        <Text className="text-body text-label">Taxable</Text>
         <Switch
           value={line.isTaxable}
           accessibilityLabel="Taxable"
@@ -109,7 +109,7 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
                 accessibilityState={{ checked: selected }}
                 className={`px-4 min-h-[44px] justify-center rounded-full ${selected ? 'bg-brand' : 'bg-fill'}`}
               >
-                <Text className={`text-[15px] ${selected ? 'text-white font-semibold' : 'text-label'}`}>
+                <Text className={`text-subhead ${selected ? 'text-white font-semibold' : 'text-label'}`}>
                   {bracket.name}
                 </Text>
               </Pressable>
@@ -121,15 +121,15 @@ export function LineItemEditor({ line, taxBrackets, currencyCode, onChange, onRe
               accessibilityRole="button"
               className="min-h-[44px] justify-center px-1"
             >
-              <Text className="text-tint text-[15px] font-medium">Add Tax Rate</Text>
+              <Text className="text-tint text-subhead font-medium">Add Tax Rate</Text>
             </Pressable>
           ) : null}
         </View>
       ) : null}
 
       <View className="flex-row justify-between items-center border-t border-separator pt-2">
-        <Text className="text-sm text-secondary">Line Total</Text>
-        <Text className="text-base font-semibold text-label">{formatMinor(computed.lineTotalMinor, currencyCode)}</Text>
+        <Text className="text-subhead text-secondary">Line Total</Text>
+        <Text className="text-body font-semibold text-label">{formatMinor(computed.lineTotalMinor, currencyCode)}</Text>
       </View>
     </View>
   );

@@ -143,7 +143,7 @@ export default function BusinessProfileScreen() {
       />
 
       <View>
-        <Text className="text-sm text-secondary mb-1.5">Accent Color</Text>
+        <Text className="text-subhead text-secondary mb-1.5">Accent Color</Text>
         <View className="flex-row flex-wrap gap-1" accessibilityRole="radiogroup">
           {ACCENT_COLORS.map((color) => {
             const selected = accentColor === color.hex;
@@ -166,7 +166,7 @@ export default function BusinessProfileScreen() {
             );
           })}
         </View>
-        <Text className="text-sm text-secondary mt-1.5">Used for headings on your PDFs.</Text>
+        <Text className="text-subhead text-secondary mt-1.5">Used for headings on your PDFs.</Text>
       </View>
 
       <View>

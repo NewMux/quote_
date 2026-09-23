@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams, useNavigation, type NativeStackHeaderItem } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '../../../../src/components/Icon';
 import * as Haptics from 'expo-haptics';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import { ActivityLogList } from '../../../../src/components/ActivityLogList';
@@ -145,8 +145,8 @@ export default function DocumentDetailScreen() {
           ? undefined
           : () => (
               <View className="flex-row">
-                {canEdit(doc) ? <HeaderButton icon="create-outline" label="Edit" onPress={openEditor} /> : null}
-                <HeaderButton icon="ellipsis-horizontal-circle-outline" label="More" onPress={() => openActionsMenuRef.current()} />
+                {canEdit(doc) ? <HeaderButton icon="pencil" label="Edit" onPress={openEditor} /> : null}
+                <HeaderButton icon="ellipsis.circle" label="More" onPress={() => openActionsMenuRef.current()} />
               </View>
             ),
     });
@@ -342,7 +342,7 @@ export default function DocumentDetailScreen() {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24, gap: 16 }}>
       <Card>
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-lg font-bold text-label">{document.doc_number}</Text>
+          <Text className="text-title3 font-bold text-label">{document.doc_number}</Text>
           <StatusBadge document={document} />
         </View>
         <View className="mb-3">
@@ -356,22 +356,22 @@ export default function DocumentDetailScreen() {
             size={40}
           />
           <View className="flex-1">
-            <Text className="text-base text-label">
+            <Text className="text-body text-label">
               {client?.display_name ?? document.client_name_snapshot ?? 'No Client'}
             </Text>
-            {client?.email ? <Text className="text-sm text-secondary">{client.email}</Text> : null}
+            {client?.email ? <Text className="text-subhead text-secondary">{client.email}</Text> : null}
           </View>
         </View>
         <View className="flex-row justify-between pt-3 border-t border-separator">
           <View>
-            <Text className="text-sm text-secondary">Issued</Text>
-            <Text className="text-base text-label">{document.issue_date ? formatDisplayDate(document.issue_date) : '—'}</Text>
+            <Text className="text-subhead text-secondary">Issued</Text>
+            <Text className="text-body text-label">{document.issue_date ? formatDisplayDate(document.issue_date) : '—'}</Text>
           </View>
           <View>
-            <Text className="text-sm text-secondary text-right">
+            <Text className="text-subhead text-secondary text-right">
               {document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}
             </Text>
-            <Text className="text-base text-label text-right">
+            <Text className="text-body text-label text-right">
               {(() => {
                 const date = document.doc_type === 'invoice' ? document.due_date : document.expiry_date;
                 return date ? formatDisplayDate(date) : '—';
@@ -381,10 +381,10 @@ export default function DocumentDetailScreen() {
         </View>
         {document.status === 'void' ? (
           <View className="mt-3 pt-3 border-t border-separator">
-            <Text className="text-sm text-secondary">
+            <Text className="text-subhead text-secondary">
               Canceled{document.voided_at ? ` on ${formatDisplayDate(document.voided_at)}` : ''}
             </Text>
-            <Text className="text-base text-label mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
+            <Text className="text-body text-label mt-0.5">{document.void_reason ?? 'No reason given'}</Text>
           </View>
         ) : null}
       </Card>
@@ -397,23 +397,23 @@ export default function DocumentDetailScreen() {
           accessibilityHint="Edit the repeat schedule"
         >
           <Card className="flex-row items-center gap-3">
-            <Ionicons name="repeat" size={20} color={colors.tint} />
-            <Text className="flex-1 text-base text-label">
+            <Icon name="repeat" size={20} color={colors.tint} />
+            <Text className="flex-1 text-body text-label">
               {describeSchedule(schedule.frequency, schedule.next_run_date)}
             </Text>
-            <Ionicons name="chevron-forward" size={17} color={colors.chevron} />
+            <Icon name="chevron.right" size={14} weight="semibold" color={colors.chevron} />
           </Card>
         </Pressable>
       ) : null}
 
       <Card>
-        <Text className="text-lg font-semibold text-label mb-2" accessibilityRole="header">
+        <Text className="text-title3 font-semibold text-label mb-2" accessibilityRole="header">
           Line Items
         </Text>
         {lines.length > 0 ? (
           lines.map((line) => <LineItemRow key={line.id} line={line} currencyCode={document.currency_code} />)
         ) : (
-          <Text className="text-base text-secondary py-2">No line items yet. Tap Edit to add some.</Text>
+          <Text className="text-body text-secondary py-2">No line items yet. Tap Edit to add some.</Text>
         )}
       </Card>
 
@@ -441,15 +441,15 @@ export default function DocumentDetailScreen() {
           accessible
           accessibilityLabel={`${document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}: ${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}`}
         >
-          <Text className="text-white/85 text-base">{document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}</Text>
-          <Text className="text-white text-lg font-bold">
+          <Text className="text-white/85 text-body">{document.doc_type === 'invoice' ? 'Balance Due' : 'Total'}</Text>
+          <Text className="text-white text-title3 font-bold">
             {formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}
           </Text>
         </View>
       </Card>
 
       {!canEdit(document) && document.status !== 'void' ? (
-        <Text className="text-sm text-secondary text-center">
+        <Text className="text-subhead text-secondary text-center">
           Editing is locked because this {document.doc_type === 'estimate' ? 'estimate' : 'invoice'} has been
           issued.
         </Text>
@@ -473,7 +473,7 @@ export default function DocumentDetailScreen() {
       ) : null}
 
       <Card>
-        <Text className="text-lg font-semibold text-label mb-1" accessibilityRole="header">
+        <Text className="text-title3 font-semibold text-label mb-1" accessibilityRole="header">
           Signatures
         </Text>
         {(['merchant', 'client'] as const).map((role) => {
@@ -481,7 +481,7 @@ export default function DocumentDetailScreen() {
           if (sig) {
             return (
               <View key={role} className="flex-row justify-between items-center gap-3 min-h-[48px]">
-                <Text className="text-base text-label flex-1">
+                <Text className="text-body text-label flex-1">
                   {role === 'merchant' ? 'You' : 'Client'} signed {formatDisplayDate(sig.signed_at)}
                 </Text>
                 <Button label="Clear" variant="destructive" size="small" onPress={() => handleClearSignature(role)} />
@@ -490,7 +490,7 @@ export default function DocumentDetailScreen() {
           }
           return (
             <View key={role} className="flex-row justify-between items-center gap-3 min-h-[48px]">
-              <Text className="text-base text-secondary flex-1">
+              <Text className="text-body text-secondary flex-1">
                 {role === 'merchant' ? "You haven't signed" : "Client hasn't signed"}
               </Text>
               <Button
@@ -505,7 +505,7 @@ export default function DocumentDetailScreen() {
       </Card>
 
       <Card>
-        <Text className="text-lg font-semibold text-label mb-2" accessibilityRole="header">
+        <Text className="text-title3 font-semibold text-label mb-2" accessibilityRole="header">
           Activity
         </Text>
         <ActivityLogList entries={activity} />
@@ -515,7 +515,7 @@ export default function DocumentDetailScreen() {
       {primaryAction ? (
         <View className="p-4 bg-card border-t border-separator gap-1.5">
           <Button label={primaryAction.label} variant="filled" size="large" onPress={primaryAction.onPress} />
-          <Text className="text-sm text-secondary text-center">{primaryAction.caption}</Text>
+          <Text className="text-subhead text-secondary text-center">{primaryAction.caption}</Text>
         </View>
       ) : null}
 
@@ -528,10 +528,10 @@ export default function DocumentDetailScreen() {
       <Modal visible={voidPromptVisible} transparent animationType="fade" onRequestClose={() => setVoidPromptVisible(false)}>
         <View className="flex-1 items-center justify-center bg-black/40 px-6">
           <View className="bg-card rounded-2xl p-5 w-full gap-3">
-            <Text className="text-lg font-semibold text-label">
+            <Text className="text-title3 font-semibold text-label">
               Cancel This {docTypeLabel(document.doc_type)}?
             </Text>
-            <Text className="text-base text-secondary">
+            <Text className="text-body text-secondary">
               It stays on record but can&apos;t be edited, sent, or paid anymore.
             </Text>
             <FormField label="Reason" hint="Optional" value={voidReason} onChangeText={setVoidReason} autoFocus />
@@ -595,8 +595,8 @@ function TotalsRow({
 }) {
   return (
     <View className="flex-row justify-between py-1">
-      <Text className="text-base text-secondary">{label}</Text>
-      <Text className="text-base text-label">{formatMinor(valueMinor, currencyCode)}</Text>
+      <Text className="text-body text-secondary">{label}</Text>
+      <Text className="text-body text-label">{formatMinor(valueMinor, currencyCode)}</Text>
     </View>
   );
 }

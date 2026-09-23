@@ -28,7 +28,7 @@ export function DateField({ label, value, onChange, emptyLabel = 'Add Date' }: D
       accessibilityLabel={`${label}: ${emptyLabel}`}
       className="min-h-[44px] justify-center"
     >
-      <Text className="text-[17px] text-tint">{emptyLabel}</Text>
+      <Text className="text-body text-tint">{emptyLabel}</Text>
     </Pressable>
   ) : Platform.OS === 'ios' ? (
     <DateTimePicker
@@ -48,13 +48,13 @@ export function DateField({ label, value, onChange, emptyLabel = 'Add Date' }: D
       accessibilityLabel={`${label}: ${formatDisplayDate(value)}`}
       className="min-h-[44px] justify-center"
     >
-      <Text className="text-[17px] text-tint">{formatDisplayDate(value)}</Text>
+      <Text className="text-body text-tint">{formatDisplayDate(value)}</Text>
     </Pressable>
   );
 
   return (
     <View className="flex-row items-center justify-between gap-3 bg-card rounded-xl border border-field pl-3 pr-2 min-h-[50px]">
-      <Text className="text-[17px] text-label flex-shrink">{label}</Text>
+      <Text className="text-body text-label flex-shrink">{label}</Text>
       {trailing}
       {showAndroidDialog && value ? (
         <DateTimePicker

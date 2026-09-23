@@ -21,7 +21,7 @@ export default function TaxBracketsScreen() {
     navigation.setOptions({
       unstable_headerRightItems: () => [addButtonItem('Add Tax Rate', addTaxRate)],
       headerRight:
-        Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="add" label="Add Tax Rate" onPress={addTaxRate} />,
+        Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="plus" label="Add Tax Rate" onPress={addTaxRate} />,
     });
   }, [navigation]);
 
@@ -39,7 +39,7 @@ export default function TaxBracketsScreen() {
     >
       {taxBrackets.length === 0 ? (
         <EmptyState
-          icon="calculator-outline"
+          icon="percent"
           title="No Tax Rates Yet"
           subtitle="Add the sales tax or VAT rates you charge."
           actionLabel="Add Tax Rate"

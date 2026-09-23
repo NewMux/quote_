@@ -3,10 +3,10 @@ import { ScrollView, Text, View } from 'react-native';
 function Section({ title, children }: { title: string; children: string }) {
   return (
     <View className="mb-6">
-      <Text className="text-lg font-semibold text-label mb-2" accessibilityRole="header">
+      <Text className="text-title3 font-semibold text-label mb-2" accessibilityRole="header">
         {title}
       </Text>
-      <Text className="text-[17px] text-label leading-6">{children}</Text>
+      <Text className="text-body text-label leading-6">{children}</Text>
     </View>
   );
 }

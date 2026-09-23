@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Text, View, Linking } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from '../../../src/components/Icon';
 import { Button } from '../../../src/components/Button';
 import { FormField } from '../../../src/components/form/FormField';
 import { FormScrollView } from '../../../src/components/form/FormScrollView';
@@ -44,11 +44,11 @@ export default function DeleteAccountScreen() {
   return (
     <FormScrollView>
       <View className="items-center gap-2 pt-2">
-        <Ionicons name="warning" size={44} color={colors.destructive} />
-        <Text className="text-xl font-semibold text-label text-center" accessibilityRole="header">
+        <Icon name="exclamationmark.triangle.fill" size={48} color={colors.destructive} />
+        <Text className="text-title2 font-semibold text-label text-center" accessibilityRole="header">
           This Can’t Be Undone
         </Text>
-        <Text className="text-base text-secondary text-center">
+        <Text className="text-body text-secondary text-center">
           This permanently deletes your account and everything in it — every client, invoice,
           estimate, item, tax rate, signature, photo, and payment record — and signs you out. To
           clear your data but keep your account, use Delete All Data instead.

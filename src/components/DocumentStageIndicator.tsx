@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon } from './Icon';
 import { useThemeColors } from '../lib/theme';
 import type { DocumentRecord } from '../types/models';
 
@@ -34,14 +34,15 @@ export function DocumentStageIndicator({ document }: { document: DocumentRecord 
       {stages.map((stage, index) => (
         <View key={stage} className="flex-row items-center">
           <Text
-            className={`text-sm ${index <= current ? 'text-tint font-semibold' : 'text-secondary'}`}
+            className={`text-subhead ${index <= current ? 'text-tint font-semibold' : 'text-secondary'}`}
           >
             {stage}
           </Text>
           {index < stages.length - 1 ? (
-            <Ionicons
-              name="chevron-forward"
-              size={12}
+            <Icon
+              name="chevron.right"
+              size={11}
+              weight="semibold"
               color={index < current ? colors.tint : colors.chevron}
               style={{ marginHorizontal: 4 }}
             />

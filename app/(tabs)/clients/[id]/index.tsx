@@ -69,9 +69,9 @@ export default function ClientDetailScreen() {
           ? undefined
           : () => (
               <View className="flex-row">
-                <HeaderButton icon="create-outline" label="Edit" onPress={openEditor} />
+                <HeaderButton icon="pencil" label="Edit" onPress={openEditor} />
                 <HeaderButton
-                  icon="ellipsis-horizontal-circle-outline"
+                  icon="ellipsis.circle"
                   label="More"
                   onPress={() =>
                     Alert.alert(client.display_name, undefined, [
@@ -147,7 +147,7 @@ export default function ClientDetailScreen() {
         <View>
           <View className="items-center gap-2 mb-6">
             <Avatar name={client.display_name} photoUri={client.photo_uri} seed={client.id} size={80} />
-            <Text className="text-2xl font-semibold text-label text-center" accessibilityRole="header">
+            <Text className="text-title1 font-semibold text-label text-center" accessibilityRole="header">
               {client.display_name}
             </Text>
           </View>
@@ -177,14 +177,14 @@ export default function ClientDetailScreen() {
             </ListSection>
           ) : null}
 
-          <Text className="text-sm text-secondary px-4 mb-1.5" accessibilityRole="header">
+          <Text className="text-subhead text-secondary px-4 mb-1.5" accessibilityRole="header">
             Documents
           </Text>
         </View>
       }
       ListEmptyComponent={
         <Card className="p-4">
-          <Text className="text-base text-secondary text-center">No documents for this client yet.</Text>
+          <Text className="text-body text-secondary text-center">No documents for this client yet.</Text>
         </Card>
       }
       renderItem={({ item }) => {
@@ -198,12 +198,12 @@ export default function ClientDetailScreen() {
             {({ pressed }) => (
               <Card className={`p-4 flex-row justify-between items-center gap-3 ${pressed ? 'opacity-70' : ''}`}>
                 <View className="flex-1 gap-1">
-                  <Text className="text-base font-semibold text-label" numberOfLines={1}>
+                  <Text className="text-body font-semibold text-label" numberOfLines={1}>
                     {item.doc_number}
                   </Text>
                   <StatusBadge document={item} />
                 </View>
-                <Text className="text-base font-medium text-label" numberOfLines={1}>
+                <Text className="text-body font-medium text-label" numberOfLines={1}>
                   {total}
                 </Text>
               </Card>

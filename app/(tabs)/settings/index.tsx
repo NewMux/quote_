@@ -91,10 +91,10 @@ export default function SettingsScreen() {
     >
       <ListSection header="Account">
         {email ? (
-          <ListRow icon="person" iconBackground={ICON_COLORS.account} title={email} subtitle="Signed In" />
+          <ListRow icon="person.fill" iconBackground={ICON_COLORS.account} title={email} subtitle="Signed In" />
         ) : null}
         <ListRow
-          icon="star"
+          icon="star.fill"
           iconBackground={ICON_COLORS.subscription}
           title="Subscription"
           onPress={() => router.push('/settings/subscription')}
@@ -103,26 +103,26 @@ export default function SettingsScreen() {
 
       <ListSection header="Business">
         <ListRow
-          icon="business"
+          icon="building.2.fill"
           iconBackground={ICON_COLORS.business}
           title="Business Profile"
           value={profile?.business_name || undefined}
           onPress={() => router.push('/settings/business-profile')}
         />
         <ListRow
-          icon="pricetags"
+          icon="tag.fill"
           iconBackground={ICON_COLORS.catalog}
           title="Item Catalog"
           onPress={() => router.push('/settings/items')}
         />
         <ListRow
-          icon="calculator"
+          icon="percent"
           iconBackground={ICON_COLORS.tax}
           title="Tax Rates"
           onPress={() => router.push('/settings/tax-brackets')}
         />
         <ListRow
-          icon="list"
+          icon="number"
           iconBackground={ICON_COLORS.numbers}
           title="Invoice & Estimate Numbers"
           onPress={() => router.push('/settings/numbering')}
@@ -140,7 +140,7 @@ export default function SettingsScreen() {
         footer="Get a notification on this device when an invoice becomes overdue."
       >
         <ListRow
-          icon="notifications"
+          icon="bell.fill"
           iconBackground={ICON_COLORS.reminders}
           title="Overdue Reminders"
           switchValue={remindersEnabled}
@@ -154,7 +154,7 @@ export default function SettingsScreen() {
         footer="Save a copy of your clients, invoices, and estimates to Files, email, or cloud storage."
       >
         <ListRow
-          icon="share"
+          icon="square.and.arrow.up"
           iconBackground={ICON_COLORS.export}
           title="Export Data"
           onPress={handleExport}
@@ -164,7 +164,7 @@ export default function SettingsScreen() {
 
       <ListSection header="About">
         <ListRow
-          icon="shield-checkmark"
+          icon="hand.raised.fill"
           iconBackground={ICON_COLORS.privacy}
           title="Privacy Policy"
           onPress={() => router.push('/settings/privacy-policy')}

@@ -17,7 +17,7 @@ export function BarChart({ data, height = 140, color, accessibilityLabel }: BarC
   if (data.length === 0) {
     return (
       <View style={{ height }} className="items-center justify-center">
-        <Text className="text-sm text-secondary">No Data Yet</Text>
+        <Text className="text-subhead text-secondary">No Data Yet</Text>
       </View>
     );
   }
@@ -41,7 +41,7 @@ export function BarChart({ data, height = 140, color, accessibilityLabel }: BarC
               style={{ height: barHeight, backgroundColor: d.value > 0 ? barColor : colors.separator }}
               className="w-full rounded-t-lg"
             />
-            <Text className="text-xs text-secondary mt-1" numberOfLines={1}>
+            <Text className="text-caption text-secondary mt-1" numberOfLines={1}>
               {d.label}
             </Text>
           </View>

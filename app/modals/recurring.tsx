@@ -83,13 +83,13 @@ export default function RecurringModal() {
         </View>
       ) : (
         <FormScrollView>
-          <Text className="text-base text-secondary">
+          <Text className="text-body text-secondary">
             A new draft copy of this invoice is created on each date. You review it and send it
             yourself — nothing goes to your client automatically.
           </Text>
 
           <View>
-            <Text className="text-sm text-secondary mb-1.5">Repeats</Text>
+            <Text className="text-subhead text-secondary mb-1.5">Repeats</Text>
             <SegmentedControl
               values={FREQUENCY_OPTIONS.map((o) => o.label)}
               selectedIndex={FREQUENCY_OPTIONS.findIndex((o) => o.value === frequency)}

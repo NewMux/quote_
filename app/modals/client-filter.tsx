@@ -33,7 +33,7 @@ export default function ClientFilterModal() {
       />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
         <View>
-          <Text className="text-sm text-secondary px-4 mb-1.5" accessibilityRole="header">
+          <Text className="text-subhead text-secondary px-4 mb-1.5" accessibilityRole="header">
             Sort By
           </Text>
           <SegmentedControl

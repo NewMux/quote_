@@ -27,16 +27,16 @@ export const FormField = forwardRef<TextInput, FormFieldProps>(function FormFiel
       inputProps.keyboardType === 'phone-pad');
   return (
     <View>
-      <Text className="text-sm text-secondary mb-1.5">{label}</Text>
+      <Text className="text-subhead text-secondary mb-1.5">{label}</Text>
       <View
         className={`flex-row items-center bg-card rounded-xl border px-3 ${
           error ? 'border-destructive' : 'border-field'
         }`}
       >
-        {prefix ? <Text className="text-[17px] text-secondary mr-1">{prefix}</Text> : null}
+        {prefix ? <Text className="text-body text-secondary mr-1">{prefix}</Text> : null}
         <TextInput
           ref={ref}
-          className="flex-1 text-[17px] text-label py-2.5"
+          className="flex-1 text-body text-label py-2.5"
           style={[{ minHeight: multiline ? 88 : 44, textAlignVertical: multiline ? 'top' : 'center' }, style]}
           placeholderTextColor={colors.placeholder}
           multiline={multiline}
@@ -54,15 +54,15 @@ export const FormField = forwardRef<TextInput, FormFieldProps>(function FormFiel
               accessibilityRole="button"
               className="min-h-[44px] justify-center px-2"
             >
-              <Text className="text-[17px] font-semibold text-tint">Done</Text>
+              <Text className="text-body font-semibold text-tint">Done</Text>
             </Pressable>
           </View>
         </InputAccessoryView>
       ) : null}
       {error ? (
-        <Text className="text-sm text-destructive mt-1.5">{error}</Text>
+        <Text className="text-subhead text-destructive mt-1.5">{error}</Text>
       ) : hint ? (
-        <Text className="text-sm text-secondary mt-1.5">{hint}</Text>
+        <Text className="text-subhead text-secondary mt-1.5">{hint}</Text>
       ) : null}
     </View>
   );

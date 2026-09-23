@@ -1,6 +1,9 @@
 import { useRef } from 'react';
 import { ActivityIndicator, Animated, Pressable, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import type { SymbolName } from '../lib/symbols';
+import { useThemeColors } from '../lib/theme';
+import { Icon } from './Icon';
 
 type ButtonVariant = 'filled' | 'tinted' | 'plain' | 'destructive';
 type ButtonSize = 'large' | 'medium' | 'small';
@@ -14,6 +17,8 @@ interface ButtonProps {
   /** Shows a spinner in place of the label and blocks presses, e.g. while saving. */
   loading?: boolean;
   accessibilityHint?: string;
+  /** Optional leading SF Symbol. */
+  icon?: SymbolName;
 }
 
 const CONTAINER_CLASSES: Record<ButtonVariant, string> = {
@@ -30,17 +35,18 @@ const TEXT_CLASSES: Record<ButtonVariant, string> = {
   destructive: 'text-destructive',
 };
 
-// Every size keeps at least a 44pt touch target.
+// Capsules, like iOS 26's bordered-prominent and tinted buttons. Every size keeps at least a 44pt
+// touch target.
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  large: 'py-3.5 px-6 rounded-2xl min-h-[52px]',
-  medium: 'py-2.5 px-4 rounded-xl min-h-[44px]',
-  small: 'py-2 px-3 rounded-lg min-h-[44px]',
+  large: 'py-3.5 px-6 rounded-full min-h-[52px]',
+  medium: 'py-2.5 px-5 rounded-full min-h-[44px]',
+  small: 'py-2 px-4 rounded-full min-h-[44px]',
 };
 
 const TEXT_SIZE_CLASSES: Record<ButtonSize, string> = {
-  large: 'text-[17px] font-semibold',
-  medium: 'text-[15px] font-semibold',
-  small: 'text-[15px] font-medium',
+  large: 'text-body font-semibold',
+  medium: 'text-subhead font-semibold',
+  small: 'text-subhead font-medium',
 };
 
 export function Button({
@@ -51,7 +57,9 @@ export function Button({
   disabled,
   loading,
   accessibilityHint,
+  icon,
 }: ButtonProps) {
+  const colors = useThemeColors();
   const scale = useRef(new Animated.Value(1)).current;
   const inactive = disabled || loading;
 
@@ -86,13 +94,28 @@ export function Button({
       style={{ opacity: disabled && !loading ? 0.4 : 1 }}
     >
       <Animated.View style={{ transform: [{ scale }] }}>
-        <View className={`${CONTAINER_CLASSES[variant]} ${SIZE_CLASSES[size]} items-center justify-center`}>
+        <View
+          className={`${CONTAINER_CLASSES[variant]} ${SIZE_CLASSES[size]} flex-row gap-2 items-center justify-center`}
+          style={{ borderCurve: 'continuous' }}
+        >
           {loading ? (
             <ActivityIndicator color={variant === 'filled' ? '#FFFFFF' : undefined} />
           ) : (
-            <Text className={`${TEXT_CLASSES[variant]} ${TEXT_SIZE_CLASSES[size]} text-center`} numberOfLines={2}>
-              {label}
-            </Text>
+            <>
+              {icon ? (
+                <Icon
+                  name={icon}
+                  size={size === 'large' ? 19 : 17}
+                  weight="semibold"
+                  color={
+                    variant === 'filled' ? '#FFFFFF' : variant === 'destructive' ? colors.destructive : colors.tint
+                  }
+                />
+              ) : null}
+                <Text className={`${TEXT_CLASSES[variant]} ${TEXT_SIZE_CLASSES[size]} text-center`} numberOfLines={2}>
+                {label}
+              </Text>
+            </>
           )}
         </View>
       </Animated.View>

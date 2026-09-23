@@ -35,12 +35,12 @@ export default function ClientsScreen() {
           : () => (
               <View className="flex-row">
                 <HeaderButton
-                  icon={hasActiveFilter ? 'filter-circle' : 'filter-circle-outline'}
+                  icon={hasActiveFilter ? 'line.3.horizontal.decrease.circle.fill' : 'line.3.horizontal.decrease.circle'}
                   label="Filter"
                   selected={hasActiveFilter}
                   onPress={openFilters}
                 />
-                <HeaderButton icon="add" label="Add Client" onPress={addClient} />
+                <HeaderButton icon="plus" label="Add Client" onPress={addClient} />
               </View>
             ),
       headerSearchBarOptions: {
@@ -113,10 +113,10 @@ export default function ClientsScreen() {
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       ListEmptyComponent={
         isNarrowed ? (
-          <EmptyState icon="search" title="No Results" subtitle="Try a different search or filter." />
+          <EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a different search or filter." />
         ) : (
           <EmptyState
-            icon="people-outline"
+            icon="person.2"
             title="No Clients Yet"
             subtitle="Add the people and businesses you bill."
             actionLabel="Add Client"
@@ -137,19 +137,19 @@ export default function ClientsScreen() {
               <View className="flex-row">
                 <SwipeAction
                   label="Edit"
-                  icon="pencil-outline"
+                  icon="pencil"
                   color={SWIPE_COLORS.edit}
                   onPress={() => handleEdit(item, swipeable)}
                 />
                 <SwipeAction
                   label="Archive"
-                  icon="archive-outline"
+                  icon="archivebox"
                   color={SWIPE_COLORS.archive}
                   onPress={() => handleArchive(item, swipeable)}
                 />
                 <SwipeAction
                   label="Delete"
-                  icon="trash-outline"
+                  icon="trash"
                   color={SWIPE_COLORS.delete}
                   onPress={() => handleDelete(item, swipeable)}
                 />
@@ -167,16 +167,16 @@ export default function ClientsScreen() {
                 <Card className={`p-4 flex-row items-center gap-3 ${pressed ? 'opacity-70' : ''}`}>
                   <Avatar name={item.display_name} photoUri={item.photo_uri} seed={item.id} size={44} />
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-label" numberOfLines={1}>
+                    <Text className="text-body font-semibold text-label" numberOfLines={1}>
                       {item.display_name}
                     </Text>
                     {item.email ? (
-                      <Text className="text-sm text-secondary" numberOfLines={1}>
+                      <Text className="text-subhead text-secondary" numberOfLines={1}>
                         {item.email}
                       </Text>
                     ) : null}
                     {item.phone ? (
-                      <Text className="text-sm text-secondary" numberOfLines={1}>
+                      <Text className="text-subhead text-secondary" numberOfLines={1}>
                         {item.phone}
                       </Text>
                     ) : null}

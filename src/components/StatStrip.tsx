@@ -19,10 +19,10 @@ export function StatStrip({ items }: StatStripProps) {
           accessibilityLabel={`${item.label}: ${item.value}`}
           className={`flex-1 items-center px-1 ${index > 0 ? 'border-l border-white/15' : ''}`}
         >
-          <Text className="text-white text-lg font-bold" numberOfLines={1} adjustsFontSizeToFit>
+          <Text className="text-white text-title3 font-bold" numberOfLines={1} adjustsFontSizeToFit>
             {item.value}
           </Text>
-          <Text className="text-white/80 text-xs mt-0.5">{item.label}</Text>
+          <Text className="text-white/80 text-caption mt-0.5">{item.label}</Text>
         </View>
       ))}
     </View>

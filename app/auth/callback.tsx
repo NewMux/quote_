@@ -47,10 +47,10 @@ export default function AuthCallbackScreen() {
   if (error) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped px-6 gap-4">
-        <Text className="text-xl font-semibold text-label text-center" accessibilityRole="header">
+        <Text className="text-title2 font-semibold text-label text-center" accessibilityRole="header">
           This Link Didn’t Work
         </Text>
-        <Text className="text-base text-secondary text-center">{error}</Text>
+        <Text className="text-body text-secondary text-center">{error}</Text>
         <Button label="Back to Sign In" variant="tinted" onPress={() => router.replace('/(auth)/sign-in')} />
       </View>
     );
@@ -59,7 +59,7 @@ export default function AuthCallbackScreen() {
   return (
     <View className="flex-1 items-center justify-center bg-grouped gap-3">
       <ActivityIndicator size="large" />
-      <Text className="text-base text-secondary">Signing You In…</Text>
+      <Text className="text-body text-secondary">Signing You In…</Text>
     </View>
   );
 }

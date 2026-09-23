@@ -38,7 +38,7 @@ export default function CustomRangeModal() {
         <DateField label="Start Date" value={startDate} onChange={setStartDate} />
         <DateField label="End Date" value={endDate} onChange={setEndDate} />
         {isBackwards ? (
-          <Text className="text-sm text-destructive">The start date needs to be on or before the end date.</Text>
+          <Text className="text-subhead text-destructive">The start date needs to be on or before the end date.</Text>
         ) : null}
       </FormScrollView>
     </View>

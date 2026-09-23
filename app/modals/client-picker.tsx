@@ -77,7 +77,7 @@ export default function ClientPickerModal() {
             {canQuickAdd ? (
               <ListSection footer="Adds a client with just this name. You can fill in their details later.">
                 <ListRow
-                  icon="person-add"
+                  icon="person.badge.plus"
                   title={`Add “${trimmedQuery}”`}
                   onPress={quickAddClient}
                   accessory="none"
@@ -98,7 +98,7 @@ export default function ClientPickerModal() {
         ListEmptyComponent={
           canQuickAdd ? null : (
             <EmptyState
-              icon="people-outline"
+              icon="person.2"
               title={trimmedQuery ? 'No Results' : 'No Clients Yet'}
               subtitle={trimmedQuery ? undefined : 'Type a name above to add your first client.'}
             />

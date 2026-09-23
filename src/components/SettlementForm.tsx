@@ -76,7 +76,7 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
   return (
     <>
       <View>
-        <Text className="text-sm text-secondary mb-1.5">Method</Text>
+        <Text className="text-subhead text-secondary mb-1.5">Method</Text>
         <SegmentedControl
           values={METHODS.map((m) => m.label)}
           selectedIndex={METHODS.findIndex((m) => m.value === method)}
@@ -109,7 +109,7 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
       <FormField label="Notes" hint="Optional" value={notes} onChangeText={setNotes} multiline maxLength={500} />
 
       <View>
-        <Text className="text-sm text-secondary mb-1.5">Receipt Photo</Text>
+        <Text className="text-subhead text-secondary mb-1.5">Receipt Photo</Text>
         {signedReceiptUrl ? (
           <Image
             source={{ uri: signedReceiptUrl }}

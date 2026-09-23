@@ -56,16 +56,16 @@ function PlanCard({
         />
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-base font-semibold text-label">{title}</Text>
+            <Text className="text-body font-semibold text-label">{title}</Text>
             {badge ? (
               <View className="bg-brand/10 rounded-full px-2 py-0.5">
-                <Text className="text-sm font-semibold text-tint">{badge}</Text>
+                <Text className="text-subhead font-semibold text-tint">{badge}</Text>
               </View>
             ) : null}
           </View>
-          {detail ? <Text className="text-sm text-secondary mt-0.5">{detail}</Text> : null}
+          {detail ? <Text className="text-subhead text-secondary mt-0.5">{detail}</Text> : null}
         </View>
-        <Text className="text-base font-semibold text-label">{price}</Text>
+        <Text className="text-body font-semibold text-label">{price}</Text>
       </View>
     </Pressable>
   );
@@ -74,7 +74,7 @@ function PlanCard({
 function FooterLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="link" className="min-h-[44px] justify-center px-1">
-      <Text className="text-sm text-tint">{label}</Text>
+      <Text className="text-subhead text-tint">{label}</Text>
     </Pressable>
   );
 }
@@ -167,8 +167,8 @@ export default function PaywallScreen() {
             <View className="w-14 h-14 rounded-2xl bg-white/15 items-center justify-center mb-1">
               <Ionicons name="receipt" size={28} color="white" />
             </View>
-            <Text className="text-2xl font-bold text-white text-center">Invoice Them Pro</Text>
-            <Text className="text-sm text-white/80 text-center">
+            <Text className="text-title1 font-bold text-white text-center">Invoice Them Pro</Text>
+            <Text className="text-subhead text-white/80 text-center">
               Everything you need to quote, invoice, and get paid.
             </Text>
           </View>
@@ -182,14 +182,14 @@ export default function PaywallScreen() {
           {BENEFITS.map((benefit) => (
             <View key={benefit.text} className="flex-row items-center gap-3">
               <Ionicons name={benefit.icon} size={20} color={colors.tint} />
-              <Text className="text-base text-label flex-1">{benefit.text}</Text>
+              <Text className="text-body text-label flex-1">{benefit.text}</Text>
             </View>
           ))}
         </View>
 
         {loadError ? (
           <View className="bg-card rounded-2xl p-4 gap-3 items-center border border-separator">
-            <Text className="text-sm text-label text-center">
+            <Text className="text-subhead text-label text-center">
               Couldn&apos;t load subscription options. Check your connection and try again.
             </Text>
             <Button label="Try Again" variant="tinted" onPress={fetchOffering} />
@@ -222,7 +222,7 @@ export default function PaywallScreen() {
         )}
 
         <View className="gap-2">
-          {trial ? <Text className="text-base text-secondary text-center">{`${trial}, then ${selected?.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}</Text> : null}
+          {trial ? <Text className="text-body text-secondary text-center">{`${trial}, then ${selected?.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}</Text> : null}
           <Button
             label={trial ? 'Start Free Trial' : 'Subscribe'}
             size="large"
@@ -233,7 +233,7 @@ export default function PaywallScreen() {
           <Button label="Restore Purchases" variant="plain" onPress={handleRestore} disabled={isWorking} />
         </View>
 
-        {renewalText ? <Text className="text-sm text-secondary leading-5">{renewalText}</Text> : null}
+        {renewalText ? <Text className="text-subhead text-secondary leading-5">{renewalText}</Text> : null}
 
         <View className="flex-row flex-wrap justify-center gap-x-4">
           <FooterLink label="Privacy Policy" onPress={() => router.push('/privacy-policy')} />

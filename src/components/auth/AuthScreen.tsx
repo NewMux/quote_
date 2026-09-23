@@ -24,10 +24,10 @@ export function AuthScreen({ title, subtitle, children, actions }: AuthScreenPro
       >
         <View className="w-full max-w-[440px] self-center gap-7">
           <View className="gap-2">
-            <Text className="text-[28px] font-bold text-label text-center" accessibilityRole="header">
+            <Text className="text-title1 font-bold text-label text-center" accessibilityRole="header">
               {title}
             </Text>
-            {subtitle ? <Text className="text-[17px] text-secondary text-center">{subtitle}</Text> : null}
+            {subtitle ? <Text className="text-body text-secondary text-center">{subtitle}</Text> : null}
           </View>
           <View className="gap-4">{children}</View>
           <View className="gap-2">{actions}</View>
@@ -41,7 +41,7 @@ export function AuthScreen({ title, subtitle, children, actions }: AuthScreenPro
 export function TextLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" className="min-h-[44px] items-center justify-center px-2">
-      <Text className="text-tint text-[15px] font-medium text-center">{label}</Text>
+      <Text className="text-tint text-subhead font-medium text-center">{label}</Text>
     </Pressable>
   );
 }

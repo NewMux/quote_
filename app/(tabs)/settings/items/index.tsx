@@ -22,7 +22,7 @@ export default function ItemsScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       unstable_headerRightItems: () => [addButtonItem('Add Item', addItem)],
-      headerRight: Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="add" label="Add Item" onPress={addItem} />,
+      headerRight: Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="plus" label="Add Item" onPress={addItem} />,
     });
   }, [navigation]);
 
@@ -40,7 +40,7 @@ export default function ItemsScreen() {
     >
       {items.length === 0 ? (
         <EmptyState
-          icon="pricetags-outline"
+          icon="tag"
           title="No Items Yet"
           subtitle="Save the items and services you bill often, then add them to a document in one tap."
           actionLabel="Add Item"

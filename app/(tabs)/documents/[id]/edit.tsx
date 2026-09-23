@@ -66,7 +66,7 @@ export default function EditDocumentScreen() {
 
   return (
     <FormScrollView>
-      <Text className="text-sm text-secondary text-center">Changes save automatically.</Text>
+      <Text className="text-subhead text-secondary text-center">Changes save automatically.</Text>
 
       <View>
         <ListSection header="Client">
@@ -89,13 +89,13 @@ export default function EditDocumentScreen() {
 
       <View>
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-lg font-semibold text-label" accessibilityRole="header">
+          <Text className="text-title3 font-semibold text-label" accessibilityRole="header">
             Line Items
           </Text>
           <Button label="Add Item" variant="tinted" onPress={() => router.push('/modals/item-picker')} />
         </View>
         {editor.lines.length === 0 ? (
-          <Text className="text-base text-secondary py-4 text-center">No line items yet.</Text>
+          <Text className="text-body text-secondary py-4 text-center">No line items yet.</Text>
         ) : null}
         {editor.lines.map((line) => (
           <LineItemEditor
@@ -157,8 +157,8 @@ function TotalsRow({
 }) {
   return (
     <View className="flex-row justify-between py-1">
-      <Text className={bold ? 'text-base font-semibold text-label' : 'text-sm text-secondary'}>{label}</Text>
-      <Text className={bold ? 'text-base font-semibold text-label' : 'text-sm text-label'}>
+      <Text className={bold ? 'text-body font-semibold text-label' : 'text-subhead text-secondary'}>{label}</Text>
+      <Text className={bold ? 'text-body font-semibold text-label' : 'text-subhead text-label'}>
         {formatMinor(valueMinor, currencyCode)}
       </Text>
     </View>
@@ -180,7 +180,7 @@ function DocumentDiscountEditor({
   return (
     <View className="bg-card rounded-2xl p-4 gap-3">
       <View className="flex-row justify-between items-center min-h-[44px]">
-        <Text className="text-[17px] text-label">Discount</Text>
+        <Text className="text-body text-label">Discount</Text>
         <Switch
           value={enabled}
           accessibilityLabel="Discount"

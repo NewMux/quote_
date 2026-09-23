@@ -51,7 +51,7 @@ export default function ItemPickerModal() {
             </View>
             <ListSection>
               <ListRow
-                icon="create-outline"
+                icon="pencil"
                 title="Custom Item"
                 subtitle="Type a one-time item on this document"
                 onPress={() => {
@@ -61,7 +61,7 @@ export default function ItemPickerModal() {
                 accessory="none"
               />
               <ListRow
-                icon="add-circle-outline"
+                icon="plus.circle.fill"
                 title="New Catalog Item"
                 subtitle="Save an item to reuse on future documents"
                 onPress={() => router.push('/items/new')}
@@ -69,7 +69,7 @@ export default function ItemPickerModal() {
               />
             </ListSection>
             {filtered.length > 0 ? (
-              <Text className="text-sm text-secondary px-4 mb-1.5" accessibilityRole="header">
+              <Text className="text-subhead text-secondary px-4 mb-1.5" accessibilityRole="header">
                 Item Catalog
               </Text>
             ) : null}
@@ -77,7 +77,7 @@ export default function ItemPickerModal() {
         }
         ListEmptyComponent={
           <EmptyState
-            icon="pricetags-outline"
+            icon="tag"
             title={query.trim() ? 'No Results' : 'No Saved Items'}
             subtitle={query.trim() ? undefined : 'Items you save to your catalog appear here.'}
           />

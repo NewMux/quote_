@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 import { router, type NativeStackHeaderItem } from 'expo-router';
 import type { DocType } from '../types/models';
+import { IS_IOS_26 } from './platform';
 
 /** Native iOS navigation bar items (SF Symbols, UIMenu). Screens pass these through
  * `unstable_headerRightItems`, with a React `headerRight` as the Android fallback. */
@@ -58,7 +59,19 @@ export function filterButtonItem(isActive: boolean, onPress: () => void): Native
   };
 }
 
-/** The trailing confirming action of an edit screen ("Save", "Done"), in the bold "done" style. */
+/** The trailing confirming action of an edit screen ("Save", "Done"). On iOS 26 it's a checkmark in
+ * a prominent tinted glass circle, like Apple's own apps; earlier iOS shows the bold text label. */
 export function saveButtonItem(label: string, onPress: () => void, disabled = false): NativeStackHeaderItem {
+  if (IS_IOS_26) {
+    return {
+      type: 'button',
+      label,
+      icon: { type: 'sfSymbol', name: 'checkmark' },
+      variant: 'prominent',
+      accessibilityLabel: label,
+      disabled,
+      onPress,
+    };
+  }
   return { type: 'button', label, variant: 'done', disabled, onPress };
 }

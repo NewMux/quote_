@@ -26,7 +26,7 @@ export function LineChart({ data, height = 140, color, accessibilityLabel }: Lin
   if (data.length === 0) {
     return (
       <View style={{ height }} className="items-center justify-center">
-        <Text className="text-sm text-secondary">No Data Yet</Text>
+        <Text className="text-subhead text-secondary">No Data Yet</Text>
       </View>
     );
   }
@@ -64,7 +64,7 @@ export function LineChart({ data, height = 140, color, accessibilityLabel }: Lin
       <View className="flex-row justify-between px-1">
         {data.map((d, i) =>
           i % labelStep === 0 || i === data.length - 1 ? (
-            <Text key={d.label} className="text-xs text-secondary" numberOfLines={1}>
+            <Text key={d.label} className="text-caption text-secondary" numberOfLines={1}>
               {d.label}
             </Text>
           ) : null

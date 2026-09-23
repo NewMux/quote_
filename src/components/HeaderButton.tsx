@@ -1,9 +1,10 @@
 import { Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import type { SymbolName } from '../lib/symbols';
+import { Icon } from './Icon';
 import { useThemeColors } from '../lib/theme';
 
 interface HeaderButtonProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: SymbolName;
   label: string;
   onPress: () => void;
   /** For toggles like an active filter: announced to VoiceOver as selected. */
@@ -23,7 +24,7 @@ export function HeaderButton({ icon, label, onPress, selected }: HeaderButtonPro
       hitSlop={6}
       className="w-11 h-11 items-center justify-center"
     >
-      <Ionicons name={icon} size={24} color={colors.tint} />
+      <Icon name={icon} size={22} color={colors.tint} />
     </Pressable>
   );
 }

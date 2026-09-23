@@ -20,7 +20,7 @@ export function HeaderTextButton({ label, onPress, disabled, prominent }: Header
       className="min-h-[44px] min-w-[44px] justify-center px-1"
     >
       <Text
-        className={`text-[17px] ${prominent ? 'font-semibold' : ''} ${disabled ? 'text-placeholder' : 'text-tint'}`}
+        className={`text-body ${prominent ? 'font-semibold' : ''} ${disabled ? 'text-placeholder' : 'text-tint'}`}
         numberOfLines={1}
       >
         {label}

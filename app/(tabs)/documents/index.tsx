@@ -60,12 +60,12 @@ export default function DocumentsScreen() {
           : () => (
               <View className="flex-row">
                 <HeaderButton
-                  icon={hasActiveFilter ? 'filter-circle' : 'filter-circle-outline'}
+                  icon={hasActiveFilter ? 'line.3.horizontal.decrease.circle.fill' : 'line.3.horizontal.decrease.circle'}
                   label="Filter"
                   selected={hasActiveFilter}
                   onPress={openFilters}
                 />
-                <HeaderButton icon="add" label="New Document" onPress={showNewDocumentChooser} />
+                <HeaderButton icon="plus" label="New Document" onPress={showNewDocumentChooser} />
               </View>
             ),
       headerSearchBarOptions: {
@@ -184,14 +184,14 @@ export default function DocumentsScreen() {
 
           {hasActiveFilter ? (
             <View className="flex-row items-center justify-between">
-              <Text className="text-sm text-secondary">Filters are on</Text>
+              <Text className="text-subhead text-secondary">Filters are on</Text>
               <Pressable
                 onPress={clearFilters}
                 accessibilityRole="button"
                 hitSlop={8}
                 className="min-h-[44px] justify-center"
               >
-                <Text className="text-base text-tint font-medium">Clear Filters</Text>
+                <Text className="text-body text-tint font-medium">Clear Filters</Text>
               </Pressable>
             </View>
           ) : null}
@@ -199,10 +199,10 @@ export default function DocumentsScreen() {
       }
       ListEmptyComponent={
         isNarrowed ? (
-          <EmptyState icon="search" title="No Results" subtitle="Try a different search or filter." />
+          <EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a different search or filter." />
         ) : (
           <EmptyState
-            icon="document-text-outline"
+            icon="doc.text"
             title="No Documents Yet"
             subtitle="Create your first estimate or invoice to get started."
             actionLabel="New Invoice"
@@ -227,14 +227,14 @@ export default function DocumentsScreen() {
               <View className="flex-row">
                 <SwipeAction
                   label="Share"
-                  icon="share-outline"
+                  icon="square.and.arrow.up"
                   color={SWIPE_COLORS.share}
                   onPress={() => handleShare(item, swipeable)}
                 />
                 {canConvertToInvoice(item) ? (
                   <SwipeAction
                     label="Convert"
-                    icon="swap-horizontal-outline"
+                    icon="arrow.left.arrow.right"
                     color={SWIPE_COLORS.convert}
                     onPress={() => handleConvert(item, swipeable)}
                   />
@@ -242,7 +242,7 @@ export default function DocumentsScreen() {
                 {canLogSettlement(item) ? (
                   <SwipeAction
                     label="Payment"
-                    icon="cash-outline"
+                    icon="banknote"
                     color={SWIPE_COLORS.payment}
                     onPress={() => handleLogPayment(item, swipeable)}
                   />
@@ -250,7 +250,7 @@ export default function DocumentsScreen() {
                 {canDelete(item) ? (
                   <SwipeAction
                     label="Delete"
-                    icon="trash-outline"
+                    icon="trash"
                     color={SWIPE_COLORS.delete}
                     onPress={() => handleDelete(item, swipeable)}
                   />
@@ -270,18 +270,18 @@ export default function DocumentsScreen() {
                   <View className="flex-row items-center gap-3">
                     <Avatar name={client} seed={item.client_id ?? item.id} size={40} />
                     <View className="flex-1">
-                      <Text className="text-base font-semibold text-label" numberOfLines={1}>
+                      <Text className="text-body font-semibold text-label" numberOfLines={1}>
                         {item.doc_number}
                       </Text>
-                      <Text className="text-sm text-secondary" numberOfLines={1}>
+                      <Text className="text-subhead text-secondary" numberOfLines={1}>
                         {client}
                       </Text>
                     </View>
                     <StatusBadge document={item} />
                   </View>
                   <View className="flex-row justify-between items-center mt-3 pt-3 border-t border-separator">
-                    <Text className="text-sm text-secondary">{docTypeLabel(item.doc_type)}</Text>
-                    <Text className="text-base font-semibold text-label" numberOfLines={1}>
+                    <Text className="text-subhead text-secondary">{docTypeLabel(item.doc_type)}</Text>
+                    <Text className="text-body font-semibold text-label" numberOfLines={1}>
                       {total}
                     </Text>
                   </View>

@@ -87,10 +87,10 @@ export default function OnboardingScreen() {
           <View className="flex-1 justify-center gap-6">
             {step === 0 ? (
               <View className="gap-3">
-                <Text className="text-[28px] font-bold text-label text-center" accessibilityRole="header">
+                <Text className="text-title1 font-bold text-label text-center" accessibilityRole="header">
                   Welcome to Invoice Them
                 </Text>
-                <Text className="text-[17px] text-secondary text-center">
+                <Text className="text-body text-secondary text-center">
                   Let&apos;s set up your business. It takes about a minute.
                 </Text>
               </View>
@@ -98,7 +98,7 @@ export default function OnboardingScreen() {
 
             {step === 1 ? (
               <View className="gap-5">
-                <Text className="text-[28px] font-bold text-label" accessibilityRole="header">
+                <Text className="text-title1 font-bold text-label" accessibilityRole="header">
                   Your Business
                 </Text>
                 <FormField
@@ -124,10 +124,10 @@ export default function OnboardingScreen() {
 
             {step === 2 ? (
               <View className="gap-5">
-                <Text className="text-[28px] font-bold text-label" accessibilityRole="header">
+                <Text className="text-title1 font-bold text-label" accessibilityRole="header">
                   Sales Tax
                 </Text>
-                <Text className="text-[17px] text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
+                <Text className="text-body text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
                 <ListSection
                   footer={chargesTax ? undefined : 'No problem — you can add tax rates anytime in Settings.'}
                 >
@@ -154,10 +154,10 @@ export default function OnboardingScreen() {
 
             {step === 3 ? (
               <View className="gap-3">
-                <Text className="text-[28px] font-bold text-label text-center" accessibilityRole="header">
+                <Text className="text-title1 font-bold text-label text-center" accessibilityRole="header">
                   You&apos;re All Set
                 </Text>
-                <Text className="text-[17px] text-secondary text-center">
+                <Text className="text-body text-secondary text-center">
                   You can change numbering and tax rates anytime in Settings.
                 </Text>
               </View>

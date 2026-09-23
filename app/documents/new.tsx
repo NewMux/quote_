@@ -44,16 +44,16 @@ export default function NewDocumentScreen() {
 
   return (
     <View className="flex-1 bg-grouped p-6 justify-center gap-4">
-      <Text className="text-xl font-semibold text-label text-center mb-4" accessibilityRole="header">
+      <Text className="text-title2 font-semibold text-label text-center mb-4" accessibilityRole="header">
         What Would You Like to Create?
       </Text>
       <Pressable onPress={() => handleChoose('estimate')} accessibilityRole="button" className="bg-card border border-separator rounded-2xl p-6 items-center">
-        <Text className="text-lg font-semibold text-label">Estimate</Text>
-        <Text className="text-base text-secondary mt-1 text-center">A quote you can convert to an invoice later</Text>
+        <Text className="text-title3 font-semibold text-label">Estimate</Text>
+        <Text className="text-body text-secondary mt-1 text-center">A quote you can convert to an invoice later</Text>
       </Pressable>
       <Pressable onPress={() => handleChoose('invoice')} accessibilityRole="button" className="bg-card border border-separator rounded-2xl p-6 items-center">
-        <Text className="text-lg font-semibold text-label">Invoice</Text>
-        <Text className="text-base text-secondary mt-1 text-center">A bill your client can pay</Text>
+        <Text className="text-title3 font-semibold text-label">Invoice</Text>
+        <Text className="text-body text-secondary mt-1 text-center">A bill your client can pay</Text>
       </Pressable>
     </View>
   );

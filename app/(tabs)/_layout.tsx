@@ -1,18 +1,9 @@
-import { ActivityIndicator, View, type ColorValue } from 'react-native';
-import { Redirect, Tabs } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '../../src/lib/theme';
 import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
-
-type IconName = keyof typeof Ionicons.glyphMap;
-
-/** Filled symbol for the selected tab, outline otherwise — the iOS tab bar convention. */
-function tabIcon(filled: IconName, outline: IconName) {
-  function TabIcon({ color, size, focused }: { color: ColorValue; size: number; focused: boolean }) {
-    return <Ionicons name={focused ? filled : outline} size={size} color={color as string} />;
-  }
-  return TabIcon;
-}
 
 export default function TabsLayout() {
   const colors = useThemeColors();
@@ -32,18 +23,39 @@ export default function TabsLayout() {
     return <Redirect href="/paywall" />;
   }
 
+  // The system tab bar: Liquid Glass on iOS 26 (shrinking as content scrolls), the standard
+  // translucent bar on earlier iOS, and a Material navigation bar on Android. SF Symbols on iOS,
+  // filled when selected; Ionicons stand in on Android.
   return (
-    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.tint }}>
-      <Tabs.Screen name="home" options={{ title: 'Home', tabBarIcon: tabIcon('home', 'home-outline') }} />
-      <Tabs.Screen
-        name="documents"
-        options={{ title: 'Documents', tabBarIcon: tabIcon('document-text', 'document-text-outline') }}
-      />
-      <Tabs.Screen name="clients" options={{ title: 'Clients', tabBarIcon: tabIcon('people', 'people-outline') }} />
-      <Tabs.Screen
-        name="settings"
-        options={{ title: 'Settings', tabBarIcon: tabIcon('settings', 'settings-outline') }}
-      />
-    </Tabs>
+    <NativeTabs tintColor={colors.tint} minimizeBehavior="onScrollDown">
+      <NativeTabs.Trigger name="home">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'house', selected: 'house.fill' }}
+          src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="home" />}
+        />
+        <NativeTabs.Trigger.Label>Summary</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="documents">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'doc.text', selected: 'doc.text.fill' }}
+          src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="document-text" />}
+        />
+        <NativeTabs.Trigger.Label>Documents</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="clients">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'person.2', selected: 'person.2.fill' }}
+          src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="people" />}
+        />
+        <NativeTabs.Trigger.Label>Clients</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'gearshape', selected: 'gearshape.fill' }}
+          src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="settings" />}
+        />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

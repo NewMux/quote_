@@ -41,7 +41,7 @@ export default function CurrencyPickerModal() {
             <SearchField value={query} onChangeText={setQuery} placeholder="Search Currencies" />
           </View>
         }
-        ListEmptyComponent={<EmptyState icon="search" title="No Results" subtitle="Try a currency name or code." />}
+        ListEmptyComponent={<EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a currency name or code." />}
         renderItem={({ item, index }) => (
           <GroupedRow index={index} count={filtered.length}>
             <ListRow
@@ -51,7 +51,7 @@ export default function CurrencyPickerModal() {
               accessory={currentCode === item.code ? 'checkmark' : 'none'}
               showSeparator={index > 0}
               trailing={
-                <Text className="text-[17px] text-secondary" accessibilityElementsHidden>
+                <Text className="text-body text-secondary" accessibilityElementsHidden>
                   {getCurrencySymbol(item.code)}
                 </Text>
               }

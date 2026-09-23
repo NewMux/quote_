@@ -31,7 +31,7 @@ export const SignaturePad = forwardRef<SignatureViewRef, SignaturePadProps>(func
         />
       </View>
       <View className="flex-row items-center justify-between">
-        <Text className="text-sm text-secondary">Sign above with your finger.</Text>
+        <Text className="text-subhead text-secondary">Sign above with your finger.</Text>
         <Button
           label="Clear"
           variant="plain"
