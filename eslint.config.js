@@ -5,7 +5,7 @@ module.exports = defineConfig([
   {
     // supabase/functions runs on Supabase's own Deno runtime, not through this app's
     // Metro/TypeScript project (see tsconfig.json's exclude for the same reason).
-    ignores: ['dist/**', '.expo/**', 'node_modules/**', 'supabase/functions/**'],
+    ignores: ['dist/**', '.expo/**', 'node_modules/**', 'supabase/functions/**', 'marketing/**'],
   },
   expoConfig,
   {
