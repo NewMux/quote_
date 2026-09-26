@@ -5,6 +5,7 @@ import {
   Modal,
   Platform,
   ScrollView,
+  Share,
   Text,
   View,
 } from 'react-native';
@@ -39,6 +40,7 @@ import { generateDocumentPdf } from '../../../../src/lib/pdf/generatePdf';
 import { emailPdf, sharePdf } from '../../../../src/lib/share';
 import { getTaxLabel } from '../../../../src/lib/documentCalculations';
 import { formatMinor } from '../../../../src/lib/money';
+import { resolvePaymentLink } from '../../../../src/lib/paymentLink';
 import { describeSchedule } from '../../../../src/lib/recurrence';
 import { docTypeLabel, formatDisplayDate, settlementMethodLabel } from '../../../../src/lib/format';
 import {
@@ -258,6 +260,25 @@ export default function DocumentDetailScreen() {
     );
   }
 
+  /** The invoice's resolved pay link, when there's a balance left to pay. */
+  function currentPaymentLink(): string | null {
+    if (!document || document.doc_type !== 'invoice' || document.status === 'void') return null;
+    const balance = document.total_minor - document.amount_paid_minor;
+    if (balance <= 0) return null;
+    return resolvePaymentLink(document.payment_link || profile?.payment_link, {
+      amountMinor: balance,
+      currencyCode: document.currency_code,
+      docNumber: document.doc_number,
+    });
+  }
+
+  async function handleSharePaymentLink() {
+    const link = currentPaymentLink();
+    if (!document || !link) return;
+    const balance = formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code);
+    await Share.share({ message: `Invoice ${document.doc_number} (${balance}). You can pay online here: ${link}` });
+  }
+
   /** The document's secondary actions: a native menu on iOS, a dialog list on Android. */
   function getMenuActions() {
     if (!document) return [];
@@ -265,6 +286,9 @@ export default function DocumentDetailScreen() {
     const actions: MenuAction[] = [
       { label: 'Share PDF', symbol: 'square.and.arrow.up', onPress: () => handleGeneratePdfAnd('view') },
     ];
+    if (currentPaymentLink()) {
+      actions.push({ label: 'Share Payment Link', symbol: 'link', onPress: handleSharePaymentLink });
+    }
     if (canMarkViewed(document)) {
       actions.push({ label: 'Mark as Viewed', symbol: 'eye', onPress: handleMarkViewed });
     }
@@ -316,6 +340,8 @@ export default function DocumentDetailScreen() {
     const docType = document.doc_type;
     const docNumber = document.doc_number;
     const overdue = isOverdue(document);
+    const payLink = currentPaymentLink();
+    const payLine = payLink ? `\n\nPay online: ${payLink}` : '';
     await withBusy(async () => {
       const pdfUri = await generateDocumentPdf(id);
       if (action === 'view') {
@@ -327,9 +353,9 @@ export default function DocumentDetailScreen() {
           pdfUri,
           recipientEmail: client?.email ?? null,
           subject: overdue ? `Payment Reminder: ${label} ${docNumber}` : `${label} ${docNumber}`,
-          body: overdue
+          body: (overdue
             ? `This is a friendly reminder that ${label.toLowerCase()} ${docNumber} for ${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)} is overdue. Please arrange payment at your earliest convenience.\n\nThank you!`
-            : `Please find attached ${docType} ${docNumber}.`,
+            : `Please find attached ${docType} ${docNumber}.`) + payLine,
         });
       }
     });

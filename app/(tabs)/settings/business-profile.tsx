@@ -12,6 +12,7 @@ import { ListSection } from '../../../src/components/list/ListSection';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { persistPickedFile } from '../../../src/lib/fileStorage';
 import { newId } from '../../../src/lib/id';
+import { normalizePaymentLink } from '../../../src/lib/paymentLink';
 import { useSaveHeader } from '../../../src/lib/useSaveHeader';
 import { useSignedUrl } from '../../../src/lib/useSignedUrl';
 import { useUnsavedChangesGuard } from '../../../src/lib/useUnsavedChangesGuard';
@@ -41,6 +42,7 @@ export default function BusinessProfileScreen() {
   const [address, setAddress] = useState('');
   const [taxRegNumber, setTaxRegNumber] = useState('');
   const [paymentInstructions, setPaymentInstructions] = useState('');
+  const [paymentLink, setPaymentLink] = useState('');
   const [footerTerms, setFooterTerms] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdatingLogo, setIsUpdatingLogo] = useState(false);
@@ -69,6 +71,7 @@ export default function BusinessProfileScreen() {
     setAddress(profile.address ?? '');
     setTaxRegNumber(profile.tax_registration_number ?? '');
     setPaymentInstructions(profile.payment_instructions ?? '');
+    setPaymentLink(profile.payment_link ?? '');
     setFooterTerms(profile.footer_terms ?? '');
   }, [profile]);
 
@@ -81,9 +84,11 @@ export default function BusinessProfileScreen() {
       address !== (profile.address ?? '') ||
       taxRegNumber !== (profile.tax_registration_number ?? '') ||
       paymentInstructions !== (profile.payment_instructions ?? '') ||
+      paymentLink !== (profile.payment_link ?? '') ||
       footerTerms !== (profile.footer_terms ?? ''));
   const leave = useUnsavedChangesGuard(isDirty && !isSaving);
-  const canSave = isDirty && !!businessName.trim() && !isSaving;
+  const paymentLinkInvalid = !!paymentLink.trim() && !normalizePaymentLink(paymentLink);
+  const canSave = isDirty && !!businessName.trim() && !paymentLinkInvalid && !isSaving;
 
   async function pickLogo() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -154,6 +159,7 @@ export default function BusinessProfileScreen() {
         address: address.trim() || null,
         tax_registration_number: taxRegNumber.trim() || null,
         payment_instructions: paymentInstructions.trim() || null,
+        payment_link: normalizePaymentLink(paymentLink),
         footer_terms: footerTerms.trim() || null,
       });
       leave(() => router.back());
@@ -249,6 +255,24 @@ export default function BusinessProfileScreen() {
           title="Currency"
           value={`${getCurrencyName(currencyCode)} (${currencyCode})`}
           onPress={() => router.push('/modals/currency-picker')}
+        />
+      </ListSection>
+
+      <ListSection
+        header="Get Paid Online"
+        footer="Paste a payment link from Stripe, PayPal, your bank or any pay page. Invoices show it as a QR code and a Pay button. Add {amount} or {number} to fill in each invoice's balance or number, e.g. paypal.me/yourname/{amount}."
+      >
+        <FormRow
+          label="Payment Link"
+          value={paymentLink}
+          onChangeText={setPaymentLink}
+          placeholder="Optional"
+          keyboardType="url"
+          textContentType="URL"
+          autoCapitalize="none"
+          autoCorrect={false}
+          maxLength={500}
+          error={paymentLinkInvalid ? 'Enter a web link, like paypal.me/yourname.' : null}
         />
       </ListSection>
 

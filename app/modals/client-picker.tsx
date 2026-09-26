@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { EmptyState } from '../../src/components/EmptyState';
 import { GroupedRow } from '../../src/components/list/GroupedRow';
@@ -8,6 +8,7 @@ import { ListSection } from '../../src/components/list/ListSection';
 import { SearchField } from '../../src/components/SearchField';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { SheetScreen } from '../../src/components/SheetScreen';
+import { pickContactAsClient } from '../../src/lib/importContact';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
@@ -60,6 +61,24 @@ export default function ClientPickerModal() {
     }
   }
 
+  /** Picks someone from the phone's contacts, saves them as a client, and selects them. */
+  async function addFromContacts() {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const picked = await pickContactAsClient();
+      if (!picked) {
+        setIsCreating(false);
+        return;
+      }
+      const client = await create(picked);
+      selectClient(client.id, client.display_name);
+    } catch (err) {
+      setIsCreating(false);
+      Alert.alert('Couldn’t Add Client', err instanceof Error ? err.message : 'Something went wrong.');
+    }
+  }
+
   return (
     <SheetScreen header={<SheetHeader title={isFilterMode ? 'Filter by Client' : 'Choose Client'} />}>
       <FlatList
@@ -80,6 +99,17 @@ export default function ClientPickerModal() {
                   icon="person.badge.plus"
                   title={`Add “${trimmedQuery}”`}
                   onPress={quickAddClient}
+                  accessory="none"
+                />
+              </ListSection>
+            ) : null}
+            {!isFilterMode && !trimmedQuery ? (
+              <ListSection>
+                <ListRow
+                  icon="person.badge.plus"
+                  title="Add from Contacts"
+                  onPress={addFromContacts}
+                  trailing={isCreating ? <ActivityIndicator accessibilityLabel="Adding Client" /> : undefined}
                   accessory="none"
                 />
               </ListSection>

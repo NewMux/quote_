@@ -27,6 +27,7 @@ export const SignaturePad = forwardRef<SignatureViewRef, SignaturePadProps>(func
           onOK={onSave}
           onEmpty={onEmpty}
           descriptionText=""
+          trimWhitespace
           webStyle=".m-signature-pad--footer { display: none; margin: 0; }"
         />
       </View>

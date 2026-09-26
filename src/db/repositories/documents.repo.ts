@@ -156,6 +156,8 @@ export interface DocumentHeaderInput {
   expiryDate: string | null;
   notes: string | null;
   termsOverride: string | null;
+  /** Per-invoice payment link; null uses the business default. */
+  paymentLink: string | null;
   discountType: DiscountType | null;
   discountValue: number | null;
 }
@@ -178,6 +180,7 @@ export async function saveDocumentEdit(
       expiry_date: header.expiryDate,
       notes: header.notes,
       terms_override: header.termsOverride,
+      payment_link: header.paymentLink,
       discount_type: header.discountType,
       discount_value: header.discountValue,
       subtotal_minor: totals.subtotalMinor,

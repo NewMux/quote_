@@ -37,6 +37,12 @@
         {
           "photosPermission": "Allow Invoice Them to access your photos to attach a receipt or set your business logo."
         }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow Invoice Them to access your contacts so you can add a client from them."
+        }
       ]
     ],
     "experiments": {

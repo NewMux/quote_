@@ -1,13 +1,15 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { Alert, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Avatar } from './Avatar';
 import { Button } from './Button';
 import { FormRow } from './form/FormRow';
 import { FormScrollView } from './form/FormScrollView';
 import { useReportFormState, type FormState } from './form/useFormState';
+import { ListRow } from './list/ListRow';
 import { ListSection } from './list/ListSection';
 import { persistPickedFile } from '../lib/fileStorage';
+import { pickContactAsClient } from '../lib/importContact';
 import { newId } from '../lib/id';
 import type { ClientInput } from '../db/repositories/clients.repo';
 import type { Client } from '../types/models';
@@ -49,6 +51,26 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
   );
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
+  /** Fills the form from a phone contact. Only fields the contact has are replaced. */
+  async function importFromContacts() {
+    setIsImporting(true);
+    try {
+      const picked = await pickContactAsClient();
+      if (!picked) return;
+      setDisplayName(picked.display_name);
+      if (picked.contact_name) setContactName(picked.contact_name);
+      if (picked.email) setEmail(picked.email);
+      if (picked.phone) setPhone(picked.phone);
+      if (picked.address) setAddress(picked.address);
+      if (picked.photo_uri) setPhotoUri(picked.photo_uri);
+    } catch (err) {
+      Alert.alert('Couldn’t Open Contacts', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsImporting(false);
+    }
+  }
 
   async function pickPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -75,6 +97,18 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
         <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={96} />
         <Button label={photoUri ? 'Edit Photo' : 'Add Photo'} variant="plain" size="small" loading={isUploading} onPress={pickPhoto} />
       </View>
+
+      {initial ? null : (
+        <ListSection footer="Fills in the name, email, phone and address from someone in your contacts.">
+          <ListRow
+            icon="person.badge.plus"
+            title="Fill from Contacts"
+            onPress={isImporting ? undefined : importFromContacts}
+            trailing={isImporting ? <ActivityIndicator accessibilityLabel="Opening Contacts" /> : undefined}
+            accessory="none"
+          />
+        </ListSection>
+      )}
 
       <ListSection>
         <FormRow

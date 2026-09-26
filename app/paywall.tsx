@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { Button } from '../src/components/Button';
 import { GlassBar } from '../src/components/GlassBar';
+import { Avatar } from '../src/components/Avatar';
 import { Icon } from '../src/components/Icon';
 import { ListRow } from '../src/components/list/ListRow';
 import { ListSection } from '../src/components/list/ListSection';
 import { APPLE_EULA_URL, annualSavingsPercent, trialLabel } from '../src/lib/subscription';
 import type { SymbolName } from '../src/lib/symbols';
+import { useSignedUrl } from '../src/lib/useSignedUrl';
 import { useAuthStore } from '../src/stores/useAuthStore';
+import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
 
 const BENEFITS: { icon: SymbolName; title: string; detail: string }[] = [
@@ -30,7 +33,16 @@ function FooterLink({ label, onPress }: { label: string; onPress: () => void }) 
   );
 }
 
+/** Where to go after subscribing: an in-app path passed by the screen that sent us here. */
+function safeNext(next: string | undefined): string {
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/(tabs)/home';
+}
+
 export default function PaywallScreen() {
+  const { next } = useLocalSearchParams<{ next?: string }>();
+  const profile = useBusinessProfileStore((s) => s.profile);
+  const logoUrl = useSignedUrl(profile?.logo_uri);
+  const businessName = profile?.business_name?.trim() ?? '';
   const isPro = useSubscriptionStore((s) => s.isPro);
   const offering = useSubscriptionStore((s) => s.offering);
   const loadOffering = useSubscriptionStore((s) => s.loadOffering);
@@ -53,8 +65,8 @@ export default function PaywallScreen() {
   }, [fetchOffering]);
 
   useEffect(() => {
-    if (isPro) router.replace('/(tabs)/home');
-  }, [isPro]);
+    if (isPro) router.replace(safeNext(next) as Href);
+  }, [isPro, next]);
 
   const annual = offering?.annual ?? null;
   const monthly = offering?.monthly ?? null;
@@ -120,19 +132,44 @@ export default function PaywallScreen() {
           alignSelf: 'center',
         }}
       >
-        {/* Apple's subscription-sheet layout: app mark, name, promise, then what you get. */}
+        {/* Apple's subscription-sheet layout: what they've set up, the name, the promise, then what
+            you get. A preview of their own invoice header shows the setup already paying off. */}
         <View className="items-center gap-2 mb-8 px-4">
-          <View
-            className="w-20 h-20 rounded-[22px] bg-brand items-center justify-center mb-2"
-            style={{ borderCurve: 'continuous' }}
-          >
-            <Icon name="doc.text.fill" size={40} color="#FFFFFF" />
-          </View>
+          {businessName ? (
+            <View
+              className="w-full bg-card rounded-3xl p-4 mb-3 flex-row items-center gap-3"
+              style={{ borderCurve: 'continuous' }}
+              accessible
+              accessibilityLabel={`Invoice preview for ${businessName}`}
+            >
+              {logoUrl ? (
+                <Image source={{ uri: logoUrl }} className="w-14 h-14 rounded-xl bg-white" resizeMode="contain" />
+              ) : (
+                <Avatar name={businessName} seed={businessName} size={56} />
+              )}
+              <View className="flex-1">
+                <Text className="text-headline font-semibold text-label" numberOfLines={1}>
+                  {businessName}
+                </Text>
+                <Text className="text-footnote text-secondary">Invoice · Ready to send</Text>
+              </View>
+              <Icon name="checkmark.circle.fill" size={28} />
+            </View>
+          ) : (
+            <View
+              className="w-20 h-20 rounded-[22px] bg-brand items-center justify-center mb-2"
+              style={{ borderCurve: 'continuous' }}
+            >
+              <Icon name="doc.text.fill" size={40} color="#FFFFFF" />
+            </View>
+          )}
           <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
             Invoice Them Pro
           </Text>
           <Text className="text-body text-secondary text-center">
-            Everything you need to quote, invoice, and get paid.
+            {businessName
+              ? `${businessName} is all set up. Start your free trial to send your first invoice.`
+              : 'Everything you need to quote, invoice, and get paid.'}
           </Text>
         </View>
 

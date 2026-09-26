@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../src/components/Button';
@@ -8,13 +9,17 @@ import { Icon } from '../src/components/Icon';
 import { ListRow } from '../src/components/list/ListRow';
 import { ListSection } from '../src/components/list/ListSection';
 import { getCurrencyName } from '../src/lib/currencies';
+import { persistPickedFile } from '../src/lib/fileStorage';
+import { newId } from '../src/lib/id';
+import { useSignedUrl } from '../src/lib/useSignedUrl';
 import { parseRateBp } from '../src/lib/money';
 import type { SymbolName } from '../src/lib/symbols';
 import { useSystemColors } from '../src/lib/theme';
+import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../src/stores/useTaxBracketsStore';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const WELCOME_FEATURES: { icon: SymbolName; title: string; detail: string }[] = [
   { icon: 'doc.text.fill', title: 'Estimates and Invoices', detail: 'Professional PDFs with your logo, ready to send.' },
@@ -35,6 +40,12 @@ export default function OnboardingScreen() {
   const [taxName, setTaxName] = useState('');
   const [taxRate, setTaxRate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const accountEmail = useAuthStore((s) => s.session?.user.email ?? '');
+  const [email, setEmail] = useState(profile?.email ?? accountEmail);
+  const [phone, setPhone] = useState(profile?.phone ?? '');
+  const [address, setAddress] = useState(profile?.address ?? '');
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const logoUrl = useSignedUrl(profile?.logo_uri);
 
   const currencyCode = profile?.default_currency_code ?? 'USD';
 
@@ -44,6 +55,40 @@ export default function OnboardingScreen() {
     try {
       await updateProfile({ business_name: businessName.trim() });
       setStep(2);
+    } catch (err) {
+      Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  /** The logo saves as soon as it's picked, like in Business Profile. */
+  async function pickLogo() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to add your logo.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
+    if (result.canceled || !result.assets[0]) return;
+    setIsUploadingLogo(true);
+    try {
+      const path = await persistPickedFile(result.assets[0].uri, 'branding', `logo-${newId()}.jpg`);
+      await updateProfile({ logo_uri: path });
+    } catch (err) {
+      Alert.alert('Couldn’t Add Logo', err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  }
+
+  const hasDetails = !!(email.trim() || phone.trim() || address.trim() || profile?.logo_uri);
+
+  async function handleContinueDetails() {
+    setIsSaving(true);
+    try {
+      await updateProfile({ email: email.trim() || null, phone: phone.trim() || null, address: address.trim() || null });
+      setStep(3);
     } catch (err) {
       Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
     } finally {
@@ -64,7 +109,7 @@ export default function OnboardingScreen() {
       }
       setIsSaving(false);
     }
-    setStep(3);
+    setStep(4);
   }
 
   function finish(target: 'invoice' | 'home') {
@@ -152,6 +197,73 @@ export default function OnboardingScreen() {
             {step === 2 ? (
               <View className="gap-5">
                 <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
+                  Your Details
+                </Text>
+                <Text className="text-body text-secondary">
+                  These go on every invoice, so clients know who it&apos;s from and how to reach you.
+                </Text>
+                <View className="items-center gap-1">
+                  <Pressable
+                    onPress={pickLogo}
+                    disabled={isUploadingLogo}
+                    accessibilityRole="button"
+                    accessibilityLabel={logoUrl ? 'Change Logo' : 'Add Logo'}
+                    className="w-24 h-24 rounded-3xl bg-card items-center justify-center overflow-hidden"
+                    style={{ borderCurve: 'continuous' }}
+                  >
+                    {logoUrl ? (
+                      <Image source={{ uri: logoUrl }} className="w-24 h-24" resizeMode="contain" />
+                    ) : (
+                      <Icon name="photo" size={34} color={system.gray} />
+                    )}
+                    {isUploadingLogo ? (
+                      <View className="absolute inset-0 items-center justify-center bg-card/70">
+                        <ActivityIndicator />
+                      </View>
+                    ) : null}
+                  </Pressable>
+                  <Button label={logoUrl ? 'Change Logo' : 'Add Logo'} variant="plain" size="small" disabled={isUploadingLogo} onPress={pickLogo} />
+                </View>
+                <ListSection footer="All optional. You can change them later in Settings → Business Profile.">
+                  <FormRow
+                    label="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Optional"
+                    keyboardType="email-address"
+                    textContentType="emailAddress"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    maxLength={150}
+                  />
+                  <FormRow
+                    label="Phone"
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="Optional"
+                    keyboardType="phone-pad"
+                    textContentType="telephoneNumber"
+                    autoComplete="tel"
+                    maxLength={30}
+                  />
+                  <FormRow
+                    label="Address"
+                    value={address}
+                    onChangeText={setAddress}
+                    placeholder="Optional"
+                    multiline
+                    textContentType="fullStreetAddress"
+                    autoComplete="street-address"
+                    maxLength={500}
+                  />
+                </ListSection>
+              </View>
+            ) : null}
+
+            {step === 3 ? (
+              <View className="gap-5">
+                <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
                   Sales Tax
                 </Text>
                 <Text className="text-body text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
@@ -175,7 +287,7 @@ export default function OnboardingScreen() {
               </View>
             ) : null}
 
-            {step === 3 ? (
+            {step === 4 ? (
               <View className="gap-3 items-center">
                 <Icon name="checkmark.circle.fill" size={72} color={system.green} />
                 <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
@@ -204,6 +316,12 @@ export default function OnboardingScreen() {
             ) : null}
             {step === 2 ? (
               <>
+                <Button label={hasDetails ? 'Continue' : 'Skip'} size="large" loading={isSaving} disabled={isUploadingLogo} onPress={handleContinueDetails} />
+                <Button label="Back" variant="plain" onPress={() => setStep(1)} />
+              </>
+            ) : null}
+            {step === 3 ? (
+              <>
                 <Button
                   label={chargesTax ? 'Continue' : 'Skip'}
                   size="large"
@@ -211,10 +329,10 @@ export default function OnboardingScreen() {
                   loading={isSaving}
                   onPress={handleContinueTaxRate}
                 />
-                <Button label="Back" variant="plain" onPress={() => setStep(1)} />
+                <Button label="Back" variant="plain" onPress={() => setStep(2)} />
               </>
             ) : null}
-            {step === 3 ? (
+            {step === 4 ? (
               <>
                 <Button label="Create Your First Invoice" size="large" onPress={() => finish('invoice')} />
                 <Button label="Explore the App" variant="plain" onPress={() => finish('home')} />

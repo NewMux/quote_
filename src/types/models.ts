@@ -32,6 +32,8 @@ export interface BusinessProfile {
   address: string | null;
   tax_registration_number: string | null;
   payment_instructions: string | null;
+  /** A payment URL (Stripe/PayPal/bank link); may contain {amount}, {currency}, {number}. */
+  payment_link: string | null;
   footer_terms: string | null;
   default_currency_code: string;
   default_payment_terms_days: number;
@@ -102,6 +104,8 @@ export interface DocumentRecord {
   amount_paid_minor: number;
   notes: string | null;
   terms_override: string | null;
+  /** Overrides the business's default payment link for this invoice. */
+  payment_link: string | null;
   converted_from_document_id: string | null;
   converted_to_document_id: string | null;
   voided_at: string | null;

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { normalizePaymentLink } from '../../../../src/lib/paymentLink';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
 import { DateField } from '../../../../src/components/DateField';
 import { FormRow } from '../../../../src/components/form/FormRow';
@@ -39,7 +40,7 @@ export default function EditDocumentScreen() {
     }, 600);
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor.isDirty, editor.lines, editor.discountType, editor.discountValue, editor.notes, editor.termsOverride, editor.issueDate, editor.dueDate, editor.expiryDate, editor.clientId]);
+  }, [editor.isDirty, editor.lines, editor.discountType, editor.discountValue, editor.notes, editor.termsOverride, editor.paymentLink, editor.issueDate, editor.dueDate, editor.expiryDate, editor.clientId]);
 
   // Edits save automatically (above), so "Done" only closes the editor — after flushing any
   // change still inside the autosave delay.
@@ -132,6 +133,23 @@ export default function EditDocumentScreen() {
           multiline
         />
       </ListSection>
+
+      {editor.docType === 'invoice' ? (
+        <ListSection footer="Clients can scan or tap this link on the PDF to pay. Leave blank to use the payment link from your Business Profile.">
+          <FormRow
+            label="Payment Link"
+            value={editor.paymentLink}
+            onChangeText={editor.setPaymentLink}
+            placeholder="Default link"
+            keyboardType="url"
+            textContentType="URL"
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={500}
+            error={editor.paymentLink.trim() && !normalizePaymentLink(editor.paymentLink) ? 'Enter a web link, like paypal.me/yourname.' : null}
+          />
+        </ListSection>
+      ) : null}
     </FormScrollView>
   );
 }

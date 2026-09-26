@@ -1,6 +1,8 @@
 import { format, parseISO } from 'date-fns';
 import { getTaxLabel } from '../documentCalculations';
 import { formatMinor, formatRateBp } from '../money';
+import { resolvePaymentLink } from '../paymentLink';
+import { qrSvg } from './qrSvg';
 import type { BusinessProfile, Client, DocumentRecord, LineItem, SignatureRecord } from '../../types/models';
 
 function formatDate(iso: string | null): string {
@@ -40,6 +42,24 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
 
   const merchantSig = signatures.find((s) => s.signer_role === 'merchant');
   const clientSig = signatures.find((s) => s.signer_role === 'client');
+  const businessName = profile.business_name || 'Your Business';
+  const clientName = client?.display_name ?? document.client_name_snapshot ?? 'Client';
+
+  const balanceMinor = document.total_minor - document.amount_paid_minor;
+  const payLink =
+    document.doc_type === 'invoice' && document.status !== 'void' && balanceMinor > 0
+      ? resolvePaymentLink(document.payment_link || profile.payment_link, {
+          amountMinor: balanceMinor,
+          currencyCode: document.currency_code,
+          docNumber: document.doc_number,
+        })
+      : null;
+
+  const signatureBlock = (sig: SignatureRecord | undefined, name: string, role: string) => `
+    <div class="signature-block">
+      <div class="signature-ink">${sig && signatureImagesBase64[sig.id] ? `<img src="data:image/png;base64,${signatureImagesBase64[sig.id]}" />` : ''}</div>
+      <div class="signature-line"><strong>${escapeHtml(name)}</strong>${sig ? ` · Signed ${formatDate(sig.signed_at)}` : ` · ${role} signature`}</div>
+    </div>`;
 
   const rowsHtml = lines
     .map(
@@ -77,10 +97,17 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
   .totals-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
   .totals-row.total { font-size: 16px; font-weight: 700; border-top: 2px solid ${accent}; margin-top: 6px; padding-top: 8px; }
   .footer { margin-top: 32px; font-size: 12px; color: #6b7280; white-space: pre-wrap; }
-  .signatures { display: flex; gap: 32px; margin-top: 40px; }
+  .signatures { display: flex; gap: 40px; margin-top: 40px; page-break-inside: avoid; }
   .signature-block { flex: 1; }
-  .signature-block img { max-height: 60px; }
-  .signature-line { border-top: 1px solid #9ca3af; margin-top: 4px; padding-top: 4px; font-size: 11px; color: #6b7280; }
+  .signature-ink { height: 110px; display: flex; align-items: flex-end; }
+  .signature-ink img { height: 110px; max-width: 100%; object-fit: contain; object-position: left bottom; }
+  .signature-line { border-top: 1px solid #9ca3af; margin-top: 6px; padding-top: 6px; font-size: 12px; color: #6b7280; }
+  .signature-line strong { color: #111827; font-weight: 600; }
+  .pay { display: flex; align-items: center; gap: 20px; margin-top: 28px; padding: 18px; border: 1.5px solid ${accent}; border-radius: 14px; page-break-inside: avoid; }
+  .pay-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .pay-text { font-size: 12px; color: #6b7280; margin: 0 0 10px; }
+  .pay-button { display: inline-block; background: ${accent}; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 9px 18px; border-radius: 999px; }
+  .pay-url { font-size: 10px; color: #6b7280; margin-top: 8px; word-break: break-all; }
 </style>
 </head>
 <body>
@@ -133,16 +160,21 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
     <div class="totals-row"><span>Balance Due</span><span>${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}</span></div>` : ''}
   </div>
 
+  ${payLink ? `
+  <div class="pay">
+    ${qrSvg(payLink, 112)}
+    <div>
+      <p class="pay-title">Pay online</p>
+      <p class="pay-text">Scan the code with your phone's camera, or tap the button.</p>
+      <a class="pay-button" href="${escapeHtml(payLink)}">Pay ${formatMinor(balanceMinor, document.currency_code)}</a>
+      <div class="pay-url">${escapeHtml(payLink)}</div>
+    </div>
+  </div>` : ''}
+
   ${merchantSig || clientSig ? `
   <div class="signatures">
-    <div class="signature-block">
-      ${merchantSig && signatureImagesBase64[merchantSig.id] ? `<img src="data:image/png;base64,${signatureImagesBase64[merchantSig.id]}" />` : ''}
-      <div class="signature-line">Merchant${merchantSig ? ` — signed ${formatDate(merchantSig.signed_at)}` : ' — not yet signed'}</div>
-    </div>
-    <div class="signature-block">
-      ${clientSig && signatureImagesBase64[clientSig.id] ? `<img src="data:image/png;base64,${signatureImagesBase64[clientSig.id]}" />` : ''}
-      <div class="signature-line">Client${clientSig ? ` — signed ${formatDate(clientSig.signed_at)}` : ' — not yet signed'}</div>
-    </div>
+    ${signatureBlock(merchantSig, businessName, 'Authorized')}
+    ${signatureBlock(clientSig, clientName, 'Client')}
   </div>` : ''}
 
   ${document.notes ? `<div class="footer"><strong>Notes</strong>\n${escapeHtml(document.notes)}</div>` : ''}

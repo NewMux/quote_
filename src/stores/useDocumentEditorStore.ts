@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { normalizePaymentLink } from '../lib/paymentLink';
 import { newId } from '../lib/id';
 import {
   getDocument,
@@ -27,6 +28,7 @@ interface DocumentEditorState {
   expiryDate: string | null;
   notes: string;
   termsOverride: string;
+  paymentLink: string;
   discountType: DiscountType | null;
   discountValue: number | null;
   currencyCode: string;
@@ -43,6 +45,7 @@ interface DocumentEditorState {
   setExpiryDate: (value: string | null) => void;
   setNotes: (value: string) => void;
   setTermsOverride: (value: string) => void;
+  setPaymentLink: (value: string) => void;
   setDocumentDiscount: (type: DiscountType | null, value: number | null) => void;
   addLineItemFromCatalog: (item: ItemCatalogEntry, taxBracket: TaxBracket | null) => void;
   addBlankLineItem: () => void;
@@ -63,6 +66,7 @@ const initialState = {
   expiryDate: null as string | null,
   notes: '',
   termsOverride: '',
+  paymentLink: '',
   discountType: null as DiscountType | null,
   discountValue: null as number | null,
   currencyCode: 'USD',
@@ -109,6 +113,7 @@ export const useDocumentEditorStore = create<DocumentEditorState>((set, get) => 
       expiryDate: doc.expiry_date,
       notes: doc.notes ?? '',
       termsOverride: doc.terms_override ?? '',
+      paymentLink: doc.payment_link ?? '',
       discountType: doc.discount_type,
       discountValue: doc.discount_value,
       currencyCode: doc.currency_code,
@@ -128,6 +133,7 @@ export const useDocumentEditorStore = create<DocumentEditorState>((set, get) => 
   setExpiryDate: (expiryDate) => set({ expiryDate, isDirty: true }),
   setNotes: (notes) => set({ notes, isDirty: true }),
   setTermsOverride: (termsOverride) => set({ termsOverride, isDirty: true }),
+  setPaymentLink: (paymentLink) => set({ paymentLink, isDirty: true }),
 
   setDocumentDiscount: (discountType, discountValue) =>
     set({ discountType, discountValue, isDirty: true }),
@@ -200,6 +206,7 @@ export const useDocumentEditorStore = create<DocumentEditorState>((set, get) => 
       expiryDate: state.expiryDate,
       notes: state.notes || null,
       termsOverride: state.termsOverride || null,
+      paymentLink: normalizePaymentLink(state.paymentLink),
       discountType: state.discountType,
       discountValue: state.discountValue,
     };

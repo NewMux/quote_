@@ -21,7 +21,7 @@ export default function PrivacyPolicyScreen() {
       <Section title="What This App Stores">
         The email address and password you sign up with, the business info you enter in Business
         Profile, the clients and items you add, the invoices and estimates you create, and any
-        signatures, photos, or payment records you attach to them.
+        signatures, photos, or payment records you attach to them. If you use Fill from Contacts, only the one contact you pick is read, and only its name, company, email, phone, address and photo are saved as a client.
       </Section>
       <Section title="Where It's Stored">
         Your data is stored in a secure cloud database and file storage (provided by Supabase),

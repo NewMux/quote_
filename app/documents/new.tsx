@@ -38,7 +38,8 @@ export default function NewDocumentScreen() {
   }, [isPro, type, profile]);
 
   if (!isPro) {
-    return <Redirect href="/paywall" />;
+    // Come back here after subscribing, so "Create Your First Invoice" still creates one.
+    return <Redirect href={{ pathname: '/paywall', params: { next: `/documents/new?type=${type ?? 'invoice'}` } }} />;
   }
 
   if (isCreating || !profile || type) {
