@@ -1,9 +1,16 @@
-# Invoice Them: launch video
+# Invoice Them: launch videos
 
-A 32-second vertical (1080×1920, 30 fps) launch film for Reels, TikTok and Shorts, built with
-[Remotion](https://www.remotion.dev). The app screens are rebuilt in code from the app's own dark-mode
-design tokens, and the soundtrack and sound effects are synthesized by `scripts/make-music.mjs`,
-so the video contains no licensed material and can be posted anywhere.
+Two vertical (1080×1920, 30 fps) launch films for Reels, TikTok and Shorts, built with
+[Remotion](https://www.remotion.dev).
+
+- **v2, current (`LaunchVideo`, 45.6 s):** a light, multicolor look with a midnight finale,
+  calmer pacing and the newest features. It renders to `out/InvoiceThem-Launch-v2-9x16.mp4`.
+- **v1 (`LaunchVideoV1`, 32 s):** the fast, dark, teal edit. It renders to
+  `out/InvoiceThem-Launch-9x16.mp4`.
+
+The app screens are rebuilt in code from the app's own design tokens. The soundtracks and sound
+effects are synthesized by `scripts/make-music*.mjs`, so the videos contain no licensed material
+and can be posted anywhere.
 
 This is a standalone project. The app's TypeScript, ESLint, Jest and Metro configs ignore
 `marketing/`.
@@ -16,29 +23,30 @@ Run these inside `marketing/launch-video`:
 npm install
 npm run dev
 npm run render
+npm run render:v1
 ```
 
 - **`npm run dev`** regenerates the audio, then opens Remotion Studio for a live preview and
-  editing. Each scene is also a separate composition in the Scenes folder.
-- **`npm run render`** writes `out/InvoiceThem-Launch-9x16.mp4`.
-- **`npm run music`** regenerates `public/audio/*.wav` only.
+  editing. Each scene is also its own composition, in the v2-Scenes and v1-Scenes folders.
+- **`npm run render`** renders v2, and **`npm run render:v1`** renders v1.
 
-## Storyboard
+## v2 storyboard
 
-Everything is cut to the music: 120 BPM, one beat = 15 frames, one bar = 60 frames. The timing
-lives in `src/timing.ts`.
+The video runs at 100 BPM: one bar is 72 frames (2.4 s). The timing lives in `src/v2/timing.ts`.
+Every headline holds for at least 2.4 s.
 
-| Time | Scene | Music |
+| Time | Scene | Color |
 | --- | --- | --- |
-| 0–4 s | Hook: "Still making invoices in spreadsheets?", which gets struck out, then "There's a better way." | Filtered intro and riser |
-| 4–6 s | Logo reveal: flash, shake, shockwave | Drop |
-| 6–10 s | Summary: Outstanding counts up, tiles, chart | Groove |
-| 10–14 s | Create: three taps add line items; totals add up | |
-| 14–16 s | Sign: the signature draws itself | |
-| 16–20 s | Share: the PDF flies out, the share sheet sends it | |
-| 20–22 s | Paid: the status flips to Paid, confetti | |
-| 22–26 s | Feature montage, one per beat | Breakdown and build |
-| 26–32 s | End card: "Now on the App Store" | Final drop and outro hit |
+| 0–4.8 s | "Still invoicing in spreadsheets?": a glitchy spreadsheet falls apart | red |
+| 4.8–7.2 s | App mark, "Invoice Them", "Invoices, made simple." | violet |
+| 7.2–12 s | Create an invoice in seconds | blue |
+| 12–16.8 s | Add clients from your contacts | orange |
+| 16.8–21.6 s | Signed on the spot, then the signature large on the PDF | violet |
+| 21.6–26.4 s | Every invoice has a pay link: the client scans the QR code and pays | pink |
+| 26.4–31.2 s | Payment received; Issued → Paid; the month's total grows | indigo |
+| 31.2–36 s | Bento grid of more features | multicolor |
+| 36–38.4 s | Circle wipe to midnight: "Everything you need to get paid." | |
+| 38.4–45.6 s | End card: "Now on the App Store" · "Try it free for a week" | midnight |
 
 ## Editing
 

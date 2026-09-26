@@ -11,7 +11,11 @@ export const Phone: React.FC<{
   style?: React.CSSProperties;
   children: React.ReactNode;
   glow?: number;
-}> = ({ width = 720, style, children, glow = 1 }) => {
+  /** Replaces the default dark-stage shadow (e.g. a soft one on light backgrounds). */
+  shadow?: string;
+  /** Dark status bar text, for light-mode screens. */
+  lightScreen?: boolean;
+}> = ({ width = 720, style, children, glow = 1, shadow, lightScreen = false }) => {
   const edge = width * 0.006;
   const bezel = width * 0.03;
   const screenW = width - 2 * (edge + bezel);
@@ -29,7 +33,7 @@ export const Phone: React.FC<{
         borderRadius: outerRadius,
         padding: edge,
         background: 'linear-gradient(145deg, #8A8A90 0%, #2A2A2E 18%, #1A1A1D 50%, #3A3A3F 82%, #9A9AA0 100%)',
-        boxShadow: `0 60px 120px rgba(0,0,0,0.65), 0 0 ${160 * glow}px rgba(76,211,165,${0.22 * glow})`,
+        boxShadow: shadow ?? `0 60px 120px rgba(0,0,0,0.65), 0 0 ${160 * glow}px rgba(76,211,165,${0.22 * glow})`,
         transformStyle: 'preserve-3d',
         ...style,
       }}
@@ -50,7 +54,7 @@ export const Phone: React.FC<{
             height: screenH,
             borderRadius: outerRadius - edge - bezel,
             overflow: 'hidden',
-            background: C.bg,
+            background: lightScreen ? '#F2F2F7' : C.bg,
           }}
         >
           <div
@@ -67,7 +71,7 @@ export const Phone: React.FC<{
             }}
           >
             {children}
-            <StatusBar />
+            <StatusBar color={lightScreen ? '#111114' : '#FFFFFF'} />
             <div
               style={{
                 position: 'absolute',
@@ -102,7 +106,7 @@ export const phoneHeight = (width: number) => {
   return (SCREEN_H * screenW) / SCREEN_W + 2 * (edge + bezel);
 };
 
-const StatusBar: React.FC = () => (
+const StatusBar: React.FC<{ color: string }> = ({ color }) => (
   <div
     style={{
       position: 'absolute',
@@ -116,6 +120,7 @@ const StatusBar: React.FC = () => (
       padding: '6px 34px 0 48px',
       fontSize: 17,
       fontWeight: 600,
+      color,
       zIndex: 5,
     }}
   >
@@ -123,17 +128,17 @@ const StatusBar: React.FC = () => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <svg width="18" height="12" viewBox="0 0 18 12">
         {[0, 1, 2, 3].map((i) => (
-          <rect key={i} x={i * 4.8} y={9 - i * 3} width="3.2" height={3 + i * 3} rx="1" fill="#fff" />
+          <rect key={i} x={i * 4.8} y={9 - i * 3} width="3.2" height={3 + i * 3} rx="1" fill={color} />
         ))}
       </svg>
-      <svg width="17" height="12" viewBox="0 0 17 12" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round">
         <path d="M1.5 4.5a10 10 0 0 1 14 0M4 7.2a6.4 6.4 0 0 1 9 0" />
-        <circle cx="8.5" cy="10" r="1.2" fill="#fff" stroke="none" />
+        <circle cx="8.5" cy="10" r="1.2" fill={color} stroke="none" />
       </svg>
       <svg width="27" height="13" viewBox="0 0 27 13">
-        <rect x="0.5" y="0.5" width="23" height="12" rx="3.8" fill="none" stroke="rgba(255,255,255,0.45)" />
-        <rect x="2.5" y="2.5" width="19" height="8" rx="2.2" fill="#fff" />
-        <rect x="24.8" y="4.3" width="1.8" height="4.4" rx="0.9" fill="rgba(255,255,255,0.45)" />
+        <rect x="0.5" y="0.5" width="23" height="12" rx="3.8" fill="none" stroke={color} strokeOpacity={0.45} />
+        <rect x="2.5" y="2.5" width="19" height="8" rx="2.2" fill={color} />
+        <rect x="24.8" y="4.3" width="1.8" height="4.4" rx="0.9" fill={color} fillOpacity={0.45} />
       </svg>
     </div>
   </div>
