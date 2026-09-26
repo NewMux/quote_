@@ -50,12 +50,12 @@ Every headline holds for at least 2.4 s.
 
 ## Editing
 
-| What | Where |
-| --- | --- |
-| Text | The scene files in `src/scenes/` |
-| Colors | `src/theme.ts`, which mirrors the app's `src/lib/theme.ts` |
-| App mockups | `src/screens/Screens.tsx` |
-| App mark | `AppMark` in `src/components/Bits.tsx` |
+| What | v2 | v1 |
+| --- | --- | --- |
+| Text | `src/v2/scenes/` | `src/scenes/` |
+| Colors | `src/v2/theme.ts` | `src/theme.ts` |
+| App mockups | `src/v2/screens.tsx` (light mode) | `src/screens/Screens.tsx` |
+| App mark | `AppMark` in `src/components/Bits.tsx` | same |
 
 `AppMark` is a placeholder. Swap in the real icon when it exists: put the PNG in `public/`,
 then use `<Img src={staticFile('icon.png')} />`.
