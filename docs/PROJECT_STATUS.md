@@ -1,6 +1,6 @@
 # Invoice Them: Project Status
 
-_Last updated: September 23, 2026 · Branch `main` at `36d81a1`_
+_Last updated: September 28, 2026 · Branch `main`_
 
 Invoice Them is an iOS app (it also runs on Android) that lets small businesses create estimates and invoices, get them signed, send them as PDFs, and track payments. It's built with Expo SDK 57, React Native 0.86, expo-router and NativeWind. Supabase stores the data and files, and RevenueCat sells the Invoice Them Pro subscription.
 
@@ -9,9 +9,10 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 | App Store name | Invoice Them |
 | Bundle ID / Android package | `com.newmux.invoicethem` |
 | Subscription group | Invoice Them Pro: `quote_pro_monthly` ($9.99) and `quote_pro_annual` ($79.99), each with a 1-week free trial |
-| Backend | Supabase project `dktncuoqcifbjvxmybnq` (Postgres, Auth, Storage, one Edge Function) |
-| Builds | EAS: `development`, `preview` and `production` profiles in `eas.json` |
-| Checks | `npx tsc --noEmit`, `npx eslint .`, `npx jest` (106 tests), `npx expo export` |
+| Backend | Supabase project `noble-kite` (`dktncuoqcifbjvxmybnq`, NewMux's org, Free plan): Postgres, Auth, Storage, one Edge Function |
+| Builds | EAS: `development`, `preview` and `production` profiles in `eas.json`. Build numbers are kept by EAS (`appVersionSource: remote`) and `production` bumps them automatically |
+| App Store Connect | App ID `6815091959`, version 1.0. TestFlight is on build 4 |
+| Checks | `npx tsc --noEmit`, `npx eslint .`, `npx jest` (127 tests), `npx expo export` |
 
 ---
 
@@ -85,7 +86,7 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
   - contrast fixes
 - Fixed a timezone bug that saved dates one day early east of UTC.
 
-### 6. iOS 26 native redesign (round 29, the latest)
+### 6. iOS 26 native redesign (round 29)
 - **System tab bar:** Liquid Glass on iOS 26, shrinking as you scroll. The icons are SF Symbols that fill in when the tab is selected.
 - **SF Symbols everywhere**, through one `Icon` component with a checked Ionicons fallback for Android.
 - **Apple text sizes** (Large Title through Caption) replace the generic sizes.
@@ -105,54 +106,64 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 - **Removed:** the gradient hero, shadowed cards, the dark stat strips, and the `expo-linear-gradient` package.
 - **Added:** `expo-symbols` and `expo-glass-effect` as direct dependencies.
 
+### 7. Launch prep (rounds 30–33)
+- **TestFlight:**
+  - The Supabase and RevenueCat keys are in every EAS build profile.
+  - The app declares no non-exempt encryption, so builds skip the export-compliance question.
+  - v1 is iPhone-only.
+  - Native package versions match SDK 57.
+  - The App Store Connect app ID is saved for `eas submit`.
+- **Privacy Policy and Support pages** in `site/`, published at https://newmux.github.io/privacy.html and https://newmux.github.io/support.html.
+- **Feedback from Jassim:**
+  - Bigger signatures on the PDF, with the signer's name.
+  - A Your Details step in onboarding, before the paywall.
+  - Fill from Contacts when adding a client.
+  - Payment links: a default link plus a per-invoice override, printed on the PDF as a QR code and a Pay button. This needs migration 004.
+- **Launch videos** (Remotion, 9:16) in `marketing/launch-video/`.
+- **App icon:** the "Primary" mark from the logo identity (a Paid Lime receipt on Midnight Ink `#12112B`). The Android icon layers, favicon and splash glyph use the same mark.
+- **App Review demo data:** `supabase/seed/demo_account.sql` fills a demo account with a business profile, clients, items, four invoices (paid, partly paid, overdue, draft) and an estimate.
+
 ---
 
-## What's next
+## Launch status
 
-### Right now: test the redesign on a device
-Round 29 adds native modules, so it needs a **new development build**:
-```sh
-git pull origin main && npm install
-npx eas-cli@latest build --profile development --platform ios
-# install the new build, then:
-npx expo start --dev-client --tunnel --clear
-```
-Check:
-- **iOS 26:** the glass tab bar shrinks on scroll, sheets show the round ✕/✓, and Save is a checkmark.
-- **Older iOS:** the same screens appear, just without glass.
-- **Appearance:** Light and Dark, and the largest text size.
-- **Layout:** content scrolls clear of the tab bar on every screen.
-- **Line items:** a quantity like 1.5 can be typed.
-- **Summary:** tap Custom, then cancel; the period control goes back to the period in effect.
-- **Sandbox purchase:** the trial starts, access persists after relaunch, and Restore works.
+### Done
+- **Supabase** (checked in the dashboard on September 28):
+  - Migration `004_payment_links` is applied (September 26, 08:52 UTC).
+  - `quoteapp://auth/callback` is in the redirect allow-list.
+- **App Store Connect:**
+  - The privacy label is published.
+  - The Privacy Policy URL and Support URL are set.
+- **Code:** the real app icon is in `main`.
 
-### Before TestFlight or App Store (blocking)
-1. **Add the Supabase variables to `eas.json`** for the `preview` and `production` profiles (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`). EAS doesn't upload `.env`, so without these a cloud-built app can't reach the backend and stops at launch.
-2. **Supabase dashboard:**
-   - Add `quoteapp://auth/callback` under Authentication → URL Configuration → Redirect URLs. Sign-up confirmation and password-reset links need it.
-   - Turn on leaked-password protection under Authentication → Settings.
-3. **Host the Privacy Policy** at a public URL and enter it in App Store Connect. The in-app screen already exists.
-4. **App Store Connect listing:**
-   - screenshots taken from the new design
-   - description and keywords
-   - the privacy "nutrition label": account email, business and client data stored in Supabase, purchases through Apple and RevenueCat
-   - an age rating
-   - review notes with a demo account
-5. **App icon and splash screen:** replace the placeholder assets in `assets/` with real artwork, including dark and tinted icon variants for iOS 18+.
-6. **Match native package versions to SDK 57:** `expo-secure-store` 15.0.8 → `~57.0.4`, and `@react-native-community/datetimepicker` 9.2.1 → `9.1.0` (run `npx expo install --fix`). The current mismatch hasn't caused a crash, but it should be fixed before a store build.
-7. **Production build and submit:**
-   `npx eas-cli@latest build --profile production --platform ios`, then `npx eas-cli@latest submit --platform ios`.
+### Deferred
+- **Leaked-password protection** needs Supabase Pro, and the org is on Free.
+- **Minimum password length:** Supabase still allows 6 characters, while the app already asks for at least 8 on sign-up and reset. Set Authentication → Sign In / Providers → Email → Minimum password length to 8 so the server matches. Leave the character-type requirements off: the app doesn't explain them, and length matters more.
+
+### Left before submitting (App Store Connect, version 1.0)
+1. **Build 5 from `main`,** which carries the new icon:
+   ```sh
+   git checkout main && git pull origin main && npm ci
+   npx eas-cli@latest build:version:get --platform ios   # should print 4
+   npx eas-cli@latest build --profile production --platform ios
+   npx eas-cli@latest submit --platform ios --latest
+   ```
+2. **Select build 5 on version 1.0,** then attach `quote_pro_annual` and `quote_pro_monthly` under In-App Purchases and Subscriptions. Both are at Prepare for Submission.
+3. **Screenshots:** 0 of 10 so far, iPhone only (6.9" is required).
+4. **Listing:** age rating, primary and secondary category, description, keywords, promotional text and copyright. Drafts are in `docs/APP_STORE_SUBMISSION.md`.
+5. **App Review:** the demo account (created as described in `supabase/seed/demo_account.sql`), contact info and review notes. Drafts are in `docs/APP_STORE_SUBMISSION.md`.
 
 ### Soon after launch
 - **Sign in with Apple:** one-tap sign-in for iPhone users.
 - **Server push reminders:** overdue alerts that fire even when the app hasn't been opened. Needs an APNs key and Expo push tokens; local reminders cover this for now.
 - **Android release:** add the RevenueCat Android key, create a Play Console listing, and set up Google Play billing products.
+- **Branded launch screen:** `assets/splash-icon.png` has the logo, but `app.json` doesn't configure a splash screen yet.
+- **Privacy page wording:** the hosted policy says "iPhone and iPad", but v1 is iPhone-only.
 - **Clients list A–Z scrubber:** the letter index down the right edge, like Contacts.
 - **Overdue badge on the Documents tab:** needs an all-time overdue count, separate from Summary's per-period figures.
 - **Test coverage:** add component or integration tests for the key flows (create → issue → pay; subscription gate) next to the existing unit tests.
 
 ### Possible later features
-- Online payment links on invoices (for example Stripe) so clients can pay directly.
 - Team members sharing one business account.
 - Offline mode that caches data and syncs later.
 - More PDF templates and custom fields.
@@ -162,6 +173,7 @@ Check:
 
 ## Reference
 - **Test account:** `info@newmux.com` (the password was shared privately).
+- **App Review demo account:** see `supabase/seed/demo_account.sql`. Keep its password out of the repo.
 - **Running locally:**
   - Put the Supabase variables and `EXPO_PUBLIC_REVENUECAT_IOS_KEY` in `.env`.
   - Start Metro with `npx expo start --dev-client --tunnel`.
