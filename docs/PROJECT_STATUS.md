@@ -134,6 +134,7 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 - **App Store Connect:**
   - The privacy label is published.
   - The Privacy Policy URL and Support URL are set.
+- **Privacy Policy:** it says iPhone only, matching v1, both on the live site (`newmux.github.io` commit `6f58f51`) and in `site/privacy.html`.
 - **Code:** the real app icon is in `main`.
 
 ### Deferred
@@ -158,7 +159,6 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 - **Server push reminders:** overdue alerts that fire even when the app hasn't been opened. Needs an APNs key and Expo push tokens; local reminders cover this for now.
 - **Android release:** add the RevenueCat Android key, create a Play Console listing, and set up Google Play billing products.
 - **Branded launch screen:** `assets/splash-icon.png` has the logo, but `app.json` doesn't configure a splash screen yet.
-- **Privacy page wording:** the hosted policy says "iPhone and iPad", but v1 is iPhone-only.
 - **Clients list A–Z scrubber:** the letter index down the right edge, like Contacts.
 - **Overdue badge on the Documents tab:** needs an all-time overdue count, separate from Summary's per-period figures.
 - **Test coverage:** add component or integration tests for the key flows (create → issue → pay; subscription gate) next to the existing unit tests.
