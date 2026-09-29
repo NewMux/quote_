@@ -121,6 +121,7 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
   - Payment links: a default link plus a per-invoice override, printed on the PDF as a QR code and a Pay button. This needs migration 004.
 - **Launch videos** (Remotion, 9:16) in `marketing/launch-video/`.
 - **App icon:** the "Primary" mark from the logo identity (a Paid Lime receipt on Midnight Ink `#12112B`). The Android icon layers, favicon and splash glyph use the same mark.
+- **Launch screen:** the logo on Midnight Ink, set up with `expo-splash-screen` in `app.json`. It stays up until sign-in and the business profile have loaded, for at most 6 seconds.
 - **App Review demo data:** `supabase/seed/demo_account.sql` fills a demo account with a business profile, clients, items, four invoices (paid, partly paid, overdue, draft) and an estimate.
 
 ---
@@ -158,7 +159,6 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 - **Sign in with Apple:** one-tap sign-in for iPhone users.
 - **Server push reminders:** overdue alerts that fire even when the app hasn't been opened. Needs an APNs key and Expo push tokens; local reminders cover this for now.
 - **Android release:** add the RevenueCat Android key, create a Play Console listing, and set up Google Play billing products.
-- **Branded launch screen:** `assets/splash-icon.png` has the logo, but `app.json` doesn't configure a splash screen yet.
 - **Clients list A–Z scrubber:** the letter index down the right edge, like Contacts.
 - **Overdue badge on the Documents tab:** needs an all-time overdue count, separate from Summary's per-period figures.
 - **Test coverage:** add component or integration tests for the key flows (create → issue → pay; subscription gate) next to the existing unit tests.
