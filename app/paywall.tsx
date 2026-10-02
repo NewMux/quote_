@@ -9,7 +9,7 @@ import { Avatar } from '../src/components/Avatar';
 import { Icon } from '../src/components/Icon';
 import { ListRow } from '../src/components/list/ListRow';
 import { ListSection } from '../src/components/list/ListSection';
-import { APPLE_EULA_URL, annualSavingsPercent, trialLabel } from '../src/lib/subscription';
+import { APPLE_EULA_URL, annualSavingsPercent, introOfferLabel } from '../src/lib/subscription';
 import type { SymbolName } from '../src/lib/symbols';
 import { useSignedUrl } from '../src/lib/useSignedUrl';
 import { useAuthStore } from '../src/stores/useAuthStore';
@@ -72,7 +72,7 @@ export default function PaywallScreen() {
   const monthly = offering?.monthly ?? null;
   const selected: PurchasesPackage | null = (plan === 'annual' ? annual : monthly) ?? annual ?? monthly;
   const selectedKind: PlanKind = selected === monthly ? 'monthly' : 'annual';
-  const trial = trialLabel(selected?.product.introPrice);
+  const intro = introOfferLabel(selected?.product.introPrice);
   const savings =
     annual && monthly ? annualSavingsPercent(monthly.product.price, annual.product.price) : null;
 
@@ -115,7 +115,7 @@ export default function PaywallScreen() {
   }
 
   const renewalText = selected
-    ? `${trial ? `After the ${trial}, ` : ''}${selected.product.priceString} per ${
+    ? `${intro ? `${intro}, then ` : ''}${selected.product.priceString} per ${
         selectedKind === 'annual' ? 'year' : 'month'
       }. Payment is charged to your Apple ID. The subscription renews automatically unless you turn it off at least 24 hours before the end of the current period. Manage or cancel anytime in your App Store account settings.`
     : null;
@@ -168,7 +168,7 @@ export default function PaywallScreen() {
           </Text>
           <Text className="text-body text-secondary text-center">
             {businessName
-              ? `${businessName} is all set up. Start your free trial to send your first invoice.`
+              ? `${businessName} is all set up. Subscribe to send your first invoice.`
               : 'Everything you need to quote, invoice, and get paid.'}
           </Text>
         </View>
@@ -230,13 +230,13 @@ export default function PaywallScreen() {
       >
         <View style={{ maxWidth: 560, width: '100%', alignSelf: 'center' }}>
           <GlassBar>
-            {trial && selected ? (
+            {intro && selected ? (
               <Text className="text-footnote text-secondary text-center pt-1">
-                {`${trial}, then ${selected.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}
+                {`${intro}, then ${selected.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}
               </Text>
             ) : null}
             <Button
-              label={trial ? 'Start Free Trial' : 'Subscribe'}
+              label="Subscribe"
               size="large"
               onPress={handlePurchase}
               disabled={!selected}

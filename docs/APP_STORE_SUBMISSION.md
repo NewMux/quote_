@@ -18,7 +18,7 @@ App Store Connect adds the © itself, so the copyright field is just the year an
 ## Promotional Text (165 of 170)
 
 ```
-Send polished estimates and invoices in minutes. Get them signed on the spot, add a Pay link with a QR code, and see at a glance who still owes you. Free for a week.
+Send polished estimates and invoices in minutes. Get them signed on the spot, add a Pay link with a QR code, and see at a glance who still owes you. Your first week is just $2.99.
 ```
 
 ## Keywords (96 of 100)
@@ -61,7 +61,7 @@ PRIVATE BY DESIGN
 Your account and data are stored securely in the cloud and kept private to your business. Export a backup at any time, or delete your account and everything in it from Settings.
 
 INVOICE THEM PRO
-Invoice Them requires an Invoice Them Pro subscription, monthly or yearly, and both start with a 1-week free trial. Payment is charged to your Apple Account when you confirm the purchase after the trial. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel it in your Apple Account settings.
+Invoice Them requires an Invoice Them Pro subscription, monthly or yearly, and both start with a 1-week introductory offer at $2.99. Payment is charged to your Apple Account when you confirm the purchase, and the regular price applies after the first week. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel it in your Apple Account settings.
 
 Privacy Policy: https://newmux.github.io/privacy.html
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
@@ -113,10 +113,10 @@ DEMO ACCOUNT
 Use the email and password in Sign-in Information. The account has a finished business profile, three clients, catalog items, four invoices (paid, partly paid, overdue and draft) and an estimate.
 
 SUBSCRIPTION / PAYWALL
-The app requires the Invoice Them Pro auto-renewable subscription ("Invoice Them Pro" group: quote_pro_monthly and quote_pro_annual, each with a 1-week free trial). The demo account is not subscribed, so the paywall appears right after sign-in.
+The app requires the Invoice Them Pro auto-renewable subscription ("Invoice Them Pro" group: quote_pro_monthly and quote_pro_annual, each with a $2.99 1-week introductory offer). The demo account is not subscribed, so the paywall appears right after sign-in.
 To test with a Sandbox account:
 1. Sign in with the demo account. The paywall appears.
-2. Choose Yearly or Monthly and tap Start Free Trial.
+2. Choose Yearly or Monthly and tap Subscribe.
 3. Confirm with your Sandbox Apple Account. The app opens to the Summary tab.
 Restore Purchases is at the bottom of the paywall and under Settings > Invoice Them Pro, which also has Manage Subscription. The paywall links to the Privacy Policy and Apple's standard Terms of Use (EULA).
 
@@ -146,7 +146,7 @@ OTHER NOTES
    - Change `v_email` on the first line of the `declare` block to the email from step 1.
    - Click **Run**. It should end with `Seeded the demo account …`.
    - The script refuses to run twice on the same account.
-3. **Check it** on a TestFlight build: sign in as the demo account. The paywall should appear straight away, because the account has no subscription. Don't buy on this account, because the reviewer should see the paywall. If you want to see the data, subscribe with a different account, or buy the trial and then delete that customer under RevenueCat → Customers (search by the Supabase user ID). A reviewer's Sandbox account can't restore your purchase.
+3. **Check it** on a TestFlight build: sign in as the demo account. The paywall should appear straight away, because the account has no subscription. Don't buy on this account, because the reviewer should see the paywall. If you want to see the data, subscribe with a different account, or buy the intro offer and then delete that customer under RevenueCat → Customers (search by the Supabase user ID). A reviewer's Sandbox account can't restore your purchase.
 4. **Enter the email and password** under App Review Information → Sign-in Information.
 
 The dates are relative to the day you run the script, so INV-003 shows as overdue. Run the script close to submitting. If review takes weeks, INV-002 will turn overdue too, which is fine.

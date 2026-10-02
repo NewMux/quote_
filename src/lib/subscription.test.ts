@@ -1,4 +1,4 @@
-import { annualSavingsPercent, hasProEntitlement, trialLabel } from './subscription';
+import { annualSavingsPercent, hasProEntitlement, introOfferLabel } from './subscription';
 
 describe('hasProEntitlement', () => {
   it('is true only when the pro entitlement is active', () => {
@@ -34,18 +34,25 @@ describe('annualSavingsPercent', () => {
   });
 });
 
-describe('trialLabel', () => {
-  it('describes a free introductory offer', () => {
-    expect(trialLabel({ price: 0, periodUnit: 'DAY', periodNumberOfUnits: 7 })).toBe('7-day free trial');
-    expect(trialLabel({ price: 0, periodUnit: 'MONTH', periodNumberOfUnits: 1 })).toBe('1-month free trial');
+describe('introOfferLabel', () => {
+  it('describes a paid introductory offer', () => {
+    expect(introOfferLabel({ price: 2.99, priceString: '$2.99', periodUnit: 'WEEK', periodNumberOfUnits: 1 })).toBe(
+      '$2.99 for 1 week'
+    );
+    expect(introOfferLabel({ price: 2.99, priceString: '$2.99', periodUnit: 'DAY', periodNumberOfUnits: 7 })).toBe(
+      '$2.99 for 1 week'
+    );
+    expect(introOfferLabel({ price: 0.99, priceString: '$0.99', periodUnit: 'MONTH', periodNumberOfUnits: 2 })).toBe(
+      '$0.99 for 2 months'
+    );
   });
 
-  it('ignores paid discounts and missing offers', () => {
-    expect(trialLabel({ price: 0.99, periodUnit: 'MONTH', periodNumberOfUnits: 1 })).toBeNull();
-    expect(trialLabel(null)).toBeNull();
+  it('ignores free trials and missing offers', () => {
+    expect(introOfferLabel({ price: 0, priceString: '$0.00', periodUnit: 'DAY', periodNumberOfUnits: 7 })).toBeNull();
+    expect(introOfferLabel(null)).toBeNull();
   });
 
   it('ignores unknown units', () => {
-    expect(trialLabel({ price: 0, periodUnit: 'UNKNOWN', periodNumberOfUnits: 3 })).toBeNull();
+    expect(introOfferLabel({ price: 2.99, priceString: '$2.99', periodUnit: 'UNKNOWN', periodNumberOfUnits: 3 })).toBeNull();
   });
 });

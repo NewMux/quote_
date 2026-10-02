@@ -32,17 +32,23 @@ export function annualSavingsPercent(monthlyPrice: number, annualPrice: number):
 
 interface IntroPriceLike {
   price: number;
+  priceString: string;
   periodUnit: string;
   periodNumberOfUnits: number;
 }
 
 const UNIT_WORDS: Record<string, string> = { DAY: 'day', WEEK: 'week', MONTH: 'month', YEAR: 'year' };
 
-/** "7-day free trial" / "1-month free trial" for a free introductory offer; null when there's no
- * intro offer or it's a paid discount rather than a free trial. */
-export function trialLabel(intro: IntroPriceLike | null | undefined): string | null {
-  if (!intro || intro.price !== 0) return null;
-  const unit = UNIT_WORDS[intro.periodUnit.toUpperCase()];
-  if (!unit || intro.periodNumberOfUnits <= 0) return null;
-  return `${intro.periodNumberOfUnits}-${unit} free trial`;
+/** "$2.99 for 1 week" for a paid introductory offer; null when there's no intro offer or it's a
+ * free trial (the app doesn't offer free trials). Whole weeks given in days are shown as weeks. */
+export function introOfferLabel(intro: IntroPriceLike | null | undefined): string | null {
+  if (!intro || intro.price <= 0) return null;
+  let unit = UNIT_WORDS[intro.periodUnit.toUpperCase()];
+  let count = intro.periodNumberOfUnits;
+  if (!unit || count <= 0) return null;
+  if (unit === 'day' && count % 7 === 0) {
+    unit = 'week';
+    count /= 7;
+  }
+  return `${intro.priceString} for ${count} ${unit}${count === 1 ? '' : 's'}`;
 }

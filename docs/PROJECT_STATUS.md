@@ -8,7 +8,7 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 | --- | --- |
 | App Store name | Invoice Them |
 | Bundle ID / Android package | `com.newmux.invoicethem` |
-| Subscription group | Invoice Them Pro: `quote_pro_monthly` ($9.99) and `quote_pro_annual` ($79.99), each with a 1-week free trial |
+| Subscription group | Invoice Them Pro: `quote_pro_monthly` ($9.99) and `quote_pro_annual` ($79.99), each with a $2.99 1-week paid introductory offer |
 | Backend | Supabase project `noble-kite` (`dktncuoqcifbjvxmybnq`, NewMux's org, Free plan): Postgres, Auth, Storage, one Edge Function |
 | Builds | EAS: `development`, `preview` and `production` profiles in `eas.json`. Build numbers are kept by EAS (`appVersionSource: remote`) and `production` bumps them automatically |
 | App Store Connect | App ID `6815091959`, version 1.0. TestFlight is on build 4 |
@@ -66,7 +66,7 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 
 ### 4. Subscription and builds (round 24)
 - **RevenueCat paywall:**
-  - A hard paywall with a 1-week trial.
+  - A hard paywall with a $2.99 1-week intro offer.
   - Restore Purchases, and the Apple-required renewal terms with links to the Privacy Policy and Terms of Use.
   - A Settings → Subscription screen with Manage Subscription.
   - Your RevenueCat user ID is your Supabase user ID, so the subscription follows your account.

@@ -103,7 +103,7 @@ export const FinaleV2: React.FC = () => {
             opacity: interpolate(frame, [66, 80], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
           }}
         >
-          Try it free for a week
+          First week just $2.99
         </div>
       </AbsoluteFill>
       <AbsoluteFill style={{ background: '#000', opacity: fade }} />
