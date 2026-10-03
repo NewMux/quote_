@@ -15,10 +15,10 @@ Drafts for App Store Connect → Invoice Them → iOS 1.0. Each block is ready t
 
 App Store Connect adds the © itself, so the copyright field is just the year and the owner.
 
-## Promotional Text (165 of 170)
+## Promotional Text (160 of 170)
 
 ```
-Send polished estimates and invoices in minutes. Get them signed on the spot, add a Pay link with a QR code, and see at a glance who still owes you. Your first month is just $0.99.
+Send polished estimates and invoices in minutes. Get them signed on the spot, add a Pay link with a QR code, and see who still owes you. First month just $0.99.
 ```
 
 ## Keywords (96 of 100)
