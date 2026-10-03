@@ -36,11 +36,11 @@ describe('annualSavingsPercent', () => {
 
 describe('introOfferLabel', () => {
   it('describes a paid introductory offer', () => {
-    expect(introOfferLabel({ price: 2.99, priceString: '$2.99', periodUnit: 'WEEK', periodNumberOfUnits: 1 })).toBe(
-      '$2.99 for 1 week'
+    expect(introOfferLabel({ price: 0.99, priceString: '$0.99', periodUnit: 'MONTH', periodNumberOfUnits: 1 })).toBe(
+      '$0.99 for 1 month'
     );
-    expect(introOfferLabel({ price: 2.99, priceString: '$2.99', periodUnit: 'DAY', periodNumberOfUnits: 7 })).toBe(
-      '$2.99 for 1 week'
+    expect(introOfferLabel({ price: 0.99, priceString: '$0.99', periodUnit: 'DAY', periodNumberOfUnits: 7 })).toBe(
+      '$0.99 for 1 week'
     );
     expect(introOfferLabel({ price: 0.99, priceString: '$0.99', periodUnit: 'MONTH', periodNumberOfUnits: 2 })).toBe(
       '$0.99 for 2 months'
@@ -53,6 +53,6 @@ describe('introOfferLabel', () => {
   });
 
   it('ignores unknown units', () => {
-    expect(introOfferLabel({ price: 2.99, priceString: '$2.99', periodUnit: 'UNKNOWN', periodNumberOfUnits: 3 })).toBeNull();
+    expect(introOfferLabel({ price: 0.99, priceString: '$0.99', periodUnit: 'UNKNOWN', periodNumberOfUnits: 3 })).toBeNull();
   });
 });

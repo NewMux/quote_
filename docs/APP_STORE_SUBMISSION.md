@@ -18,7 +18,7 @@ App Store Connect adds the © itself, so the copyright field is just the year an
 ## Promotional Text (165 of 170)
 
 ```
-Send polished estimates and invoices in minutes. Get them signed on the spot, add a Pay link with a QR code, and see at a glance who still owes you. Your first week is just $2.99.
+Send polished estimates and invoices in minutes. Get them signed on the spot, add a Pay link with a QR code, and see at a glance who still owes you. Your first month is just $0.99.
 ```
 
 ## Keywords (96 of 100)
@@ -61,7 +61,7 @@ PRIVATE BY DESIGN
 Your account and data are stored securely in the cloud and kept private to your business. Export a backup at any time, or delete your account and everything in it from Settings.
 
 INVOICE THEM PRO
-Invoice Them requires an Invoice Them Pro subscription, monthly or yearly, and both start with a 1-week introductory offer at $2.99. Payment is charged to your Apple Account when you confirm the purchase, and the regular price applies after the first week. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel it in your Apple Account settings.
+Invoice Them requires an Invoice Them Pro subscription, monthly or yearly, and both start with a 1-month introductory offer at $0.99. Payment is charged to your Apple Account when you confirm the purchase, and the regular price applies after the first month. The subscription renews automatically unless you cancel at least 24 hours before the end of the current period. You can manage or cancel it in your Apple Account settings.
 
 Privacy Policy: https://newmux.github.io/privacy.html
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
@@ -113,7 +113,7 @@ DEMO ACCOUNT
 Use the email and password in Sign-in Information. The account has a finished business profile, three clients, catalog items, four invoices (paid, partly paid, overdue and draft) and an estimate.
 
 SUBSCRIPTION / PAYWALL
-The app requires the Invoice Them Pro auto-renewable subscription ("Invoice Them Pro" group: quote_pro_monthly and quote_pro_annual, each with a $2.99 1-week introductory offer). The demo account is not subscribed, so the paywall appears right after sign-in.
+The app requires the Invoice Them Pro auto-renewable subscription ("Invoice Them Pro" group: quote_pro_monthly and quote_pro_annual, each with a $0.99 1-month introductory offer). The demo account is not subscribed, so the paywall appears right after sign-in.
 To test with a Sandbox account:
 1. Sign in with the demo account. The paywall appears.
 2. Choose Yearly or Monthly and tap Subscribe.

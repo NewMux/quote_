@@ -38,7 +38,7 @@ emulator.
 
 - Bundle ID / Android package: `com.newmux.invoicethem`
 - App Store subscription group "Invoice Them Pro": `quote_pro_monthly` ($9.99)
-  and `quote_pro_annual` ($79.99), each with a $2.99 1-week paid introductory offer
+  and `quote_pro_annual` ($79.99), each with a $0.99 1-month paid introductory offer
 
 The app is gated behind an auto-renewing App Store subscription, handled by
 [RevenueCat](https://www.revenuecat.com) (`react-native-purchases`). With

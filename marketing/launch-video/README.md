@@ -46,7 +46,7 @@ Every headline holds for at least 2.4 s.
 | 26.4–31.2 s | Payment received; Issued → Paid; the month's total grows | indigo |
 | 31.2–36 s | Bento grid of more features | multicolor |
 | 36–38.4 s | Circle wipe to midnight: "Everything you need to get paid." | |
-| 38.4–45.6 s | End card: "Now on the App Store" · "First week just $2.99" | midnight |
+| 38.4–45.6 s | End card: "Now on the App Store" · "First month just $0.99" | midnight |
 
 ## Editing
 

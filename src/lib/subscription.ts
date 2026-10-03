@@ -39,7 +39,7 @@ interface IntroPriceLike {
 
 const UNIT_WORDS: Record<string, string> = { DAY: 'day', WEEK: 'week', MONTH: 'month', YEAR: 'year' };
 
-/** "$2.99 for 1 week" for a paid introductory offer; null when there's no intro offer or it's a
+/** "$0.99 for 1 month" for a paid introductory offer; null when there's no intro offer or it's a
  * free trial (the app doesn't offer free trials). Whole weeks given in days are shown as weeks. */
 export function introOfferLabel(intro: IntroPriceLike | null | undefined): string | null {
   if (!intro || intro.price <= 0) return null;
