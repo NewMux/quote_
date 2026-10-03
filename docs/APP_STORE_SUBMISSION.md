@@ -100,7 +100,7 @@ If the form offers "Made for Kids", leave it off.
 
 ## App Review Information
 
-**Sign-in required:** Yes. Enter the demo account's email and password in the Sign-in Information fields. The password isn't stored in this repo.
+**Sign-in required:** Yes. Enter the demo account's email and password in the Sign-in Information fields. The password is stored in App Store Connect → App Review Information (ask Mohammed).
 
 **Contact information:** first and last name, a phone number and `info@newmux.com`.
 
@@ -139,7 +139,7 @@ OTHER NOTES
 
 1. **Supabase dashboard** → project `noble-kite` → **Authentication → Users → Add user → Create new user.**
    - Email: an inbox you control, such as `appreview@newmux.com`. Apple never needs to receive mail there.
-   - Password: a strong one. Save it only in App Store Connect and your password manager.
+   - Password: stored in App Store Connect → App Review Information (ask Mohammed).
    - Tick **Auto Confirm User**, so the email counts as confirmed with no link to click.
 2. **SQL Editor → New query:**
    - Paste the contents of `supabase/seed/demo_account.sql`.
