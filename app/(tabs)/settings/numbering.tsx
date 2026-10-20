@@ -44,6 +44,12 @@ export default function NumberingScreen() {
   const leave = useUnsavedChangesGuard(isDirty && !isSaving);
 
   async function handleSave() {
+    // Estimates and invoices are numbered separately, so identical prefixes would hand both the
+    // same numbers (EST-001 and EST-001).
+    if (estimatePrefix.trim() === invoicePrefix.trim()) {
+      Alert.alert('Use Different Prefixes', 'Estimates and invoices need different prefixes so their numbers never clash.');
+      return;
+    }
     setIsSaving(true);
     try {
       await update({
