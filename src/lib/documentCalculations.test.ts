@@ -147,3 +147,35 @@ describe('getTaxLabel', () => {
     ).toBe('VAT');
   });
 });
+
+describe('document discount and tax', () => {
+  it('taxes the amount after the document discount', () => {
+    const totals = computeDocumentTotals(
+      [line({ id: 'a', unitPriceMinor: 10000, isTaxable: true, taxRateBp: 1000 })],
+      'percent',
+      5000
+    );
+    // $100 at 10% VAT with 50% off: tax is on $50, so $5, and the total is $55.
+    expect(totals.taxTotalMinor).toBe(500);
+    expect(totals.totalMinor).toBe(5500);
+  });
+
+  it('spreads the discount across lines so the shares add up exactly', () => {
+    const totals = computeDocumentTotals(
+      [
+        line({ id: 'a', unitPriceMinor: 3333, isTaxable: true, taxRateBp: 2000 }),
+        line({ id: 'b', unitPriceMinor: 6667, isTaxable: false, taxRateBp: 0 }),
+      ],
+      'fixed',
+      1000
+    );
+    // Line a carries 333 of the 1000 discount: tax = 20% of 3000 = 600.
+    expect(totals.taxTotalMinor).toBe(600);
+    expect(totals.totalMinor).toBe(10000 - 1000 + 600);
+  });
+
+  it('never goes negative with an oversized percent discount', () => {
+    const totals = computeDocumentTotals([line({ id: 'a', unitPriceMinor: 10000 })], 'percent', 15000);
+    expect(totals.totalMinor).toBe(0);
+  });
+});

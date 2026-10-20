@@ -39,15 +39,44 @@ export function formatMinor(minor: number, currencyCode: string, locale = 'en-US
   }).format(minor / divisor);
 }
 
-/** Parses a user-typed amount string (e.g. "12.5") into integer minor units, scaled for the
- * given currency's decimal precision. Returns 0 for invalid input. */
+/** Normalizes a typed number to plain "1234.5" form, accepting either "." or "," as the decimal
+ * point — iOS and Android show "," on the decimal pad in most of Europe, Latin America, and
+ * Indonesia. The last separator typed is the decimal point and earlier ones are digit grouping
+ * ("1.234,50" and "1,234.50" are both 1234.50); one kind repeated with no other ("1.234.567") is
+ * grouping only. Everything that isn't a digit or separator is dropped, minus signs included. */
+export function normalizeDecimalInput(input: string): string {
+  const cleaned = input.replace(/[^0-9.,]/g, '');
+  const lastSeparator = Math.max(cleaned.lastIndexOf('.'), cleaned.lastIndexOf(','));
+  if (lastSeparator === -1) return cleaned;
+  const separator = cleaned[lastSeparator];
+  const other = separator === '.' ? ',' : '.';
+  if (!cleaned.includes(other) && cleaned.split(separator).length > 2) {
+    return cleaned.replace(/[.,]/g, '');
+  }
+  return `${cleaned.slice(0, lastSeparator).replace(/[.,]/g, '')}.${cleaned.slice(lastSeparator + 1)}`;
+}
+
+/** Parses a typed decimal number (see normalizeDecimalInput). Returns NaN when it has no digits. */
+export function parseDecimalInput(input: string): number {
+  const normalized = normalizeDecimalInput(input);
+  return /\d/.test(normalized) ? Number(normalized) : Number.NaN;
+}
+
+/** Scales a typed decimal to an integer count of 10^-digits units, rounding half up. Works on the
+ * digit string, so "1.005" at 2 digits is 101 (float math gives 100). */
+function parseScaled(input: string, digits: number): number {
+  const normalized = normalizeDecimalInput(input);
+  if (!/\d/.test(normalized)) return 0;
+  const [whole, fraction = ''] = normalized.split('.');
+  const padded = (fraction + '0'.repeat(digits + 1)).slice(0, digits + 1);
+  const scaled = Number((whole || '0') + padded.slice(0, digits));
+  return padded[digits] >= '5' ? scaled + 1 : scaled;
+}
+
+/** Parses a user-typed amount string (e.g. "12.5" or "12,5") into integer minor units, scaled
+ * for the given currency's decimal precision. Returns 0 for invalid input. */
 export function parseToMinor(input: string, currencyCode: string): number {
-  const cleaned = input.replace(/[^0-9.]/g, '');
-  if (!cleaned) return 0;
-  const value = Number.parseFloat(cleaned);
-  if (!Number.isFinite(value)) return 0;
-  const multiplier = 10 ** getCurrencyDecimals(currencyCode);
-  return Math.round(value * multiplier);
+  return parseScaled(input, getCurrencyDecimals(currencyCode));
 }
 
 export function minorToDecimalString(minor: number, currencyCode: string): string {
@@ -64,9 +93,11 @@ export function applyDiscount(
 ): number {
   if (!discountType || !discountValue) return 0;
   if (discountType === 'percent') {
-    return Math.round((baseMinor * discountValue) / 10000);
+    // Capped at 100%, so a typo like "150" can't drive a total negative.
+    const bp = Math.min(Math.max(discountValue, 0), 10000);
+    return Math.round((baseMinor * bp) / 10000);
   }
-  return Math.min(discountValue, baseMinor);
+  return Math.min(Math.max(discountValue, 0), baseMinor);
 }
 
 /** Applies a tax rate in basis points (1500 = 15.00%) to a minor amount. */
@@ -78,10 +109,7 @@ export function formatRateBp(rateBp: number): string {
   return `${(rateBp / 100).toFixed(2)}%`;
 }
 
+/** Parses a typed percentage ("7.5" or "7,5") into basis points (750). */
 export function parseRateBp(input: string): number {
-  const cleaned = input.replace(/[^0-9.]/g, '');
-  if (!cleaned) return 0;
-  const value = Number.parseFloat(cleaned);
-  if (!Number.isFinite(value)) return 0;
-  return Math.round(value * 100);
+  return parseScaled(input, 2);
 }
