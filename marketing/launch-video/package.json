@@ -25,13 +25,14 @@
     "typescript": "5.9.3"
   },
   "scripts": {
-    "music": "node scripts/make-music.mjs && node scripts/make-music-v2.mjs",
+    "music": "node scripts/make-music.mjs && node scripts/make-music-v2.mjs && node scripts/make-music-ad.mjs",
     "dev": "npm run music && remotion studio",
     "render": "npm run music && remotion render LaunchVideo out/InvoiceThem-Launch-v2-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
     "still": "remotion still LaunchVideo out/still.png",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
+    "render:ad": "npm run music && remotion render Ad15 out/InvoiceThem-Ad-15s-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
     "render:v1": "npm run music && remotion render LaunchVideoV1 out/InvoiceThem-Launch-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k"
   },
   "sideEffects": [

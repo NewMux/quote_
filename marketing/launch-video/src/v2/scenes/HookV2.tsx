@@ -9,8 +9,9 @@ const COLS = 5;
 const ROWS = 13;
 const VALUES = ['=SUM(B2:B9', '1,250.00', '#REF!', 'INV-0038?', '450', 'Total', '=B4*1.1', 'Due ??', '3,900', '#VALUE!', 'Client', '12/09', 'Paid?'];
 
-/** 0–4.8 s: a jittery, error-riddled spreadsheet under the question — then it falls apart. */
-export const HookV2: React.FC = () => {
+/** 0–4.8 s: a jittery, error-riddled spreadsheet under the question — then it falls apart. The
+ * 15 s ad plays it faster, with an earlier `fallAt` and `outAt`. */
+export const HookV2: React.FC<{ fallAt?: number; outAt?: number }> = ({ fallAt = 92, outAt = 128 }) => {
   const frame = useCurrentFrame();
   const tick = Math.floor(frame / 6);
   return (
@@ -31,8 +32,8 @@ export const HookV2: React.FC = () => {
           const r = Math.floor(i / COLS);
           const c = i % COLS;
           const dist = Math.hypot(c - 2, r - 5);
-          const fall = interpolate(frame, [92 + dist * 3, 136 + dist * 3], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EASE_IN });
-          const jitter = frame < 92 ? 3 : 0;
+          const fall = interpolate(frame, [fallAt + dist * 3, fallAt + 44 + dist * 3], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: EASE_IN });
+          const jitter = frame < fallAt ? 3 : 0;
           const text = VALUES[(i * 7 + r) % VALUES.length];
           const isError = text.startsWith('#') || text.endsWith('?');
           return (
@@ -64,7 +65,7 @@ export const HookV2: React.FC = () => {
         })}
       </div>
       <div style={{ position: 'absolute', top: 250, left: 70, right: 70 }}>
-        <LineReveal lines={['Still invoicing', 'in *spreadsheets?*']} accent={ACCENT.red} at={8} stagger={10} size={110} outAt={128} />
+        <LineReveal lines={['Still invoicing', 'in *spreadsheets?*']} accent={ACCENT.red} at={8} stagger={10} size={110} outAt={outAt} />
       </div>
     </AbsoluteFill>
   );

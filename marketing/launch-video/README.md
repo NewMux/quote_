@@ -1,16 +1,19 @@
 # Invoice Them: launch videos
 
-Two vertical (1080×1920, 30 fps) launch films for Reels, TikTok and Shorts, built with
+Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
 [Remotion](https://www.remotion.dev).
 
 - **v2, current (`LaunchVideo`, 45.6 s):** a light, multicolor look with a midnight finale,
   calmer pacing and the newest features. It renders to `out/InvoiceThem-Launch-v2-9x16.mp4`.
+- **15 s ad (`Ad15`, 14.4 s):** a paid-social cutdown of v2 with a voiceover. It renders to
+  `out/InvoiceThem-Ad-15s-9x16.mp4`.
 - **v1 (`LaunchVideoV1`, 32 s):** the fast, dark, teal edit. It renders to
   `out/InvoiceThem-Launch-9x16.mp4`.
 
 The app screens are rebuilt in code from the app's own design tokens. The soundtracks and sound
 effects are synthesized by `scripts/make-music*.mjs`, so the videos contain no licensed material
-and can be posted anywhere.
+and can be posted anywhere. The ad's voiceover, `public/vo/ad-voiceover.mp3`, was generated with
+ElevenLabs (voice "Justin Case", model `eleven_v4`).
 
 This is a standalone project. The app's TypeScript, ESLint, Jest and Metro configs ignore
 `marketing/`.
@@ -28,7 +31,8 @@ npm run render:v1
 
 - **`npm run dev`** regenerates the audio, then opens Remotion Studio for a live preview and
   editing. Each scene is also its own composition, in the v2-Scenes and v1-Scenes folders.
-- **`npm run render`** renders v2, and **`npm run render:v1`** renders v1.
+- **`npm run render`** renders v2, **`npm run render:ad`** renders the 15 s ad, and
+  **`npm run render:v1`** renders v1.
 
 ## v2 storyboard
 
@@ -48,11 +52,29 @@ Every headline holds for at least 2.4 s.
 | 36–38.4 s | Circle wipe to midnight: "Everything you need to get paid." | |
 | 38.4–45.6 s | End card: "Now on the App Store" · "Try it free for a week" | midnight |
 
+## 15 s ad storyboard
+
+The ad uses the same 100 BPM grid, cut on beats (one beat is 18 frames). Its timing and voiceover
+cues live in `src/ad/timing.ts`.
+
+| Time | Scene | Voiceover |
+| --- | --- | --- |
+| 0–3 s | The spreadsheet hook, sped up | "Still invoicing in spreadsheets?" |
+| 3–5.4 s | Three line items added | "Create an invoice in seconds." |
+| 5.4–7.8 s | Signature drawn, "Signed" | "Get it signed on the spot." |
+| 7.8–10.2 s | The client scans the PDF's QR code and pays | "Your client scans… and pays." |
+| 10.2–14.4 s | Midnight end card: "Get it on the App Store" · "Try it free for a week" | "Invoice Them. Try it free on the App Store." |
+
+The voiceover is a single take. `VO` in `src/ad/timing.ts` trims each line out of it at the take's
+pauses and places it in its scene, and the music dips under each line. To re-record, replace the
+MP3, then update each line's `from`/`to` frames. Find the pauses with
+`ffmpeg -i public/vo/ad-voiceover.mp3 -af silencedetect=n=-40dB:d=0.18 -f null -`.
+
 ## Editing
 
 | What | v2 | v1 |
 | --- | --- | --- |
-| Text | `src/v2/scenes/` | `src/scenes/` |
+| Text | `src/v2/scenes/` (ad: `src/ad/scenes.tsx`) | `src/scenes/` |
 | Colors | `src/v2/theme.ts` | `src/theme.ts` |
 | App mockups | `src/v2/screens.tsx` (light mode) | `src/screens/Screens.tsx` |
 | App mark | `AppMark` in `src/components/Bits.tsx` | same |
