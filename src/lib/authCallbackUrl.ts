@@ -1,3 +1,10 @@
+/** Where every auth email (signup confirmation, password recovery) sends the user back to. Must
+ * match an entry in Supabase → Authentication → URL Configuration → Redirect URLs exactly;
+ * Supabase silently swaps in the Site URL for anything that doesn't match. Written out rather
+ * than built with `Linking.createURL('/auth/callback')`, which in a release build yields
+ * `quoteapp:///auth/callback` (three slashes) and so never matches. */
+export const AUTH_CALLBACK_URL = 'quoteapp://auth/callback';
+
 /** What an auth email link (signup confirmation, password recovery) carried back into the app.
  * Supabase can return any of three shapes depending on the client's flow type and the email
  * template, so the callback screen accepts all of them:

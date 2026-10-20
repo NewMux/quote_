@@ -7,6 +7,19 @@ import { FormField } from '../../src/components/form/FormField';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 
+function isEmailNotConfirmed(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === 'email_not_confirmed';
+}
+
+async function handleResend(email: string) {
+  try {
+    await useAuthStore.getState().resendConfirmation(email);
+    Alert.alert('Check Your Email', `We sent a new confirmation link to ${email}.`);
+  } catch (err) {
+    Alert.alert('Couldn’t Send Email', err instanceof Error ? err.message : 'Something went wrong.');
+  }
+}
+
 export default function SignInScreen() {
   const signIn = useAuthStore((s) => s.signIn);
   const [email, setEmail] = useState('');
@@ -25,6 +38,17 @@ export default function SignInScreen() {
       const profile = useBusinessProfileStore.getState().profile;
       router.replace(profile?.business_name?.trim() ? '/(tabs)/home' : '/onboarding');
     } catch (err) {
+      if (isEmailNotConfirmed(err)) {
+        Alert.alert(
+          'Confirm Your Email',
+          'Tap the link in the email we sent when you signed up. If it expired or never arrived, we can send a new one.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Resend Email', onPress: () => handleResend(email.trim()) },
+          ]
+        );
+        return;
+      }
       Alert.alert('Couldn’t Sign In', err instanceof Error ? err.message : 'Check your email and password, then try again.');
     } finally {
       setIsSubmitting(false);

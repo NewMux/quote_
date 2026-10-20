@@ -8,6 +8,7 @@ import { FormScrollView } from '../../../src/components/form/FormScrollView';
 import { useThemeColors } from '../../../src/lib/theme';
 import { wipeAllData } from '../../../src/db/repositories/dataManagement.repo';
 import { wipeAllFiles } from '../../../src/lib/fileStorage';
+import { clearUserData } from '../../../src/stores/resetUserState';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 
 const CONFIRM_WORD = 'DELETE';
@@ -23,6 +24,7 @@ export default function DeleteDataScreen() {
     try {
       await wipeAllData();
       await wipeAllFiles();
+      await clearUserData();
       await useBusinessProfileStore.getState().load();
       router.replace('/onboarding');
     } catch (err) {

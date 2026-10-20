@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import * as Linking from 'expo-linking';
+import { AUTH_CALLBACK_URL } from '../../src/lib/authCallbackUrl';
 import { AuthScreen, TextLink } from '../../src/components/auth/AuthScreen';
 import { Button } from '../../src/components/Button';
 import { FormField } from '../../src/components/form/FormField';
@@ -17,7 +17,7 @@ export default function ForgotPasswordScreen() {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: Linking.createURL('/auth/callback'),
+        redirectTo: AUTH_CALLBACK_URL,
       });
       if (error) throw error;
       Alert.alert(

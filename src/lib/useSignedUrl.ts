@@ -3,6 +3,11 @@ import { getSignedUrl } from './fileStorage';
 
 const cache = new Map<string, string>();
 
+/** Signed URLs grant access to the signed-in user's files, so they're dropped on sign-out. */
+export function clearSignedUrlCache(): void {
+  cache.clear();
+}
+
 /** Resolves a Storage object path (as saved on a client/business-profile/settlement record) into
  * a temporary fetchable URL for display. Returns null while resolving or if the path is empty. */
 export function useSignedUrl(path: string | null | undefined): string | null {
