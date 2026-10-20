@@ -92,8 +92,15 @@ export default function DocumentDetailScreen() {
   const openActionsMenuRef = useRef<() => void>(() => {});
   const colors = useThemeColors();
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const reload = useCallback(async () => {
     const doc = await getDocument(id);
+    if (!doc) {
+      setLoadError('This document no longer exists.');
+      return;
+    }
+    setLoadError(null);
     setDocument(doc);
     if (doc?.client_id) setClient(await getClient(doc.client_id));
     else setClient(null);
@@ -106,7 +113,9 @@ export default function DocumentDetailScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      reload();
+      reload().catch((err) => {
+        setLoadError(err instanceof Error ? err.message : 'Something went wrong.');
+      });
     }, [reload])
   );
 
@@ -160,6 +169,15 @@ export default function DocumentDetailScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, document, schedule]);
 
+  if (!document && loadError) {
+    return (
+      <View className="flex-1 items-center justify-center bg-grouped px-8 gap-4">
+        <Text className="text-body text-secondary text-center">{loadError}</Text>
+        <Button label="Try Again" onPress={() => reload().catch(() => {})} />
+      </View>
+    );
+  }
+
   if (!document) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
@@ -173,6 +191,8 @@ export default function DocumentDetailScreen() {
     try {
       await fn();
       await reload();
+    } catch (err) {
+      Alert.alert('Something Went Wrong', err instanceof Error ? err.message : 'Please try again.');
     } finally {
       setBusy(false);
     }

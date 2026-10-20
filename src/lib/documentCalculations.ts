@@ -51,14 +51,27 @@ export function computeDocumentTotals<T extends LineItemDraft>(
   documentDiscountType: DiscountType | null,
   documentDiscountValue: number | null
 ): DocumentTotals<T> {
-  const computedLines = lines.map(computeLineItem);
+  let computedLines = lines.map(computeLineItem);
   const subtotalMinor = computedLines.reduce((sum, l) => sum + l.lineSubtotalMinor, 0);
   const lineLevelDiscount = computedLines.reduce((sum, l) => sum + l.lineDiscountMinor, 0);
-  const documentDiscountMinor = applyDiscount(
-    subtotalMinor - lineLevelDiscount,
-    documentDiscountType,
-    documentDiscountValue
-  );
+  const netMinor = subtotalMinor - lineLevelDiscount;
+  const documentDiscountMinor = applyDiscount(netMinor, documentDiscountType, documentDiscountValue);
+  if (documentDiscountMinor > 0 && netMinor > 0) {
+    // A document-level discount lowers what's taxable too: spread it across the lines in
+    // proportion to their net amounts, then tax each line on what's left. The last line takes
+    // the rounding remainder so the shares add up to the discount exactly.
+    let unallocated = documentDiscountMinor;
+    computedLines = computedLines.map((l, index) => {
+      const lineNet = l.lineSubtotalMinor - l.lineDiscountMinor;
+      const share =
+        index === computedLines.length - 1
+          ? unallocated
+          : Math.min(unallocated, Math.round((documentDiscountMinor * lineNet) / netMinor));
+      unallocated -= share;
+      const lineTaxMinor = l.isTaxable ? applyTaxBp(Math.max(lineNet - share, 0), l.taxRateBp) : 0;
+      return { ...l, lineTaxMinor, lineTotalMinor: lineNet + lineTaxMinor };
+    });
+  }
   const taxTotalMinor = computedLines.reduce((sum, l) => sum + l.lineTaxMinor, 0);
   const discountAmountMinor = lineLevelDiscount + documentDiscountMinor;
   const totalMinor = subtotalMinor - discountAmountMinor + taxTotalMinor;

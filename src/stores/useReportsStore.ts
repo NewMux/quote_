@@ -42,7 +42,7 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
   load: async () => {
     set({ isLoading: true });
     const [breakdown, revenueByMonth, paidByPeriod] = await Promise.all([
-      getStatusBreakdown(undefined, getPeriodRange(get().period)),
+      getStatusBreakdown('invoice', getPeriodRange(get().period)),
       getRevenueByMonth(6),
       getPaidTotalsByPeriod(get().granularity),
     ]);
@@ -55,7 +55,7 @@ export const useReportsStore = create<ReportsState>((set, get) => ({
   },
   setPeriod: async (period) => {
     set({ period, isLoading: true });
-    const breakdown = await getStatusBreakdown(undefined, getPeriodRange(period));
+    const breakdown = await getStatusBreakdown('invoice', getPeriodRange(period));
     set({ breakdown, isLoading: false });
   },
 }));

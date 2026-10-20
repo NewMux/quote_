@@ -35,7 +35,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Invoice Them to access your photos to attach a receipt or set your business logo."
+          "photosPermission": "Allow Invoice Them to access your photos to attach a receipt or set your business logo.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ],
       [

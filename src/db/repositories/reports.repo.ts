@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { toStoredDate } from '../../lib/format';
 import { getDisplayStatus } from '../../lib/statusMachine';
 import { requireOwnerId } from '../ownerId';
 import type { ChartPoint, DocStatus, DocType } from '../../types/models';
@@ -139,10 +140,9 @@ export async function getPaidTotalsByPeriod(
 
   return buckets.map((bucket) => {
     const total = settlements
-      .filter((s) => {
-        const settledAt = new Date(s.settled_date);
-        return settledAt >= bucket.start && settledAt < bucket.end;
-      })
+      // settled_date is a local calendar date ("2026-10-01"); new Date() would read it as UTC
+      // midnight and shift it a day early west of UTC, so compare the date strings instead.
+      .filter((s) => s.settled_date >= toStoredDate(bucket.start) && s.settled_date < toStoredDate(bucket.end))
       .reduce((sum, s) => sum + s.amount_minor, 0);
     return { label: bucket.label, value: total };
   });

@@ -253,13 +253,19 @@ export async function deleteDocument(id: string): Promise<void> {
   if (!doc || doc.converted_to_document_id) return;
 
   const [signatures, settlements] = await Promise.all([listSignatures(id), listSettlements(id)]);
-  await deleteFileIfExists(doc.pdf_uri);
-  await Promise.all(signatures.map((sig) => deleteFileIfExists(sig.signature_image_uri)));
-  await Promise.all(settlements.map((settlement) => deleteFileIfExists(settlement.receipt_photo_uri)));
 
+  // The row goes first: if that fails, the document must still have its signature and receipt
+  // files.
   const { error } = await supabase.from('documents').delete().eq('id', id);
   if (error) throw error;
   await cancelOverdueReminder(id);
+
+  const paths = [
+    doc.pdf_uri,
+    ...signatures.map((sig) => sig.signature_image_uri),
+    ...settlements.map((settlement) => settlement.receipt_photo_uri),
+  ];
+  await Promise.all(paths.map((path) => deleteFileIfExists(path)));
 }
 
 export async function setPdfUri(id: string, pdfUri: string): Promise<void> {

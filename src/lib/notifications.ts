@@ -39,14 +39,13 @@ export async function disableReminders(): Promise<void> {
 }
 
 /** Reminders fire the morning after the due date, at 9am local time — never "overdue as of
- * midnight," which would land at an unhelpful hour. If that moment has already passed (the
- * invoice is already overdue, e.g. reminders were just turned on), fire shortly instead of
- * silently skipping it. */
-function reminderTriggerDate(dueDateIso: string): Date {
+ * midnight," which would land at an unhelpful hour. Returns null once that moment has passed:
+ * reminders are resynced on every launch, so firing late ones "now" re-sent every overdue
+ * invoice's reminder each time the app opened (the Overdue badge already covers those). */
+function reminderTriggerDate(dueDateIso: string): Date | null {
   const [year, month, day] = dueDateIso.split('-').map(Number);
   const trigger = new Date(year, month - 1, day + 1, 9, 0, 0);
-  const now = new Date();
-  return trigger > now ? trigger : new Date(now.getTime() + 5000);
+  return trigger > new Date() ? trigger : null;
 }
 
 /** Schedules (or reschedules) an overdue reminder for one invoice. Cancels any existing reminder
@@ -59,13 +58,15 @@ export async function scheduleOverdueReminder(document: {
 }): Promise<void> {
   await Notifications.cancelScheduledNotificationAsync(document.id).catch(() => {});
   if (!document.due_date || !(await isRemindersEnabled())) return;
+  const date = reminderTriggerDate(document.due_date);
+  if (!date) return;
 
   await Notifications.scheduleNotificationAsync({
     identifier: document.id,
     content: { title: 'Invoice overdue', body: `${document.doc_number} is now overdue.` },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: reminderTriggerDate(document.due_date),
+      date,
     },
   });
 }

@@ -1,4 +1,4 @@
-import { parseAuthCallbackUrl } from './authCallbackUrl';
+import { AUTH_CALLBACK_URL, parseAuthCallbackUrl } from './authCallbackUrl';
 
 describe('parseAuthCallbackUrl', () => {
   it('returns none for a missing or bare URL', () => {
@@ -52,5 +52,14 @@ describe('parseAuthCallbackUrl', () => {
       kind: 'error',
       message: 'Email link is invalid or has expired',
     });
+  });
+});
+
+describe('AUTH_CALLBACK_URL', () => {
+  // Supabase only honors a redirect that matches the allowlist exactly; `quoteapp:///…` (what
+  // Linking.createURL produces in a release build) silently falls back to the Site URL.
+  it('is the exact allowlisted URL, with two slashes', () => {
+    expect(AUTH_CALLBACK_URL).toBe('quoteapp://auth/callback');
+    expect(new URL(AUTH_CALLBACK_URL).host).toBe('auth');
   });
 });

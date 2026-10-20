@@ -5,6 +5,7 @@ import {
   getCurrencyDecimals,
   getCurrencySymbol,
   minorToDecimalString,
+  parseDecimalInput,
   parseRateBp,
   parseToMinor,
 } from './money';
@@ -163,5 +164,41 @@ describe('parseRateBp', () => {
 
   it('round-trips with formatRateBp for a typical rate', () => {
     expect(parseRateBp(formatRateBp(1234).replace('%', ''))).toBe(1234);
+  });
+});
+
+describe('comma-decimal input', () => {
+  it('treats a lone comma as the decimal point', () => {
+    expect(parseToMinor('12,50', 'USD')).toBe(1250);
+    expect(parseRateBp('7,5')).toBe(750);
+    expect(parseDecimalInput('1,5')).toBe(1.5);
+  });
+
+  it('treats the last separator as the decimal point when both appear', () => {
+    expect(parseToMinor('1.234,56', 'EUR')).toBe(123456);
+    expect(parseToMinor('1,234.56', 'USD')).toBe(123456);
+  });
+
+  it('treats one separator repeated as grouping', () => {
+    expect(parseToMinor('1.234.567', 'IDR')).toBe(123456700);
+  });
+
+  it('rounds on the digits, not a float', () => {
+    expect(parseToMinor('1.005', 'USD')).toBe(101);
+  });
+
+  it('returns NaN from parseDecimalInput when there are no digits', () => {
+    expect(parseDecimalInput('')).toBeNaN();
+    expect(parseDecimalInput(',')).toBeNaN();
+  });
+});
+
+describe('applyDiscount bounds', () => {
+  it('caps a percent discount at 100%', () => {
+    expect(applyDiscount(10000, 'percent', 15000)).toBe(10000);
+  });
+
+  it('never returns a negative discount', () => {
+    expect(applyDiscount(10000, 'fixed', -500)).toBe(0);
   });
 });
