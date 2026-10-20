@@ -174,9 +174,19 @@ const EndCard: React.FC = () => {
   );
 };
 
-/** Voiceover only: the music gets added in TikTok. `withMusic` mixes in a reference track for
- * checking the cut against it (never for posting). */
-export const ProsVideo: React.FC<{ withMusic?: boolean }> = ({ withMusic }) => (
+/** The music dips under each spoken card and comes back up between them. */
+const musicVolume = (f: number) => {
+  const speech = Math.max(
+    0,
+    ...CARDS.map((c) => interpolate(f, [c.from - 4, c.from, c.to, c.to + 6], [0, 1, 1, 0], CLAMP)),
+    interpolate(f, [END_WORDS.invoice - 4, END_WORDS.invoice, END_WORDS.them + 12, END_WORDS.them + 22], [0, 1, 1, 0], CLAMP)
+  );
+  return 0.7 - 0.34 * speech;
+};
+
+/** `music` (on by default) is the song from the Bond reference edit (public/pros/music.wav, built
+ * by scripts/prep-pros-footage.sh). ProsVoiceOnly leaves it out, for adding a sound in TikTok. */
+export const ProsVideo: React.FC<{ music?: boolean }> = ({ music = true }) => (
   <AbsoluteFill style={{ background: '#000' }}>
     <div style={{ position: 'absolute', top: BAND.top, left: 0, width: 1080, height: BAND.height, overflow: 'hidden' }}>
       <Series>
@@ -202,8 +212,8 @@ export const ProsVideo: React.FC<{ withMusic?: boolean }> = ({ withMusic }) => (
     </Sequence>
 
     <Sequence from={VO_AT} layout="none" name="Voiceover">
-      <Audio src={staticFile('pros/voiceover.mp3')} />
+      <Audio src={staticFile('pros/voiceover.mp3')} volume={0.85} />
     </Sequence>
-    {withMusic ? <Audio src={staticFile('pros/reference-music.wav')} volume={0.35} loop /> : null}
+    {music ? <Audio src={staticFile('pros/music.wav')} volume={musicVolume} /> : null}
   </AbsoluteFill>
 );

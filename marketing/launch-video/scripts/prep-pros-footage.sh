@@ -50,4 +50,13 @@ cut "$BOND" 7.55 1.05 1 crop=541:361:17:332 bond-shades "$SOFT"
 cut "$BOND" 5.60 0.65 1 crop=541:361:17:332 bond-aston "$SOFT"
 cut "$BOND" 10.15 1.45 1 crop=541:361:17:332 bond-rolls "$SOFT"
 
+# Music: the song under the Bond edit. Its clip holds 12.2 s of the song (TikTok's end jingle
+# starts at 12.3 s and is left out). One 7.22 s phrase repeats: the song plays to 9.06 s, then
+# crossfades back to 1.84 s, which is the closest match (chroma, mel and onset) in the song. That
+# drops it to the quiet intro after "afterthought", builds again for "the pros", and lands the
+# song's own fade-out on the end card. 19.5 s, loudness-normalized to -16 LUFS.
+ffmpeg -hide_banner -loglevel error -y -i "$BOND" -vn -filter_complex \
+  "[0:a]atrim=0:9.135,asetpts=PTS-STARTPTS[a];[0:a]atrim=1.765:12.25,asetpts=PTS-STARTPTS[b];[a][b]acrossfade=d=0.15:c1=tri:c2=tri,afade=t=out:st=19.0:d=0.47,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=44100" \
+  public/pros/music.wav
+
 ls -1 "$OUT"

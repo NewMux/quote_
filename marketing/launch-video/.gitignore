@@ -12,4 +12,4 @@ public/audio/*.wav
 # Pros edit: footage and music from third-party reference videos.
 # Rebuild the clips with scripts/prep-pros-footage.sh.
 public/pros/clips
-public/pros/reference-music.wav
+public/pros/music.wav

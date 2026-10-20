@@ -49,7 +49,7 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="FinaleV2" component={FinaleV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.finale} />
     </Folder>
     <Composition id="Pros" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} />
-    <Composition id="ProsWithMusic" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} defaultProps={{ withMusic: true }} />
+    <Composition id="ProsVoiceOnly" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} defaultProps={{ music: false }} />
     <Composition id="Ad15" component={AdVideo} width={W} height={H} fps={FPS_AD} durationInFrames={TOTAL_AD} />
     <Folder name="Ad-Scenes">
       <Composition id="HookAd" component={HookAd} width={W} height={H} fps={FPS_AD} durationInFrames={SCENES_AD.hook} />

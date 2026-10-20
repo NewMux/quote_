@@ -6,9 +6,9 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
 - **v2, current (`LaunchVideo`, 45.6 s):** a light, multicolor look with a midnight finale,
   calmer pacing and the newest features. It renders to `out/InvoiceThem-Launch-v2-9x16.mp4`.
 - **"What separates the pros" (`Pros`, 20 s):** a motivational-edit style spot (black frame,
-  footage in a band, word-by-word subtitles) with a voiceover and no music, which gets added in
-  TikTok. It renders to `out/InvoiceThem-Pros-9x16.mp4`. `ProsWithMusic` mixes in the reference
-  track only to check the cut against it.
+  footage in a band, word-by-word subtitles) with a voiceover over the song from the Bond reference
+  edit, which dips under each line. It renders to `out/InvoiceThem-Pros-9x16.mp4`.
+  `ProsVoiceOnly` leaves the music out, for adding a sound in TikTok instead.
 - **15 s ad (`Ad15`, 14.4 s):** a paid-social cutdown of v2 with a voiceover. It renders to
   `out/InvoiceThem-Ad-15s-9x16.mp4`.
 - **v1 (`LaunchVideoV1`, 32 s):** the fast, dark, teal edit. It renders to
@@ -73,7 +73,9 @@ scripts/prep-pros-footage.sh oceans.mp4 advance-1.mp4 advance-2.mp4 bond.mp4
 The script trims each moment and crops it to the band, keeping each TikTok watermark and
 "ADVANCE" mark out of frame. It slows the shortest moments with motion interpolation. Video 4's
 caption covers the middle of every frame, so the script blurs that block and the subtitles sit on
-top of it. The clips and the reference music are third-party material and stay out of Git.
+top of it. It also builds `public/pros/music.wav`, the song from the Bond edit. Only 12.2 s of
+the song is in that clip, so one 7.22 s phrase repeats at the closest-matching seam, which
+stretches it to 19.5 s. The clips and the music are third-party material and stay out of Git.
 
 ```console
 npx remotion render Pros out/InvoiceThem-Pros-9x16.mp4 --codec=h264 --crf=17 --audio-codec=aac --audio-bitrate=256k
