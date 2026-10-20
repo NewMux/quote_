@@ -119,6 +119,9 @@ export default function RootLayout() {
               setLaunchAttempt((n) => n + 1);
             }}
           />
+          {/* A way out if the account itself is broken (e.g. its profile row is missing), not
+              just the network. */}
+          <Button label="Sign Out" variant="plain" onPress={() => useAuthStore.getState().signOut()} />
         </View>
       </ThemeRoot>
     );
