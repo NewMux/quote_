@@ -1,19 +1,19 @@
 import React from 'react';
-import { interpolate, random, useCurrentFrame } from 'remotion';
+import { Img, interpolate, random, staticFile, useCurrentFrame } from 'remotion';
 import { EASE_OUT } from '../anim';
+import { BRAND } from '../brand';
 import { C, FONT } from '../theme';
 import { Icon, type IconName } from './Icon';
 
-/** Placeholder app mark (until the real icon exists): a teal squircle with a document glyph and
- * a checkmark, echoing "invoice" and "paid". */
+/** The app icon ("Primary"): the lime receipt-and-arrow mark on a Midnight Ink squircle. */
 export const AppMark: React.FC<{ size: number; style?: React.CSSProperties }> = ({ size, style }) => (
   <div
     style={{
       width: size,
       height: size,
       borderRadius: size * 0.225,
-      background: `linear-gradient(150deg, #2FB58C 0%, ${C.brand} 55%, ${C.brandDarker} 100%)`,
-      boxShadow: `inset 0 ${size * 0.01}px ${size * 0.02}px rgba(255,255,255,0.35), 0 ${size * 0.08}px ${size * 0.2}px rgba(21,122,99,0.55)`,
+      background: BRAND.midnight,
+      boxShadow: `inset 0 0 0 ${Math.max(1, size * 0.004)}px rgba(255,255,255,0.08), 0 ${size * 0.08}px ${size * 0.2}px rgba(18,17,43,0.45)`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -21,12 +21,7 @@ export const AppMark: React.FC<{ size: number; style?: React.CSSProperties }> = 
       ...style,
     }}
   >
-    <svg width={size * 0.56} height={size * 0.56} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6.5 2.5h7.5l4.5 4.5v13.5a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-17a1 1 0 0 1 1-1Z" fill="rgba(255,255,255,0.14)" />
-      <path d="M13.5 2.5v5h5" />
-      <path d="M8.5 11h5M8.5 14h3" />
-      <path d="m10.5 17.3 1.8 1.8 3.7-3.7" stroke={C.mint} strokeWidth={2} />
-    </svg>
+    <Img src={staticFile('brand/mark.svg')} style={{ width: size * 0.56, height: size * 0.56 * (72 / 69), marginLeft: size * 0.03 }} />
   </div>
 );
 

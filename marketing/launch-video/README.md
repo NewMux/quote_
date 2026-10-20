@@ -106,8 +106,10 @@ MP3, then update each line's `from`/`to` frames. Find the pauses with
 | App mockups | `src/v2/screens.tsx` (light mode) | `src/screens/Screens.tsx` |
 | App mark | `AppMark` in `src/components/Bits.tsx` | same |
 
-`AppMark` is a placeholder. Swap in the real icon when it exists: put the PNG in `public/`,
-then use `<Img src={staticFile('icon.png')} />`.
+`AppMark` is the real app icon: the lime mark on a Midnight Ink squircle. The identity lives in
+`src/brand.ts` (colors, typeface, tagline) and `public/brand/` (mark and wordmark as SVG, cut
+from the "Invoice Them Logo Identity" PDF). The brand typeface, Bricolage Grotesque, is bundled
+in `public/fonts`.
 
 ## License note
 
