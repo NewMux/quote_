@@ -130,6 +130,7 @@ Check:
 1. **Add the Supabase variables to `eas.json`** for the `preview` and `production` profiles (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`). EAS doesn't upload `.env`, so without these a cloud-built app can't reach the backend and stops at launch.
 2. **Supabase dashboard:**
    - Add `quoteapp://auth/callback` under Authentication → URL Configuration → Redirect URLs. Sign-up confirmation and password-reset links need it.
+   - Change the Site URL from the default `http://localhost:3000` (e.g. to `quoteapp://auth/callback`). Supabase sends email links there when a redirect isn't allowlisted, and localhost goes nowhere on a phone.
    - Turn on leaked-password protection under Authentication → Settings.
 3. **Host the Privacy Policy** at a public URL and enter it in App Store Connect. The in-app screen already exists.
 4. **App Store Connect listing:**
