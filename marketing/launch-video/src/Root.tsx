@@ -5,6 +5,8 @@ import { AdVideo } from './ad/AdVideo';
 import { CreateAd, FinaleAd, HookAd, PayAd, SignAd } from './ad/scenes';
 import { FPS as FPS_AD, SCENES_AD, TOTAL_AD } from './ad/timing';
 import { LaunchVideo } from './LaunchVideo';
+import { ProsVideo } from './pros/ProsVideo';
+import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
 import { LaunchVideoV2 } from './v2/LaunchVideoV2';
 import { BentoV2 } from './v2/scenes/BentoV2';
 import { ContactsV2 } from './v2/scenes/ContactsV2';
@@ -46,6 +48,8 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="NightV2" component={NightV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.night} />
       <Composition id="FinaleV2" component={FinaleV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.finale} />
     </Folder>
+    <Composition id="Pros" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} />
+    <Composition id="ProsWithMusic" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} defaultProps={{ withMusic: true }} />
     <Composition id="Ad15" component={AdVideo} width={W} height={H} fps={FPS_AD} durationInFrames={TOTAL_AD} />
     <Folder name="Ad-Scenes">
       <Composition id="HookAd" component={HookAd} width={W} height={H} fps={FPS_AD} durationInFrames={SCENES_AD.hook} />
