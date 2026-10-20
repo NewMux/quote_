@@ -63,10 +63,17 @@ each word's onset in the voiceover. The subtitles appear word by word from those
 `public/pros/voiceover.mp3` is ElevenLabs (voice "Marcus – Powerful Motivational Narrator",
 `eleven_v4`), loudness-normalized to -14 LUFS.
 
-Footage: run `scripts/prep-pros-footage.sh path/to/oceans-reference.mp4` once before rendering.
-It downloads and cuts the Mixkit stock shots (free for commercial use), and cuts the film shots
-out of the Ocean's reference edit, cropping each one clear of its TikTok watermark. The film
-clips and the reference music are kept out of Git, because they're third-party material.
+Footage: every shot is cut from the four TikTok reference edits (Ocean's, two "ADVANCE"
+edits, Bond). Run this once before rendering:
+
+```console
+scripts/prep-pros-footage.sh oceans.mp4 advance-1.mp4 advance-2.mp4 bond.mp4
+```
+
+The script trims each moment and crops it to the band, keeping each TikTok watermark and
+"ADVANCE" mark out of frame. It slows the shortest moments with motion interpolation. Video 4's
+caption covers the middle of every frame, so the script blurs that block and the subtitles sit on
+top of it. The clips and the reference music are third-party material and stay out of Git.
 
 ```console
 npx remotion render Pros out/InvoiceThem-Pros-9x16.mp4 --codec=h264 --crf=17 --audio-codec=aac --audio-bitrate=256k

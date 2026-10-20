@@ -78,29 +78,29 @@ export type Shot =
   | { kind: 'graphic'; name: 'text' | 'sloppy' | 'estimate' | 'invoice'; len: number };
 
 /**
- * The cut. `film-*` clips are from the Ocean's reference edit, the rest are Mixkit stock (see
- * scripts/prep-pros-footage.sh). `rate` below 1 is slow motion.
+ * The cut, all from the four reference edits (see scripts/prep-pros-footage.sh, which also does
+ * the slow motion): `film-*` Ocean's, `adv-*` the "ADVANCE" edits, `bond-*` the Bond edit.
  */
 export const SHOTS: Shot[] = [
-  { kind: 'clip', src: 'film-tux', len: 24, rate: 0.66, zoom: [1.04, 1.1], grade: 'film' }, // What separates
-  { kind: 'clip', src: 'film-lean', len: 30, zoom: [1.0, 1.06], grade: 'film' }, // the pros
-  { kind: 'clip', src: 'stressed-desk', len: 27, grade: 'cold' }, // from the
-  { kind: 'clip', src: 'overwhelmed', len: 37, zoom: [1.08, 1.0], grade: 'cold' }, // average?
-  { kind: 'clip', src: 'film-dice', len: 24, grade: 'film' }, // It's not talent
-  { kind: 'clip', src: 'film-hand', len: 17, grade: 'film' },
-  { kind: 'clip', src: 'watch-on', len: 30, grade: 'warm' }, // it's presentation
-  { kind: 'clip', src: 'watch-bw', len: 19, grade: 'mono' },
-  { kind: 'clip', src: 'paperwork-thrown', len: 24, grade: 'cold' }, // The average send
+  { kind: 'clip', src: 'film-tux', len: 24, zoom: [1.04, 1.1] }, // What separates
+  { kind: 'clip', src: 'film-lean', len: 30, zoom: [1.0, 1.06] }, // the pros
+  { kind: 'clip', src: 'adv-gym', len: 27, grade: 'cold' }, // from the
+  { kind: 'clip', src: 'adv-kneel', len: 37, zoom: [1.08, 1.0], grade: 'cold' }, // average?
+  { kind: 'clip', src: 'film-dice', len: 24 }, // It's not talent
+  { kind: 'clip', src: 'film-hand', len: 17 },
+  { kind: 'clip', src: 'bond-shades', len: 30, grade: 'warm' }, // it's presentation
+  { kind: 'clip', src: 'bond-aston', len: 19, grade: 'warm' },
+  { kind: 'clip', src: 'adv-boxer', len: 24, grade: 'cold' }, // The average send
   { kind: 'graphic', name: 'text', len: 36 }, // invoices that look like
   { kind: 'graphic', name: 'sloppy', len: 30 }, // an afterthought
-  { kind: 'clip', src: 'film-jet', len: 30, rate: 0.5, zoom: [1.0, 1.08], grade: 'film' }, // The pros
+  { kind: 'clip', src: 'film-jet', len: 30, zoom: [1.0, 1.08] }, // The pros
   { kind: 'graphic', name: 'estimate', len: 30 }, // they send estimates
   { kind: 'graphic', name: 'invoice', len: 21 }, // and invoices
-  { kind: 'clip', src: 'suit-street', len: 42, rate: 0.75, zoom: [1.0, 1.1], grade: 'warm' }, // that look the part
-  { kind: 'clip', src: 'handshake', len: 26, grade: 'warm' }, // And clients notice
-  { kind: 'clip', src: 'film-drink', len: 16, grade: 'film' },
-  { kind: 'clip', src: 'film-car', len: 30, rate: 0.5, zoom: [1.0, 1.06], grade: 'film' }, // Be the pro
-  { kind: 'clip', src: 'city-night', len: 14, grade: 'cold' },
+  { kind: 'clip', src: 'bond-rolls', len: 42, zoom: [1.0, 1.08], grade: 'warm' }, // that look the part
+  { kind: 'clip', src: 'film-smile', len: 26 }, // And clients notice
+  { kind: 'clip', src: 'film-drink', len: 16 },
+  { kind: 'clip', src: 'film-car', len: 30, zoom: [1.0, 1.06] }, // Be the pro
+  { kind: 'clip', src: 'adv-sunset', len: 14 },
 ];
 
 export const END_AT = SHOTS.reduce((t, s) => t + s.len, 0);
