@@ -2,6 +2,9 @@ import React from 'react';
 import { Composition, Folder } from 'remotion';
 import './fonts';
 import { AdVideo } from './ad/AdVideo';
+import { ArVideo } from './ar/ArVideo';
+import { ChatAr, FinaleAr, GlanceAr, InvoiceAr, NoResultAr, SearchAr } from './ar/scenes';
+import { FPS as FPS_AR, SCENES_AR, TOTAL_AR } from './ar/timing';
 import { CreateAd, FinaleAd, HookAd, PayAd, SignAd } from './ad/scenes';
 import { FPS as FPS_AD, SCENES_AD, TOTAL_AD } from './ad/timing';
 import { LaunchVideo } from './LaunchVideo';
@@ -57,6 +60,15 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="SignAd" component={SignAd} width={W} height={H} fps={FPS_AD} durationInFrames={SCENES_AD.sign} />
       <Composition id="PayAd" component={PayAd} width={W} height={H} fps={FPS_AD} durationInFrames={SCENES_AD.pay} />
       <Composition id="FinaleAd" component={FinaleAd} width={W} height={H} fps={FPS_AD} durationInFrames={SCENES_AD.finale} />
+    </Folder>
+    <Composition id="AdAr" component={ArVideo} width={W} height={H} fps={FPS_AR} durationInFrames={TOTAL_AR} />
+    <Folder name="Ar-Scenes">
+      <Composition id="ChatAr" component={ChatAr} width={W} height={H} fps={FPS_AR} durationInFrames={SCENES_AR.chat} />
+      <Composition id="SearchAr" component={SearchAr} width={W} height={H} fps={FPS_AR} durationInFrames={SCENES_AR.search} />
+      <Composition id="NoResultAr" component={NoResultAr} width={W} height={H} fps={FPS_AR} durationInFrames={SCENES_AR.noresult} />
+      <Composition id="InvoiceAr" component={InvoiceAr} width={W} height={H} fps={FPS_AR} durationInFrames={SCENES_AR.invoice} />
+      <Composition id="GlanceAr" component={GlanceAr} width={W} height={H} fps={FPS_AR} durationInFrames={SCENES_AR.glance} />
+      <Composition id="FinaleAr" component={FinaleAr} width={W} height={H} fps={FPS_AR} durationInFrames={SCENES_AR.finale} />
     </Folder>
     <Composition id="LaunchVideoV1" component={LaunchVideo} width={W} height={H} fps={FPS} durationInFrames={TOTAL_FRAMES} />
     <Folder name="v1-Scenes">

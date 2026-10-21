@@ -11,6 +11,10 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
   `ProsVoiceOnly` leaves the music out, for adding a sound in TikTok instead.
 - **15 s ad (`Ad15`, 14.4 s):** a paid-social cutdown of v2 with a voiceover. It renders to
   `out/InvoiceThem-Ad-15s-9x16.mp4`.
+- **Arabic promo (`AdAr`, 24 s):** a Gulf-Arabic ad cut to a voiceover (Saudi dialect: "I finished the
+  job and the client said he'd transfer it… two months digging through chats… now I fill in the blanks
+  from my phone and get a PDF invoice in my name, and see at a glance who paid"). Right-to-left, with
+  word-by-word Arabic subtitles. It renders to `out/InvoiceThem-Ad-AR-9x16.mp4`.
 - **v1 (`LaunchVideoV1`, 32 s):** the fast, dark, teal edit. It renders to
   `out/InvoiceThem-Launch-9x16.mp4`.
 
@@ -99,11 +103,39 @@ pauses and places it in its scene, and the music dips under each line. To re-rec
 MP3, then update each line's `from`/`to` frames. Find the pauses with
 `ffmpeg -i public/vo/ad-voiceover.mp3 -af silencedetect=n=-40dB:d=0.18 -f null -`.
 
+## Arabic promo storyboard
+
+Everything lives in `src/ar/`. The voiceover, `public/vo/ar-voiceover.mp3`, is an ElevenLabs take
+loudness-normalized to about -16 LUFS; `scripts/make-music-ar.mjs` writes a matching 100 BPM
+soundtrack, so every cut lands on a beat (one beat is 18 frames). Word onsets in `src/ar/timing.ts`
+come from an ElevenLabs Scribe transcript of the take, and the on-screen captions pop in on them.
+Prefix a caption word with `*` for the scene's accent color, `+` for green or `!` for orange.
+
+| Time | Scene | Voiceover |
+| --- | --- | --- |
+| 0–5.4 s | Chat: the job is delivered, the client says "sure, I'll transfer it now" | خلصت الشغل والعميل قال أبشر الحين أحولك |
+| 5.4–9 s | A chat list flies past; "60 days" counter | من شهرين وأنا للحين أدور في الـ WhatsApp |
+| 9–10.8 s | Search finds nothing, question marks | أرسلت له الفاتورة ولا لا؟ |
+| 10.8–15.6 s | The app fills in, then the PDF in the user's name | الحين أعبي الفراغات من جوالي وتطلع لي فاتورة PDF باسمي |
+| 15.6–19.8 s | The invoice list: paid vs. still owed | وأشوف بنظرة واحدة مين دفع ومين باقي عليه |
+| 19.8–24 s | Midnight end card: wordmark, "فلوسك توصلك", payment toast, App Store | Invoice Them. فلوسك توصلك. |
+
+The chat and search screens are a generic messenger (no real app's branding or logo). The app
+screens and the PDF are the app's own English UI. Arabic text is set in Cairo (SIL Open Font
+License), bundled in `public/fonts` next to Inter and Bricolage Grotesque.
+
+To re-record, replace the MP3, re-transcribe it for word timings, then update `CAPTIONS`, `FINALE`
+and the section lengths in `src/ar/timing.ts` (and the beats in `scripts/make-music-ar.mjs`).
+
+```console
+npm run render:ar
+```
+
 ## Editing
 
 | What | v2 | v1 |
 | --- | --- | --- |
-| Text | `src/v2/scenes/` (ad: `src/ad/scenes.tsx`) | `src/scenes/` |
+| Text | `src/v2/scenes/` (ad: `src/ad/scenes.tsx`, Arabic: `src/ar/`) | `src/scenes/` |
 | Colors | `src/v2/theme.ts` | `src/theme.ts` |
 | App mockups | `src/v2/screens.tsx` (light mode) | `src/screens/Screens.tsx` |
 | App mark | `AppMark` in `src/components/Bits.tsx` | same |

@@ -14,20 +14,20 @@ import { ACCENT, IOS } from './theme';
 
 const CLAMP = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
-const Screen: React.FC<{ children: React.ReactNode; bg?: string }> = ({ children, bg = IOS.grouped }) => (
+export const Screen: React.FC<{ children: React.ReactNode; bg?: string }> = ({ children, bg = IOS.grouped }) => (
   <div style={{ position: 'absolute', inset: 0, width: SCREEN_W, height: SCREEN_H, background: bg, fontFamily: FONT, color: IOS.label }}>
     {children}
   </div>
 );
 
-const Section: React.FC<{ header?: string; children: React.ReactNode; style?: React.CSSProperties }> = ({ header, children, style }) => (
+export const Section: React.FC<{ header?: string; children: React.ReactNode; style?: React.CSSProperties }> = ({ header, children, style }) => (
   <div style={{ margin: '0 16px 18px', ...style }}>
     {header ? <div style={{ fontSize: 13, color: IOS.secondary, margin: '0 16px 7px', textTransform: 'uppercase' }}>{header}</div> : null}
     <div style={{ background: IOS.card, borderRadius: 26, overflow: 'hidden' }}>{children}</div>
   </div>
 );
 
-const Row: React.FC<{
+export const Row: React.FC<{
   title: React.ReactNode;
   subtitle?: string;
   value?: string;
@@ -49,7 +49,7 @@ const Row: React.FC<{
   </div>
 );
 
-const Circle: React.FC<{ icon: IconName; tinted?: boolean }> = ({ icon, tinted }) => (
+export const Circle: React.FC<{ icon: IconName; tinted?: boolean }> = ({ icon, tinted }) => (
   <div
     style={{
       width: 44,
@@ -86,7 +86,7 @@ export const Avatar: React.FC<{ initials: string; size?: number; color?: string 
   </div>
 );
 
-const NavBar: React.FC<{ title: string; left?: IconName; right?: IconName }> = ({ title, left = 'xmark', right = 'check' }) => (
+export const NavBar: React.FC<{ title: string; left?: IconName; right?: IconName }> = ({ title, left = 'xmark', right = 'check' }) => (
   <div style={{ position: 'absolute', top: 58, left: 16, right: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
     <Circle icon={left} />
     <div style={{ fontSize: 17, fontWeight: 600 }}>{title}</div>
