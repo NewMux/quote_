@@ -7,6 +7,9 @@ import { FPS as FPS_AD, SCENES_AD, TOTAL_AD } from './ad/timing';
 import { LaunchVideo } from './LaunchVideo';
 import { ProsVideo } from './pros/ProsVideo';
 import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
+import { STORE_H, STORE_W } from './store/layout';
+import { SHOTS } from './store/shots';
+import { STRIP_H, STRIP_W, StoreStrip } from './store/strip';
 import { LaunchVideoV2 } from './v2/LaunchVideoV2';
 import { BentoV2 } from './v2/scenes/BentoV2';
 import { ContactsV2 } from './v2/scenes/ContactsV2';
@@ -47,6 +50,12 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="BentoV2" component={BentoV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.bento} />
       <Composition id="NightV2" component={NightV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.night} />
       <Composition id="FinaleV2" component={FinaleV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.finale} />
+    </Folder>
+    <Folder name="AppStore">
+      {SHOTS.map(({ id, Component }) => (
+        <Composition key={id} id={id} component={Component} width={STORE_W} height={STORE_H} fps={30} durationInFrames={1} />
+      ))}
+      <Composition id="StoreStrip" component={StoreStrip} width={STRIP_W} height={STRIP_H} fps={30} durationInFrames={1} />
     </Folder>
     <Composition id="Pros" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} />
     <Composition id="ProsVoiceOnly" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} defaultProps={{ music: false }} />

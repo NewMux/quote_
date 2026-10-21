@@ -34,6 +34,7 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "render:ad": "npm run music && remotion render Ad15 out/InvoiceThem-Ad-15s-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
+    "render:store": "node scripts/render-store.mjs",
     "render:v1": "npm run music && remotion render LaunchVideoV1 out/InvoiceThem-Launch-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k"
   },
   "sideEffects": [

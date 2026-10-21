@@ -19,6 +19,13 @@ effects are synthesized by `scripts/make-music*.mjs`, so the videos contain no l
 and can be posted anywhere. The ad's voiceover, `public/vo/ad-voiceover.mp3`, was generated with
 ElevenLabs (voice "Justin Case", model `eleven_v4`).
 
+- **App Store screenshots (`Store1Create` … `Store6More`):** six 1320×2868 stills (iPhone 6.9", the
+  size App Store Connect asks for; it scales down to the smaller iPhones, and the app is
+  iPhone-only). `npm run render:store` writes them to `out/appstore/` as opaque RGB PNGs, plus
+  `preview-strip.png`, all six side by side for sharing (not an upload). They reuse the v2 phone
+  mockups, frozen at their best frame. The copy lives in `src/store/shots.tsx` and the layout in
+  `src/store/layout.tsx`.
+
 This is a standalone project. The app's TypeScript, ESLint, Jest and Metro configs ignore
 `marketing/`.
 
