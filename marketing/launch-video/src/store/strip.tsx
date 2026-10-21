@@ -1,9 +1,9 @@
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
-import { STORE_H, STORE_W } from './layout';
+import { STORE_H, STORE_W } from './design';
 import { SHOTS } from './shots';
 
-const SCALE = 0.3;
+const SCALE = 0.26;
 const GAP = 40;
 const PAD = 70;
 

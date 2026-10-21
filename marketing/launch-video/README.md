@@ -19,12 +19,17 @@ effects are synthesized by `scripts/make-music*.mjs`, so the videos contain no l
 and can be posted anywhere. The ad's voiceover, `public/vo/ad-voiceover.mp3`, was generated with
 ElevenLabs (voice "Justin Case", model `eleven_v4`).
 
-- **App Store screenshots (`Store1Create` … `Store6More`):** six 1320×2868 stills (iPhone 6.9", the
-  size App Store Connect asks for; it scales down to the smaller iPhones, and the app is
+- **App Store screenshots (`Store1Summary` … `Store7More`):** seven 1320×2868 stills (iPhone 6.9",
+  the size App Store Connect asks for; it scales down to the smaller iPhones, and the app is
   iPhone-only). `npm run render:store` writes them to `out/appstore/` as opaque RGB PNGs, plus
-  `preview-strip.png`, all six side by side for sharing (not an upload). They reuse the v2 phone
-  mockups, frozen at their best frame. The copy lives in `src/store/shots.tsx` and the layout in
-  `src/store/layout.tsx`.
+  `preview-strip.png`, all seven side by side for sharing (not an upload). Flat Invoice Them
+  brand colors, Bricolage Grotesque headlines, a different composition per shot. The app screens
+  in `src/store/app/` are rebuilt from the app's own source (`app/(tabs)/…`, its theme tokens and
+  list / button components); the invoice in shots 4 and 5 is the app's real PDF template
+  (`src/lib/pdf/htmlTemplate.ts`) filled with sample data by `scripts/make-real-pdf.mjs` (re-run it
+  after changing the template; it needs `scripts/assets/signature.png` from
+  `scripts/make-signature.py`). Copy lives in `src/store/shots.tsx`; the `AppProof` composition
+  shows every rebuilt screen side by side for checking them against the real app.
 
 This is a standalone project. The app's TypeScript, ESLint, Jest and Metro configs ignore
 `marketing/`.

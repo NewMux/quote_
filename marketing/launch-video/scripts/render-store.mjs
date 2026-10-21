@@ -5,12 +5,13 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 
 const SHOTS = [
-  ['Store1Create', '01-create'],
-  ['Store2Contacts', '02-contacts'],
-  ['Store3Sign', '03-sign'],
-  ['Store4Pay', '04-pay'],
-  ['Store5Paid', '05-paid'],
-  ['Store6More', '06-more'],
+  ['Store1Summary', '01-summary'],
+  ['Store2Documents', '02-documents'],
+  ['Store3Detail', '03-detail'],
+  ['Store4Sign', '04-sign'],
+  ['Store5Pay', '05-pay'],
+  ['Store6Clients', '06-clients'],
+  ['Store7More', '07-more'],
   ['StoreStrip', 'preview-strip'],
 ];
 
