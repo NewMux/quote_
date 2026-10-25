@@ -112,6 +112,20 @@ export default function RootLayout() {
     };
   }, [isAuthLoading, userId, launchAttempt, loadProfile, configureSubscription]);
 
+  const isLoading = !ready || isAuthLoading;
+  // The launch screen also comes down for the "Couldn't Load Your Account" screen below. This hook
+  // sits above that early return so every render calls the same hooks in the same order.
+  const launchScreenDone = !isLoading || launchError;
+
+  useEffect(() => {
+    if (launchScreenDone) {
+      SplashScreen.hideAsync().catch(() => {});
+      return;
+    }
+    const timer = setTimeout(() => SplashScreen.hideAsync().catch(() => {}), SPLASH_MAX_MS);
+    return () => clearTimeout(timer);
+  }, [launchScreenDone]);
+
   if (launchError && !ready) {
     return (
       <ThemeRoot>
@@ -134,17 +148,6 @@ export default function RootLayout() {
       </ThemeRoot>
     );
   }
-
-  const isLoading = !ready || isAuthLoading;
-
-  useEffect(() => {
-    if (!isLoading) {
-      SplashScreen.hideAsync().catch(() => {});
-      return;
-    }
-    const timer = setTimeout(() => SplashScreen.hideAsync().catch(() => {}), SPLASH_MAX_MS);
-    return () => clearTimeout(timer);
-  }, [isLoading]);
 
   if (isLoading) {
     return (
