@@ -4,6 +4,7 @@ import { ActivityIndicator, Text, View, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { THEME_COLORS, THEME_VARS } from '../src/lib/theme';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
@@ -13,6 +14,13 @@ import { supabase } from '../src/lib/supabase';
 import { Button } from '../src/components/Button';
 import { resetUserState } from '../src/stores/resetUserState';
 import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
+
+// Keep the branded launch screen up until auth and the business profile have loaded, so launch
+// goes straight from the logo to the first screen instead of flashing a spinner in between.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+/** Never leave someone staring at the logo: if loading stalls, the spinner below takes over. */
+const SPLASH_MAX_MS = 6000;
 
 /** Follows the system Light/Dark appearance: feeds the semantic color variables to NativeWind and
  * gives the native headers, tab bar, and back buttons matching colors. */
@@ -127,7 +135,18 @@ export default function RootLayout() {
     );
   }
 
-  if (!ready || isAuthLoading) {
+  const isLoading = !ready || isAuthLoading;
+
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hideAsync().catch(() => {});
+      return;
+    }
+    const timer = setTimeout(() => SplashScreen.hideAsync().catch(() => {}), SPLASH_MAX_MS);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  if (isLoading) {
     return (
       <ThemeRoot>
         <View className="flex-1 items-center justify-center bg-grouped">

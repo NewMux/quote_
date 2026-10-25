@@ -31,10 +31,6 @@ ElevenLabs (voice "Justin Case", model `eleven_v4`).
   `scripts/make-signature.py`). Copy lives in `src/store/shots.tsx`; the `AppProof` composition
   shows every rebuilt screen side by side for checking them against the real app.
 
-The app's icon files in `assets/` (iOS icon, Android adaptive layers, favicon, splash icon) are
-generated from the brand mark by `python3 -I scripts/make-app-icons.py` (it rasterizes
-`public/brand/mark.svg` with headless Chromium; set `CHROME` to override the browser path).
-
 This is a standalone project. The app's TypeScript, ESLint, Jest and Metro configs ignore
 `marketing/`.
 
@@ -70,7 +66,7 @@ Every headline holds for at least 2.4 s.
 | 26.4–31.2 s | Payment received; Issued → Paid; the month's total grows | indigo |
 | 31.2–36 s | Bento grid of more features | multicolor |
 | 36–38.4 s | Circle wipe to midnight: "Everything you need to get paid." | |
-| 38.4–45.6 s | End card: "Now on the App Store" · "Try it free for a week" | midnight |
+| 38.4–45.6 s | End card: "Now on the App Store" · "First month just $0.99" | midnight |
 
 ## "Pros" edit
 

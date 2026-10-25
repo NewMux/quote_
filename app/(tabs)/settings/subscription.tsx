@@ -63,7 +63,7 @@ export default function SubscriptionScreen() {
       ) : entitlement ? (
         <ListSection header="Invoice Them Pro">
           <ListRow title="Plan" value={planName(entitlement.productIdentifier)} />
-          <ListRow title="Status" value={entitlement.periodType === 'TRIAL' ? 'Free Trial' : 'Active'} />
+          <ListRow title="Status" value={entitlement.periodType === 'INTRO' ? 'Intro Offer' : 'Active'} />
           {entitlement.expirationDate ? (
             <ListRow
               title={entitlement.willRenew ? 'Renews On' : 'Ends On'}
