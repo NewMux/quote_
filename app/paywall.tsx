@@ -220,6 +220,7 @@ export default function PaywallScreen() {
           <FooterLink label="Privacy Policy" onPress={() => router.push('/privacy-policy')} />
           <FooterLink label="Terms of Use" onPress={() => Linking.openURL(APPLE_EULA_URL)} />
           <FooterLink label="Sign Out" onPress={handleSignOut} />
+          <FooterLink label="Delete Account" onPress={() => router.push('/delete-account')} />
         </View>
       </ScrollView>
 

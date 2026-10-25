@@ -1,8 +1,7 @@
 import { create } from 'zustand';
-import * as Linking from 'expo-linking';
 import type { Session } from '@supabase/supabase-js';
+import { AUTH_CALLBACK_URL } from '../lib/authCallbackUrl';
 import { supabase } from '../lib/supabase';
-import { useSubscriptionStore } from './useSubscriptionStore';
 
 interface AuthState {
   session: Session | null;
@@ -11,6 +10,7 @@ interface AuthState {
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
 }
 
 let initialized = false;
@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: Linking.createURL('/auth/callback') },
+      options: { emailRedirectTo: AUTH_CALLBACK_URL },
     });
     if (error) throw error;
     set({ session: data.session });
@@ -42,10 +42,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) throw error;
     set({ session: data.session });
   },
+  // supabase-js clears the local session (and fires SIGNED_OUT, which resets every per-user store
+  // in the root layout) even when the server call fails, e.g. offline — so a failure here still
+  // leaves the user signed out on this device and isn't worth surfacing.
   signOut: async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    await useSubscriptionStore.getState().reset();
+    await supabase.auth.signOut().catch(() => {});
     set({ session: null });
+  },
+  resendConfirmation: async (email) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: AUTH_CALLBACK_URL },
+    });
+    if (error) throw error;
   },
 }));

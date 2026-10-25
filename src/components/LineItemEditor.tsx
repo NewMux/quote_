@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { computeLineItem } from '../lib/documentCalculations';
-import { formatMinor } from '../lib/money';
+import { formatMinor, parseDecimalInput } from '../lib/money';
 import { FormRow } from './form/FormRow';
 import { ListRow } from './list/ListRow';
 import { ListSection } from './list/ListSection';
@@ -41,7 +41,7 @@ export function LineItemEditor({ line, position, taxBrackets, currencyCode, onCh
         value={quantityText}
         onChangeText={(text) => {
           setQuantityText(text);
-          const qty = Number.parseFloat(text.replace(/[^0-9.]/g, ''));
+          const qty = parseDecimalInput(text);
           onChange({ quantity: Number.isFinite(qty) ? qty : 0 });
         }}
         onEndEditing={() => setQuantityText(String(line.quantity))}

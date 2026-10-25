@@ -16,22 +16,26 @@
     "remotion": "4.0.529"
   },
   "devDependencies": {
+    "@fontsource/bricolage-grotesque": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@remotion/eslint-config-flat": "4.0.529",
     "@types/react": "19.2.7",
     "@types/web": "0.0.166",
+    "date-fns": "^4.4.0",
     "eslint": "9.19.0",
     "prettier": "3.8.1",
     "typescript": "5.9.3"
   },
   "scripts": {
-    "music": "node scripts/make-music.mjs && node scripts/make-music-v2.mjs",
+    "music": "node scripts/make-music.mjs && node scripts/make-music-v2.mjs && node scripts/make-music-ad.mjs",
     "dev": "npm run music && remotion studio",
     "render": "npm run music && remotion render LaunchVideo out/InvoiceThem-Launch-v2-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
     "still": "remotion still LaunchVideo out/still.png",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
+    "render:ad": "npm run music && remotion render Ad15 out/InvoiceThem-Ad-15s-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
+    "render:store": "node scripts/render-store.mjs",
     "render:v1": "npm run music && remotion render LaunchVideoV1 out/InvoiceThem-Launch-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k"
   },
   "sideEffects": [

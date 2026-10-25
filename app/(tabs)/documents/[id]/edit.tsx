@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { normalizePaymentLink } from '../../../../src/lib/paymentLink';
 import SegmentedControl from '@react-native-segmented-control/segmented-control';
@@ -10,7 +10,7 @@ import { ListRow } from '../../../../src/components/list/ListRow';
 import { ListSection } from '../../../../src/components/list/ListSection';
 import { LineItemEditor } from '../../../../src/components/LineItemEditor';
 import { computeDocumentTotals, getTaxLabel } from '../../../../src/lib/documentCalculations';
-import { formatMinor, getCurrencySymbol, minorToDecimalString, parseToMinor } from '../../../../src/lib/money';
+import { formatMinor, getCurrencySymbol, minorToDecimalString, parseRateBp, parseToMinor } from '../../../../src/lib/money';
 import { useSaveHeader } from '../../../../src/lib/useSaveHeader';
 import { useDocumentEditorStore } from '../../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
@@ -26,7 +26,13 @@ export default function EditDocumentScreen() {
     return () => {
       const state = useDocumentEditorStore.getState();
       if (state.isDirty) {
-        state.save();
+        // The screen is already gone, so a failure can only be reported, not retried here.
+        state.save().catch((err) => {
+          Alert.alert(
+            'Couldn’t Save Your Last Changes',
+            `${err instanceof Error ? err.message : 'Something went wrong.'} Open the draft again to check it.`
+          );
+        });
       }
       useDocumentEditorStore.getState().reset();
     };
@@ -36,7 +42,8 @@ export default function EditDocumentScreen() {
   useEffect(() => {
     if (!editor.isDirty) return;
     const handle = setTimeout(() => {
-      editor.save();
+      // A failure shows in the editor (saveError) and stays dirty, so the next edit or Done retries.
+      editor.save().catch(() => {});
     }, 600);
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,12 +53,25 @@ export default function EditDocumentScreen() {
   // change still inside the autosave delay.
   async function handleDone() {
     if (useDocumentEditorStore.getState().isDirty) {
-      await useDocumentEditorStore.getState().save();
+      try {
+        await useDocumentEditorStore.getState().save();
+      } catch (err) {
+        Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Something went wrong.');
+        return;
+      }
     }
     router.back();
   }
 
   useSaveHeader({ title: editor.docNumber ? `Edit ${editor.docNumber}` : undefined, label: 'Done', onSave: handleDone });
+
+  if (editor.loadError) {
+    return (
+      <View className="flex-1 items-center justify-center bg-grouped px-8">
+        <Text className="text-body text-secondary text-center">{editor.loadError}</Text>
+      </View>
+    );
+  }
 
   if (editor.isLoading || !editor.documentId) {
     return (
@@ -65,7 +85,10 @@ export default function EditDocumentScreen() {
 
   return (
     <FormScrollView>
-      <ListSection header="Client" footer="Changes save automatically.">
+      <ListSection
+        header="Client"
+        footer={editor.saveError ? `Couldn’t save: ${editor.saveError}` : 'Changes save automatically.'}
+      >
         <ListRow
           icon="person.crop.circle.fill"
           title={editor.clientNameSnapshot ?? 'Choose Client'}
@@ -183,24 +206,49 @@ function DocumentDiscountEditor({
         </View>
       ) : null}
       {enabled ? (
-        <FormRow
-          label={discountType === 'percent' ? 'Percent' : 'Amount'}
-          prefix={discountType === 'percent' ? undefined : getCurrencySymbol(currencyCode)}
-          keyboardType="decimal-pad"
-          placeholder="0"
-          value={
-            discountType === 'percent'
-              ? String((discountValue ?? 0) / 100)
-              : minorToDecimalString(discountValue ?? 0, currencyCode)
-          }
-          onChangeText={(text) => {
-            const numeric = Number.parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-            const minorOrBp =
-              discountType === 'percent' ? Math.round(numeric * 100) : parseToMinor(text, currencyCode);
-            onChange(discountType, minorOrBp);
-          }}
+        <DiscountValueRow
+          key={discountType}
+          discountType={discountType}
+          discountValue={discountValue}
+          currencyCode={currencyCode}
+          onChange={(value) => onChange(discountType, value)}
         />
       ) : null}
     </ListSection>
+  );
+}
+
+/** Keeps its own text while typing — rebuilding the text from the stored number on every
+ * keystroke turned "7." back into "7" and "5" into "5.00". */
+function DiscountValueRow({
+  discountType,
+  discountValue,
+  currencyCode,
+  onChange,
+}: {
+  discountType: 'percent' | 'fixed';
+  discountValue: number | null;
+  currencyCode: string;
+  onChange: (value: number) => void;
+}) {
+  const format = (value: number | null) =>
+    !value ? '' : discountType === 'percent' ? String(value / 100) : minorToDecimalString(value, currencyCode);
+  const [text, setText] = useState(() => format(discountValue));
+  const parse = (input: string) =>
+    discountType === 'percent' ? Math.min(parseRateBp(input), 10000) : parseToMinor(input, currencyCode);
+
+  return (
+    <FormRow
+      label={discountType === 'percent' ? 'Percent' : 'Amount'}
+      prefix={discountType === 'percent' ? undefined : getCurrencySymbol(currencyCode)}
+      keyboardType="decimal-pad"
+      placeholder="0"
+      value={text}
+      onChangeText={(next) => {
+        setText(next);
+        onChange(parse(next));
+      }}
+      onEndEditing={() => setText(format(parse(text)))}
+    />
   );
 }

@@ -333,7 +333,13 @@ export const QR: React.FC<{ text: string; size: number; color?: string }> = ({ t
 export const PAY_LINK = 'https://paypal.me/northwind/4290.00';
 
 /** The invoice PDF on white paper (640 px wide), with the new Pay Online block and large signatures. */
-export const PdfV2: React.FC<{ signature?: number; payReveal?: number; accent?: string }> = ({ signature = 1, payReveal = 1, accent = '#1F2937' }) => {
+export const PdfV2: React.FC<{ signature?: number; payReveal?: number; accent?: string; title?: string; meta?: string }> = ({
+  signature = 1,
+  payReveal = 1,
+  accent = '#1F2937',
+  title = 'Invoice',
+  meta = 'INV-0042 · Due Oct 9',
+}) => {
   const ink = '#111827';
   const muted = '#6B7280';
   return (
@@ -347,8 +353,8 @@ export const PdfV2: React.FC<{ signature?: number; payReveal?: number; accent?: 
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 30, fontWeight: 800, color: accent }}>Invoice</div>
-          <div style={{ fontSize: 13, color: muted }}>INV-0042 · Due Oct 9</div>
+          <div style={{ fontSize: 30, fontWeight: 800, color: accent }}>{title}</div>
+          <div style={{ fontSize: 13, color: muted }}>{meta}</div>
         </div>
       </div>
       <div style={{ marginTop: 26, fontSize: 13 }}>

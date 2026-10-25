@@ -4,7 +4,6 @@ import { requireOwnerId } from '../db/ownerId';
 export type StorageCategory = 'branding' | 'signatures' | 'receipts' | 'pdfs' | 'client-photos';
 
 const BUCKET = 'user-files';
-const ALL_CATEGORIES: StorageCategory[] = ['branding', 'signatures', 'receipts', 'pdfs', 'client-photos'];
 
 function contentTypeFor(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase();
@@ -47,19 +46,41 @@ export async function readFileAsBase64(path: string): Promise<string> {
   return blobToBase64(data);
 }
 
+/** Best effort: callers run this to clean up after a database change that already succeeded, so
+ * a file that won't delete is left as an orphan (Delete All Data and account deletion still sweep
+ * the whole folder) rather than reported as a failed save. */
 export async function deleteFileIfExists(path: string | null | undefined): Promise<void> {
   if (!path) return;
   await supabase.storage.from(BUCKET).remove([path]);
 }
 
-/** Deletes every file this business owns from Storage, across all categories. */
+const LIST_PAGE_SIZE = 1000;
+
+/** Every file path under a folder, including nested folders. Storage's list() returns one level
+ * at a time and only 100 entries unless asked for more, so it's walked and paged. */
+async function listAllPaths(folder: string): Promise<string[]> {
+  const paths: string[] = [];
+  for (let offset = 0; ; offset += LIST_PAGE_SIZE) {
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .list(folder, { limit: LIST_PAGE_SIZE, offset, sortBy: { column: 'name', order: 'asc' } });
+    if (error) throw error;
+    for (const entry of data) {
+      const path = `${folder}/${entry.name}`;
+      // Folders come back with no id.
+      if (entry.id) paths.push(path);
+      else paths.push(...(await listAllPaths(path)));
+    }
+    if (data.length < LIST_PAGE_SIZE) return paths;
+  }
+}
+
+/** Deletes every file this business owns from Storage. */
 export async function wipeAllFiles(): Promise<void> {
-  const ownerId = requireOwnerId();
-  for (const category of ALL_CATEGORIES) {
-    const { data, error } = await supabase.storage.from(BUCKET).list(`${ownerId}/${category}`);
-    if (error || !data || data.length === 0) continue;
-    const paths = data.map((file) => `${ownerId}/${category}/${file.name}`);
-    await supabase.storage.from(BUCKET).remove(paths);
+  const paths = await listAllPaths(requireOwnerId());
+  for (let i = 0; i < paths.length; i += LIST_PAGE_SIZE) {
+    const { error } = await supabase.storage.from(BUCKET).remove(paths.slice(i, i + LIST_PAGE_SIZE));
+    if (error) throw error;
   }
 }
 

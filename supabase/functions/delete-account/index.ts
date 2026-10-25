@@ -1,32 +1,42 @@
-// Deletes the calling business's entire account: every owner-scoped database row, every stored
-// file, and the auth.users row itself. This can only run server-side — deleting an auth user
+// Deletes the calling business's entire account: every stored file, then the auth.users row,
+// which cascades to every owner-scoped database row (each table's owner_id references
+// auth.users(id) on delete cascade). This can only run server-side — deleting an auth user
 // requires the service_role key, which must never reach the client bundle. verify_jwt is enabled
 // on this function (see deploy config), so Supabase already rejects any request without a valid
 // session token before this code runs; the token is then used here only to look up whose account
 // to delete, never trusted for anything else.
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-
-const OWNER_SCOPED_TABLES = [
-  'recurring_schedules',
-  'activity_logs',
-  'settlements',
-  'signatures',
-  'line_items',
-  'documents',
-  'clients',
-  'item_catalog',
-  'tax_brackets',
-  'doc_counters',
-];
+import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 
 const STORAGE_BUCKET = 'user-files';
-const STORAGE_CATEGORIES = ['branding', 'signatures', 'receipts', 'pdfs', 'client-photos'];
+const PAGE_SIZE = 1000;
 
 function jsonResponse(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }
 
+/** Every file path under a folder, including nested folders. Storage's list() returns one level
+ * at a time and only 100 entries unless asked for more, so it's walked and paged. */
+async function listAllPaths(admin: SupabaseClient, folder: string): Promise<string[]> {
+  const paths: string[] = [];
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const { data, error } = await admin.storage
+      .from(STORAGE_BUCKET)
+      .list(folder, { limit: PAGE_SIZE, offset, sortBy: { column: 'name', order: 'asc' } });
+    if (error) throw new Error(`Failed listing ${folder}: ${error.message}`);
+    for (const entry of data) {
+      const path = `${folder}/${entry.name}`;
+      // Folders come back with no id.
+      if (entry.id) paths.push(path);
+      else paths.push(...(await listAllPaths(admin, path)));
+    }
+    if (data.length < PAGE_SIZE) return paths;
+  }
+}
+
 Deno.serve(async (req: Request) => {
+  if (req.method !== 'POST') {
+    return jsonResponse({ error: 'Method not allowed' }, 405);
+  }
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) {
     return jsonResponse({ error: 'Missing authorization header' }, 401);
@@ -49,20 +59,12 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(supabaseUrl, serviceRoleKey);
 
   try {
-    for (const table of OWNER_SCOPED_TABLES) {
-      const { error } = await admin.from(table).delete().eq('owner_id', userId);
-      if (error) throw new Error(`Failed deleting ${table}: ${error.message}`);
-    }
-
-    const { error: profileError } = await admin.from('business_profile').delete().eq('id', userId);
-    if (profileError) throw new Error(`Failed deleting business_profile: ${profileError.message}`);
-
-    for (const category of STORAGE_CATEGORIES) {
-      const { data: files } = await admin.storage.from(STORAGE_BUCKET).list(`${userId}/${category}`);
-      if (files && files.length > 0) {
-        const paths = files.map((file) => `${userId}/${category}/${file.name}`);
-        await admin.storage.from(STORAGE_BUCKET).remove(paths);
-      }
+    // Files first: once the user is gone nothing could find (or clean up) their folder. If this
+    // fails, the account is untouched and the user can simply try again.
+    const paths = await listAllPaths(admin, userId);
+    for (let i = 0; i < paths.length; i += PAGE_SIZE) {
+      const { error } = await admin.storage.from(STORAGE_BUCKET).remove(paths.slice(i, i + PAGE_SIZE));
+      if (error) throw new Error(`Failed deleting files: ${error.message}`);
     }
 
     const { error: deleteUserError } = await admin.auth.admin.deleteUser(userId);

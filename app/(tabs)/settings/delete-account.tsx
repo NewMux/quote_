@@ -10,9 +10,7 @@ import { ListRow } from '../../../src/components/list/ListRow';
 import { ListSection } from '../../../src/components/list/ListSection';
 import { deleteAccount } from '../../../src/db/repositories/account.repo';
 import { APPLE_MANAGE_SUBSCRIPTIONS_URL } from '../../../src/lib/subscription';
-import { supabase } from '../../../src/lib/supabase';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
-import { useSubscriptionStore } from '../../../src/stores/useSubscriptionStore';
 
 const CONFIRM_WORD = 'DELETE';
 
@@ -26,14 +24,9 @@ export default function DeleteAccountScreen() {
     setIsDeleting(true);
     try {
       await deleteAccount();
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        // The account is already gone server-side, so this network call may fail — the local
-        // session is cleared explicitly below regardless of whether it does.
-      }
-      await useSubscriptionStore.getState().reset();
-      useAuthStore.setState({ session: null });
+      // The account is already gone server-side, so the sign-out call itself may fail — the local
+      // session is cleared regardless, and the root layout's SIGNED_OUT handler resets the rest.
+      await useAuthStore.getState().signOut();
       router.replace('/(auth)/sign-in');
     } catch (err) {
       setIsDeleting(false);

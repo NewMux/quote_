@@ -138,6 +138,8 @@ Invoice Them is an iOS app (it also runs on Android) that lets small businesses 
 - **Privacy Policy:** it says iPhone only, matching v1, both on the live site (`newmux.github.io` commit `6f58f51`) and in `site/privacy.html`.
 - **Code:** the real app icon is in `main`.
 
+> **Update, October 2026:** version 1.0.1 is live on the App Store, and 1.0.2 is in preparation with the new screenshots (`marketing/launch-video/src/store`, rendered by `npm run render:store`). The steps below were written for version 1.0; the build number comes from EAS (`appVersionSource: remote`), and the version string comes from `app.json`.
+
 ### Deferred
 - **Leaked-password protection** needs Supabase Pro, and the org is on Free.
 - **Minimum password length:** Supabase still allows 6 characters, while the app already asks for at least 8 on sign-up and reset. Set Authentication → Sign In / Providers → Email → Minimum password length to 8 so the server matches. Leave the character-type requirements off: the app doesn't explain them, and length matters more.

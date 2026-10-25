@@ -1,6 +1,6 @@
 import '../global.css';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, Text, View, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -10,6 +10,9 @@ import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
 import { refreshAllReminders } from '../src/lib/notifications';
+import { supabase } from '../src/lib/supabase';
+import { Button } from '../src/components/Button';
+import { resetUserState } from '../src/stores/resetUserState';
 import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
 
 // Keep the branded launch screen up until auth and the business profile have loaded, so launch
@@ -62,14 +65,39 @@ export default function RootLayout() {
     initializeAuth();
   }, [initializeAuth]);
 
+  // Every way of losing the session — sign-out, a revoked refresh token, account deletion —
+  // arrives here, so per-user state is cleared in one place.
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') resetUserState().catch(() => {});
+    });
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  // Keyed on the user id, not the session object: the session is replaced on every hourly token
+  // refresh, which must not re-run launch work.
+  const userId = session?.user.id ?? null;
+  const [launchError, setLaunchError] = useState(false);
+  const [launchAttempt, setLaunchAttempt] = useState(0);
+
   useEffect(() => {
     if (isAuthLoading) return;
-    if (!session) {
+    if (!userId) {
       setReady(true);
       return;
     }
+    let cancelled = false;
     (async () => {
-      await Promise.all([loadProfile(), configureSubscription(session.user.id)]);
+      try {
+        await Promise.all([loadProfile(), configureSubscription(userId)]);
+      } catch {
+        // Offline at launch, or a brief Supabase error — offer a retry instead of an endless
+        // spinner.
+        if (!cancelled) setLaunchError(true);
+        return;
+      }
+      if (cancelled) return;
+      setLaunchError(false);
       setReady(true);
       // A document's status can change from a different device while this one was closed, so
       // this resyncs every scheduled reminder against the current data on each sign-in/launch.
@@ -79,18 +107,47 @@ export default function RootLayout() {
       // without waiting for that job. Also non-critical.
       generateDueRecurringInvoices().catch(() => {});
     })();
-  }, [isAuthLoading, session, loadProfile, configureSubscription]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthLoading, userId, launchAttempt, loadProfile, configureSubscription]);
 
   const isLoading = !ready || isAuthLoading;
+  // The launch screen also comes down for the "Couldn't Load Your Account" screen below. This hook
+  // sits above that early return so every render calls the same hooks in the same order.
+  const launchScreenDone = !isLoading || launchError;
 
   useEffect(() => {
-    if (!isLoading) {
+    if (launchScreenDone) {
       SplashScreen.hideAsync().catch(() => {});
       return;
     }
     const timer = setTimeout(() => SplashScreen.hideAsync().catch(() => {}), SPLASH_MAX_MS);
     return () => clearTimeout(timer);
-  }, [isLoading]);
+  }, [launchScreenDone]);
+
+  if (launchError && !ready) {
+    return (
+      <ThemeRoot>
+        <View className="flex-1 items-center justify-center bg-grouped px-8 gap-4">
+          <Text className="text-title3 font-semibold text-label text-center">Couldn’t Load Your Account</Text>
+          <Text className="text-body text-secondary text-center">
+            Check your internet connection, then try again.
+          </Text>
+          <Button
+            label="Try Again"
+            onPress={() => {
+              setLaunchError(false);
+              setLaunchAttempt((n) => n + 1);
+            }}
+          />
+          {/* A way out if the account itself is broken (e.g. its profile row is missing), not
+              just the network. */}
+          <Button label="Sign Out" variant="plain" onPress={() => useAuthStore.getState().signOut()} />
+        </View>
+      </ThemeRoot>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -111,6 +168,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="paywall" options={{ headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy', presentation: 'modal' }} />
+        <Stack.Screen name="delete-account" options={{ title: 'Delete Account' }} />
         <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
         <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />
         <Stack.Screen
