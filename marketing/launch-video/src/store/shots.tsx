@@ -80,7 +80,7 @@ export const ShotSign: React.FC = () => (
     </div>
   </Canvas>
 );
-const SIG_CROP = { x: 4, y: 500, s: 1.52 };
+const SIG_CROP = { x: 4, y: 484, s: 1.52 };
 
 /** 5. The pay link, on the PDF itself. */
 export const ShotPay: React.FC = () => (
@@ -127,13 +127,13 @@ const MORE = [
 export const ShotMore: React.FC = () => (
   <Canvas bg={PAL.violet}>
     <TextBlock top={150} color={PAL.white} accent={PAL.lime} lines={['And so much', '*more.*']} sub="Everything you need to get paid." />
-    <div style={{ position: 'absolute', left: 96, right: 96, top: 900, display: 'flex', flexWrap: 'wrap', gap: 28 }}>
+    <div style={{ position: 'absolute', left: 96, right: 96, top: 960, display: 'flex', flexWrap: 'wrap', gap: 28 }}>
       {MORE.map((m) => (
         <div
           key={m.title}
           style={{
             width: 'wide' in m ? '100%' : (STORE_W - 192 - 28) / 2,
-            height: 'wide' in m ? 220 : 300,
+            height: 'wide' in m ? 240 : 340,
             borderRadius: 52,
             background: PAL.white,
             padding: 40,
