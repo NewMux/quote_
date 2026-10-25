@@ -13,16 +13,15 @@ import { PdfPage } from './pdf';
 
 /** 1. The promise, over the Summary tab. */
 export const ShotSummary: React.FC = () => (
-  <Canvas bg={PAL.midnight}>
+  <Canvas bg={PAL.paper}>
     <TextBlock
       top={150}
       size={206}
-      color={PAL.white}
-      accent={PAL.lime}
+      color={PAL.midnight}
       lines={['Bill it.', 'Send it.', '*Get paid.*']}
       sub="Estimates and invoices for people who’d rather be doing the work."
     />
-    <Device left={110} top={1010} width={1100} shadow="0 0 0 2px rgba(255,255,255,0.06), 0 60px 120px rgba(0,0,0,0.55)">
+    <Device left={110} top={1010} width={1100} shadow="0 60px 110px rgba(18,17,43,0.26)">
       <SummaryScreen />
     </Device>
   </Canvas>
@@ -34,7 +33,6 @@ export const ShotDocuments: React.FC = () => (
     <TextBlock
       top={150}
       color={PAL.midnight}
-      accent={PAL.violet}
       lines={['Every estimate', 'and invoice,', '*one list.*']}
       sub="Search, filter and see where each one stands at a glance."
     />
@@ -46,14 +44,13 @@ export const ShotDocuments: React.FC = () => (
 
 /** 3. The detail screen's big button, with the phone hanging in from the top. */
 export const ShotDetail: React.FC = () => (
-  <Canvas bg={PAL.violet}>
-    <Device left={110} top={-170} width={1100} shadow="0 60px 120px rgba(18,17,43,0.45)">
+  <Canvas bg={PAL.paper}>
+    <Device left={110} top={-170} width={1100} shadow="0 60px 110px rgba(18,17,43,0.26)">
       <DetailScreen />
     </Device>
     <TextBlock
       bottom={118}
-      color={PAL.white}
-      accent={PAL.lime}
+      color={PAL.midnight}
       lines={['Always one tap', 'from *paid.*']}
       sub="Issue it, log a payment or send a reminder. The big button knows what’s next."
     />
@@ -62,18 +59,17 @@ export const ShotDetail: React.FC = () => (
 
 /** 4. Signing on the phone, and where the signature lands on the PDF. */
 export const ShotSign: React.FC = () => (
-  <Canvas bg={PAL.lime}>
+  <Canvas bg={PAL.paper}>
     <TextBlock
       top={150}
       color={PAL.midnight}
-      accent={PAL.violet}
       lines={['Signed on', 'the *spot.*']}
       sub="Draw your signature on the phone. It prints on the PDF."
     />
-    <ScreenPanel left={96} top={880} width={1000} height={1380} radius={84} shadow="0 50px 100px rgba(18,17,43,0.28)">
+    <ScreenPanel left={96} top={880} width={1000} height={1380} radius={84} shadow="0 50px 100px rgba(18,17,43,0.18), 0 0 0 1px rgba(18,17,43,0.04)">
       <SignSheet />
     </ScreenPanel>
-    <div style={{ position: 'absolute', left: 300, top: 1900, width: 930, height: 760, borderRadius: 40, overflow: 'hidden', background: '#fff', boxShadow: '0 50px 100px rgba(18,17,43,0.35)' }}>
+    <div style={{ position: 'absolute', left: 300, top: 1900, width: 930, height: 760, borderRadius: 40, overflow: 'hidden', background: '#fff', boxShadow: '0 50px 100px rgba(18,17,43,0.22), 0 0 0 1px rgba(18,17,43,0.06)' }}>
       <div style={{ position: 'absolute', left: -SIG_CROP.x * SIG_CROP.s, top: -SIG_CROP.y * SIG_CROP.s, transform: `scale(${SIG_CROP.s})`, transformOrigin: '0 0' }}>
         <PdfPage height={1000} />
       </div>
@@ -84,15 +80,14 @@ const SIG_CROP = { x: 4, y: 484, s: 1.52 };
 
 /** 5. The pay link, on the PDF itself. */
 export const ShotPay: React.FC = () => (
-  <Canvas bg={PAL.midnight}>
+  <Canvas bg={PAL.paper}>
     <TextBlock
       top={150}
-      color={PAL.white}
-      accent={PAL.lime}
+      color={PAL.midnight}
       lines={['Every invoice', 'has a *pay link.*']}
       sub="A QR code and a Pay button on the PDF take clients straight to your payment page."
     />
-    <div style={{ position: 'absolute', left: 48, top: 900, transform: 'scale(2.0)', transformOrigin: '0 0', borderRadius: 10, overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.5)' }}>
+    <div style={{ position: 'absolute', left: 48, top: 900, transform: 'scale(2.0)', transformOrigin: '0 0', borderRadius: 10, overflow: 'hidden', boxShadow: '0 20px 50px rgba(18,17,43,0.16), 0 0 0 0.5px rgba(18,17,43,0.12)' }}>
       <PdfPage height={1000} />
     </div>
   </Canvas>
@@ -104,11 +99,10 @@ export const ShotClients: React.FC = () => (
     <TextBlock
       top={150}
       color={PAL.midnight}
-      accent={PAL.violet}
       lines={['Everyone you', 'bill, *A to Z.*']}
       sub="Add clients straight from your contacts."
     />
-    <Device left={160} top={1000} width={1000} shadow="0 60px 110px rgba(18,17,43,0.28)">
+    <Device left={160} top={1000} width={1000} shadow="0 60px 110px rgba(18,17,43,0.26)">
       <ClientsScreen />
     </Device>
   </Canvas>
@@ -125,8 +119,8 @@ const MORE = [
 ] as const;
 
 export const ShotMore: React.FC = () => (
-  <Canvas bg={PAL.violet}>
-    <TextBlock top={150} color={PAL.white} accent={PAL.lime} lines={['And so much', '*more.*']} sub="Everything you need to get paid." />
+  <Canvas bg={PAL.paper}>
+    <TextBlock top={150} color={PAL.midnight} lines={['And so much', '*more.*']} sub="Everything you need to get paid." />
     <div style={{ position: 'absolute', left: 96, right: 96, top: 960, display: 'flex', flexWrap: 'wrap', gap: 28 }}>
       {MORE.map((m) => (
         <div
@@ -136,6 +130,7 @@ export const ShotMore: React.FC = () => (
             height: 'wide' in m ? 240 : 340,
             borderRadius: 52,
             background: PAL.white,
+            boxShadow: '0 20px 50px rgba(18,17,43,0.08), 0 0 0 1px rgba(18,17,43,0.04)',
             padding: 40,
             display: 'flex',
             flexDirection: 'wide' in m ? 'row' : 'column',
@@ -156,11 +151,11 @@ export const ShotMore: React.FC = () => (
         </div>
       ))}
     </div>
-    <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, bottom: 130, display: 'flex', alignItems: 'center', gap: 36, color: PAL.white }}>
+    <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, bottom: 130, display: 'flex', alignItems: 'center', gap: 36, color: PAL.midnight }}>
       <AppMark size={180} />
       <div>
         <div style={{ fontFamily: BRAND_FONT, fontSize: 96, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1 }}>Invoice Them</div>
-        <div style={{ fontSize: 44, fontWeight: 600, color: PAL.lime, marginTop: 10 }}>{TAGLINE}</div>
+        <div style={{ fontSize: 44, fontWeight: 600, opacity: 0.62, marginTop: 10 }}>{TAGLINE}</div>
       </div>
     </div>
   </Canvas>

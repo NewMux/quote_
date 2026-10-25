@@ -23,17 +23,16 @@ export const Canvas: React.FC<{ bg: string; children: React.ReactNode }> = ({ bg
   <AbsoluteFill style={{ background: bg, overflow: 'hidden', fontFamily: FONT }}>{children}</AbsoluteFill>
 );
 
-/** Headline + sub-line, pinned to the top or the bottom of the canvas. `*word*` takes `accent`. */
+/** Headline + sub-line, pinned to the top or the bottom of the canvas. `*word*` gets a lime marker stripe under it. */
 export const TextBlock: React.FC<{
   lines: string[];
   sub: string;
   color: string;
-  accent: string;
   subColor?: string;
   top?: number;
   bottom?: number;
   size?: number;
-}> = ({ lines, sub, color, accent, subColor, top, bottom, size = 160 }) => (
+}> = ({ lines, sub, color, subColor, top, bottom, size = 160 }) => (
   <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, top, bottom, color }}>
     <div style={{ fontFamily: BRAND_FONT, fontSize: size, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 0.98, whiteSpace: 'nowrap' }}>
       {lines.map((line) => (
@@ -43,7 +42,7 @@ export const TextBlock: React.FC<{
             .filter(Boolean)
             .map((part, i) =>
               part.startsWith('*') ? (
-                <span key={i} style={{ color: accent }}>
+                <span key={i} style={{ backgroundImage: `linear-gradient(transparent 66%, ${PAL.lime} 66%, ${PAL.lime} 92%, transparent 92%)`, padding: '0 0.04em', margin: '0 -0.04em' }}>
                   {part.slice(1, -1)}
                 </span>
               ) : (

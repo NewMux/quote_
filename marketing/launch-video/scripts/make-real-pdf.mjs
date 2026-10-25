@@ -40,7 +40,7 @@ const html = buildDocumentHtml({
   },
   lines,
   profile: {
-    id: 1, business_name: 'Northwind Studio', logo_uri: null, accent_color: '#6D5DF6', email: 'hello@northwind.studio',
+    id: 1, business_name: 'Northwind Studio', logo_uri: null, accent_color: '#12112B', email: 'hello@northwind.studio',
     phone: '+1 (555) 014-2280', address: '88 Mercer St, NYC', tax_registration_number: null,
     payment_instructions: null, payment_link: 'https://paypal.me/northwind/{amount}', footer_terms: 'Payment due within 14 days. Thank you for your business!',
     default_currency_code: 'USD', default_payment_terms_days: 14, estimate_prefix: 'EST-', invoice_prefix: 'INV-', number_padding: 4,
