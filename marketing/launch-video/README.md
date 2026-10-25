@@ -31,6 +31,10 @@ ElevenLabs (voice "Justin Case", model `eleven_v4`).
   `scripts/make-signature.py`). Copy lives in `src/store/shots.tsx`; the `AppProof` composition
   shows every rebuilt screen side by side for checking them against the real app.
 
+The app's icon files in `assets/` (iOS icon, Android adaptive layers, favicon, splash icon) are
+generated from the brand mark by `python3 -I scripts/make-app-icons.py` (it rasterizes
+`public/brand/mark.svg` with headless Chromium; set `CHROME` to override the browser path).
+
 This is a standalone project. The app's TypeScript, ESLint, Jest and Metro configs ignore
 `marketing/`.
 
