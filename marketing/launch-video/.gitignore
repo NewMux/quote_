@@ -13,3 +13,6 @@ public/audio/*.wav
 # Rebuild the clips with scripts/prep-pros-footage.sh.
 public/pros/clips
 public/pros/music.wav
+
+# The doc trailer's licensed track (LETS GO), supplied by the owner. Not for Git.
+public/track/

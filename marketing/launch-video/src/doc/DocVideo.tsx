@@ -7,7 +7,7 @@ import { AppMark } from '../components/Bits';
 import { Phone } from '../components/Phone';
 import { FONT } from '../theme';
 import { DetailLight, EditorLight, ScanPay, SignLight } from '../v2/screens';
-import { BEAT, DOC_PRICE_AT, DOC_SHOTS, DOC_STARTS, SOURCES, type DocShot } from './timing';
+import { DOC_PRICE_AT, DOC_SHOTS, DROP, FPS, SOURCES, TOTAL_DOC, VO, sec, shotLength, vo, type DocShot } from './timing';
 
 const CLAMP = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const { midnight: INK, lime: LIME, paper: PAPER } = BRAND;
@@ -53,51 +53,65 @@ const Grain: React.FC<{ opacity?: number }> = ({ opacity = 0.22 }) => {
 // ---------------------------------------------------------------------------------------------
 
 /** Archival film, full frame: graded, pushed in, flickering, with grain and a heavy vignette. */
-const FilmShot: React.FC<{ shot: Extract<DocShot, { kind: 'film' }> }> = ({ shot }) => {
+const Film: React.FC<{ clip: string; trim?: number; color?: boolean; focus?: string; seed: string }> = ({ clip, trim = 0, color, focus, seed }) => {
   const f = useCurrentFrame();
-  const flicker = 1 + (random(`fl${shot.clip}${f}`) - 0.5) * 0.08;
-  const grade = shot.color ? `saturate(0.55) sepia(0.25) contrast(1.15) brightness(${flicker})` : `grayscale(1) contrast(1.3) brightness(${flicker * 0.95})`;
-  const flash = shot.flash ? interpolate(f, [0, 2], [0.7, 0], CLAMP) : 0;
+  const flicker = 1 + (random(`fl${seed}${f}`) - 0.5) * 0.08;
+  const grade = color ? `saturate(0.55) sepia(0.25) contrast(1.15) brightness(${flicker})` : `grayscale(1) contrast(1.3) brightness(${flicker * 0.95})`;
   return (
     <AbsoluteFill style={{ background: '#000', overflow: 'hidden' }}>
-      <AbsoluteFill style={{ scale: String(interpolate(f, [0, 60], [1.06, 1.14])) }}>
-        <OffthreadVideo
-          src={staticFile(`doc/${shot.clip}.mp4`)}
-          trimBefore={shot.trim ?? 0}
-          muted
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: shot.focus ?? '50% 50%', filter: grade }}
-        />
+      <AbsoluteFill style={{ scale: String(interpolate(f, [0, 90], [1.06, 1.16])) }}>
+        <OffthreadVideo src={staticFile(`doc/${clip}.mp4`)} trimBefore={trim} muted style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focus ?? '50% 50%', filter: grade }} />
       </AbsoluteFill>
       <AbsoluteFill style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.7) 100%)' }} />
-      <AbsoluteFill style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.25) 100%)' }} />
+      <AbsoluteFill style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 72%, rgba(0,0,0,0.3) 100%)' }} />
       <Grain opacity={0.35} />
-
-      {shot.line && (
-        <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: `0 ${MARGIN}px`, paddingTop: 620 }}>
-          <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 200, lineHeight: 0.95, color: PAPER, textAlign: 'center', textShadow: SHADOW, ...land(f, 1.06), ...lift(f, 0, 30) }}>
-            {shot.line}
-          </div>
-        </AbsoluteFill>
-      )}
-      {shot.word && (
-        <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', paddingTop: 560 }}>
-          <div style={{ fontFamily: BRAND_FONT, fontWeight: 800, fontSize: 210, letterSpacing: '-0.045em', color: PAPER, textShadow: SHADOW, whiteSpace: 'nowrap', ...land(f) }}>{shot.word}</div>
-        </AbsoluteFill>
-      )}
-
-      <div style={{ position: 'absolute', left: MARGIN, top: 200, ...meta(MUTED, 22), textShadow: SHADOW }}>Archive · {SOURCES[shot.source]}</div>
-      <AbsoluteFill style={{ background: '#FFF', opacity: flash }} />
     </AbsoluteFill>
   );
 };
 
-/** The year, typed out on black. */
-const TYPED = ['It’s 2026.', 'You’re still waiting.'];
-const Typed: React.FC = () => {
+/** The narration line, big serif over the picture. */
+const Caption: React.FC<{ text: string }> = ({ text }) => {
   const f = useCurrentFrame();
-  const chars = Math.floor(f / 1.2);
-  const first = TYPED[0].slice(0, chars);
-  const second = TYPED[1].slice(0, Math.max(0, chars - TYPED[0].length - 4));
+  return (
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: `0 ${MARGIN}px`, paddingTop: 640 }}>
+      <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: text.length > 24 ? 132 : 170, lineHeight: 0.98, color: PAPER, textAlign: 'center', textShadow: SHADOW, ...land(f, 1.05), ...lift(f, 0, 26) }}>
+        {text}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+const Credit: React.FC<{ source: keyof typeof SOURCES }> = ({ source }) => (
+  <div style={{ position: 'absolute', left: MARGIN, top: 200, ...meta(MUTED, 22), textShadow: SHADOW }}>Archive · {SOURCES[source]}</div>
+);
+
+const Title: React.FC<{ shot: Extract<DocShot, { kind: 'title' }> }> = ({ shot }) => {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill>
+      <Film clip={shot.clip} trim={shot.trim} seed="title" />
+      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', paddingTop: 560 }}>
+        <div style={{ ...meta(LIME, 28), textShadow: SHADOW, ...lift(f, 4, 12) }}>Invoice Them presents</div>
+        <div style={{ fontFamily: SERIF, fontSize: 150, lineHeight: 0.95, color: PAPER, textAlign: 'center', marginTop: 26, textShadow: SHADOW, ...lift(f, 10, 20) }}>
+          A short history
+          <br />
+          <span style={{ fontStyle: 'italic' }}>of getting paid.</span>
+        </div>
+      </AbsoluteFill>
+      <AbsoluteFill style={{ background: '#000', opacity: interpolate(f, [0, 8], [1, 0], CLAMP) }} />
+    </AbsoluteFill>
+  );
+};
+
+/** "It's 2026. / And you're still waiting?", typed in time with the narration. */
+const Typed: React.FC<{ from: number }> = ({ from }) => {
+  const f = useCurrentFrame();
+  const abs = f + from;
+  const typeOut = (text: string, start: number, dur: number) => text.slice(0, Math.floor(interpolate(abs, [start, start + dur], [0, text.length], CLAMP)));
+  const y = vo('year');
+  const s = vo('still');
+  const first = typeOut('It’s 2026.', sec(y.at), sec((y.to - y.from) * 0.8));
+  const second = typeOut('And you’re still waiting?', sec(s.at), sec((s.to - s.from) * 0.85));
   const cursor = Math.floor(f / 8) % 2 === 0;
   return (
     <AbsoluteFill style={{ background: NIGHT, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
@@ -105,7 +119,7 @@ const Typed: React.FC = () => {
         {first}
         {second === '' && cursor && <span style={{ color: LIME }}>|</span>}
       </div>
-      <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 130, lineHeight: 1.05, color: MUTED, marginTop: 30, minHeight: 140 }}>
+      <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 120, lineHeight: 1.02, color: MUTED, marginTop: 30, minHeight: 250 }}>
         {second}
         {second !== '' && cursor && <span style={{ color: LIME }}>|</span>}
       </div>
@@ -114,11 +128,25 @@ const Typed: React.FC = () => {
   );
 };
 
+const Anymore: React.FC = () => {
+  const f = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ background: NIGHT, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
+      <div style={{ fontFamily: BRAND_FONT, fontSize: 190, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 0.92, color: PAPER, transformOrigin: '0% 50%', ...land(f, 1.1) }}>
+        Not
+        <br />
+        <span style={{ color: LIME }}>anymore.</span>
+      </div>
+      <Grain opacity={0.15} />
+    </AbsoluteFill>
+  );
+};
+
 const Question: React.FC = () => {
   const f = useCurrentFrame();
   return (
     <AbsoluteFill style={{ background: PAPER, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
-      <div style={{ fontFamily: BRAND_FONT, fontSize: 210, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 0.95, color: INK, transformOrigin: '0% 50%', ...land(f, 1.08) }}>
+      <div style={{ fontFamily: BRAND_FONT, fontSize: 210, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 0.95, color: INK, transformOrigin: '0% 50%', scale: String(interpolate(f, [0, 60], [1, 1.06])) }}>
         You have
         <br />
         clients?
@@ -128,17 +156,31 @@ const Question: React.FC = () => {
   );
 };
 
+/** The drop. */
 const Answer: React.FC = () => {
   const f = useCurrentFrame();
+  const shake = interpolate(f, [0, 10], [1, 0], CLAMP);
   return (
     <AbsoluteFill style={{ background: LIME, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
-      <div style={{ fontFamily: BRAND_FONT, fontSize: 250, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 0.92, color: INK, transformOrigin: '0% 50%', ...land(f, 1.25) }}>
-        Invoice
+      <div
+        style={{
+          fontFamily: BRAND_FONT,
+          fontSize: 260,
+          fontWeight: 800,
+          letterSpacing: '-0.045em',
+          lineHeight: 0.9,
+          color: INK,
+          transformOrigin: '0% 50%',
+          translate: `${(random(`ax${f}`) - 0.5) * 30 * shake}px ${(random(`ay${f}`) - 0.5) * 30 * shake}px`,
+          ...land(f, 1.35),
+        }}
+      >
+        INVOICE
         <br />
-        them.
+        THEM.
       </div>
-      <div style={{ height: 14, background: INK, marginTop: 56, width: `${interpolate(f, [4, 20], [0, 100], { ...CLAMP, easing: EASE_OUT })}%` }} />
-      <AbsoluteFill style={{ background: '#FFF', opacity: interpolate(f, [0, 3], [0.9, 0], CLAMP) }} />
+      <div style={{ height: 16, background: INK, marginTop: 56, width: `${interpolate(f, [3, 16], [0, 100], { ...CLAMP, easing: EASE_OUT })}%` }} />
+      <AbsoluteFill style={{ background: '#FFF', opacity: interpolate(f, [0, 4], [1, 0], CLAMP) }} />
     </AbsoluteFill>
   );
 };
@@ -146,13 +188,12 @@ const Answer: React.FC = () => {
 const STEPS = ['Create it.', 'Sign it.', 'Send it.', 'Get paid.'];
 const STEP_BG = [PAPER, LIME, PAPER, INK];
 
-/** The app, one step per two beats. */
 const AppStep: React.FC<{ step: number }> = ({ step }) => {
   const f = useCurrentFrame();
   const screen = [
-    <EditorLight key="c" f={f + 8} adds={[0, 7, 14]} />,
-    <SignLight key="s" f={f} drawStart={0} drawEnd={20} doneAt={22} />,
-    <ScanPay key="p" f={f + 12} detectAt={0} sheetAt={6} payAt={18} />,
+    <EditorLight key="c" f={f + 8} adds={[0, 6, 12]} />,
+    <SignLight key="s" f={f} drawStart={0} drawEnd={18} doneAt={20} />,
+    <ScanPay key="p" f={f + 12} detectAt={0} sheetAt={6} payAt={16} />,
     <DetailLight key="d" f={f} paidAt={2} />,
   ][step];
   const dark = STEP_BG[step] === INK;
@@ -166,7 +207,7 @@ const AppStep: React.FC<{ step: number }> = ({ step }) => {
         width={540}
         lightScreen
         shadow="0 60px 110px rgba(0,0,0,0.3)"
-        style={{ left: 270, top: 430 + interpolate(f, [0, 10], [120, 0], { ...CLAMP, easing: SPRING }), rotate: `${interpolate(f, [0, 10], [step % 2 ? 4 : -4, 0], { ...CLAMP, easing: EASE_OUT })}deg` }}
+        style={{ left: 270, top: 430 + interpolate(f, [0, 10], [140, 0], { ...CLAMP, easing: SPRING }), rotate: `${interpolate(f, [0, 10], [step % 2 ? 5 : -5, 0], { ...CLAMP, easing: EASE_OUT })}deg` }}
       >
         {screen}
       </Phone>
@@ -181,7 +222,7 @@ const EndCard: React.FC<{ len: number }> = ({ len }) => {
   return (
     <AbsoluteFill style={{ background: INK }}>
       <AbsoluteFill style={{ alignItems: 'center', paddingTop: 290 }}>
-        <AppMark size={170} style={{ ...land(f, 1.3) }} />
+        <AppMark size={170} style={land(f, 1.3)} />
         <div style={{ marginTop: 60, clipPath: `inset(0 ${100 - wipe}% 0 0)` }}>
           <Img src={staticFile('brand/wordmark.svg')} style={{ width: 800, height: 800 * (51 / 331) }} />
         </div>
@@ -190,7 +231,7 @@ const EndCard: React.FC<{ len: number }> = ({ len }) => {
         </div>
         <div style={{ marginTop: 60, display: 'flex', alignItems: 'baseline', gap: 28, opacity: price >= 0 ? 1 : 0, ...land(price, 1.4) }}>
           <span style={meta(MUTED, 28)}>First month</span>
-          <span style={{ fontFamily: FONT, fontSize: 160, fontWeight: 800, letterSpacing: '-0.05em', color: LIME }}>$0.99</span>
+          <span style={{ fontFamily: FONT, fontSize: 170, fontWeight: 800, letterSpacing: '-0.05em', color: LIME }}>$0.99</span>
         </div>
         <div style={{ marginTop: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22, ...lift(f, DOC_PRICE_AT + 8) }}>
           <div style={{ padding: '24px 52px', borderRadius: 999, background: PAPER, color: INK, fontFamily: FONT, fontSize: 42, fontWeight: 700, letterSpacing: '-0.02em' }}>
@@ -199,28 +240,38 @@ const EndCard: React.FC<{ len: number }> = ({ len }) => {
           <div style={meta(MUTED, 22)}>Then $9.99/month · Cancel anytime</div>
         </div>
       </AbsoluteFill>
-      <div style={{ position: 'absolute', left: 0, right: 0, top: 1470, textAlign: 'center', ...lift(f, BEAT) }}>
+      <div style={{ position: 'absolute', left: 0, right: 0, top: 1470, textAlign: 'center', ...lift(f, 20) }}>
         <div style={meta(MUTED, 22)}>
           Powered by <span style={{ color: PAPER, fontWeight: 800 }}>NewMux</span>
         </div>
         <div style={{ ...meta('rgba(244,241,234,0.35)', 15), marginTop: 20, letterSpacing: '0.12em' }}>Archival film: Prelinger Archives, public domain</div>
       </div>
       <Grain opacity={0.1} />
-      <AbsoluteFill style={{ background: '#000', opacity: interpolate(f, [len - 10, len], [0, 1], CLAMP) }} />
+      <AbsoluteFill style={{ background: '#000', opacity: interpolate(f, [len - 12, len], [0, 1], CLAMP) }} />
     </AbsoluteFill>
   );
 };
 
 // ---------------------------------------------------------------------------------------------
 
-const renderShot = (s: DocShot) => {
+const renderShot = (s: DocShot, i: number, len: number) => {
   switch (s.kind) {
+    case 'title':
+      return <Title shot={s} />;
     case 'film':
-      return <FilmShot shot={s} />;
-    case 'gap':
+      return (
+        <AbsoluteFill>
+          <Film clip={s.clip} trim={s.trim} color={s.color} focus={s.focus} seed={String(i)} />
+          {s.caption && <Caption text={s.caption} />}
+          <Credit source={s.source} />
+        </AbsoluteFill>
+      );
+    case 'black':
       return <AbsoluteFill style={{ background: '#000' }} />;
     case 'typed':
-      return <Typed />;
+      return <Typed from={s.from} />;
+    case 'anymore':
+      return <Anymore />;
     case 'question':
       return <Question />;
     case 'answer':
@@ -228,17 +279,36 @@ const renderShot = (s: DocShot) => {
     case 'app':
       return <AppStep step={s.step} />;
     case 'end':
-      return <EndCard len={s.len} />;
+      return <EndCard len={len} />;
   }
+};
+
+// The music dips under every line, more before the drop than after it.
+const VO_SPANS = VO.map((l) => ({ start: sec(l.at), end: sec(l.at + l.to - l.from) }));
+const musicVolume = (f: number) => {
+  const under = Math.max(0, ...VO_SPANS.map(({ start, end }) => interpolate(f, [start - 4, start, end, end + 8], [0, 1, 1, 0], CLAMP)));
+  const post = f >= sec(DROP) - 2;
+  const base = post ? 0.85 : 0.6;
+  const ducked = post ? 0.28 : 0.26;
+  const fade = interpolate(f, [0, 6, TOTAL_DOC - 40, TOTAL_DOC], [0, 1, 1, 0], CLAMP);
+  return fade * (base + (ducked - base) * under);
 };
 
 export const DocVideo: React.FC<{ music?: boolean }> = ({ music = true }) => (
   <AbsoluteFill style={{ background: '#000' }}>
-    {DOC_SHOTS.map((s, i) => (
-      <Sequence key={i} from={DOC_STARTS[i]} durationInFrames={s.len} name={`${String(i + 1).padStart(2, '0')} ${s.kind}${s.kind === 'film' ? ` ${s.clip}` : ''}`}>
-        {renderShot(s)}
+    {DOC_SHOTS.map((s, i) => {
+      const len = shotLength(i);
+      return (
+        <Sequence key={i} from={s.from} durationInFrames={len} name={`${String(i + 1).padStart(2, '0')} ${s.kind}${'clip' in s ? ` ${s.clip}` : ''}`}>
+          {renderShot(s, i, len)}
+        </Sequence>
+      );
+    })}
+    {music && <Audio src={staticFile('track/lets-go-from-0m29.wav')} volume={musicVolume} />}
+    {VO.map((l) => (
+      <Sequence key={l.id} from={sec(l.at)} durationInFrames={sec(l.to - l.from) + 2} name={`vo: ${l.text}`} layout="none">
+        <Audio src={staticFile('vo/doc-voiceover.mp3')} trimBefore={Math.round(l.from * FPS)} trimAfter={Math.round(l.to * FPS)} />
       </Sequence>
     ))}
-    {music && <Audio src={staticFile('audio/music-doc.wav')} />}
   </AbsoluteFill>
 );

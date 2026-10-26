@@ -10,14 +10,19 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
   before "Invoice them.", and the $0.99 first-month offer and "Powered by NewMux" on the end card.
   It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`. The cut list lives in
   `src/reel/timing.ts`, the soundtrack in `scripts/make-music-reel.mjs`.
-- **"A short history of getting paid." (`DocTrailer`, 19 s):** a documentary-trailer reel at 120 BPM.
-  Full-frame archival film with big serif lines ("For a hundred years, / getting paid / looked like
-  this."), then a word per cut, with the cuts speeding up from a beat to four frames ("Write it. File it.
-  Chase it. Wait. Call. Wait…"), under staccato strings and a ticking clock. Then two beats of
-  silence, "It's 2026. You're still waiting." typed out, a braam on "Invoice them.", the app on a
-  groove with a till's ka-ching, and the $0.99 end card. It renders to
-  `out/InvoiceThem-Doc-Trailer-9x16.mp4` with `npm run render:doc`. The cut lives in
-  `src/doc/timing.ts`, the score and sound design in `scripts/make-music-doc.mjs`.
+- **"A short history of getting paid." (`DocTrailer`, 45 s):** a narrated documentary-trailer reel.
+  Full-frame archival film with a narrator ("For a hundred years… getting paid looked like this…
+  You called. You waited. You called again…"), a flash montage, "It's 2026. And you're still
+  waiting?" typed out, then "INVOICE THEM!" on the drop of the owner's track and the app and $0.99
+  end card over it. It renders to `out/InvoiceThem-Doc-Trailer-9x16.mp4` with `npm run render:doc`.
+  The cut and the narration's placement live in `src/doc/timing.ts`.
+  - Music: "LETS GO", supplied by the owner, used from 0:29 (its drop is 34.25 s later, 129 BPM).
+    It is not in Git; put it at `public/track/lets-go-from-0m29.wav` before rendering:
+    `ffmpeg -ss 29 -t 60 -i LETS_GO.mp3 -c:a pcm_s16le -ar 44100 public/track/lets-go-from-0m29.wav`.
+  - Narration: `public/vo/doc-voiceover.mp3`, ElevenLabs (voice "Marcus – Powerful Motivational
+    Narrator", `eleven_v4`), compressed and normalized to about -14 LUFS. `VO` in
+    `src/doc/timing.ts` trims each line out of it (word timings from an ElevenLabs Scribe pass) and
+    places it on a beat; the music ducks under each line.
   - Footage, all public domain from the Prelinger Archives (archive.org), trimmed into
     `public/doc/`: *Troubles of a Merchant and How to Stop Them* (1925), *Bookkeeping and
     Accounting* (1945), *The Town and the Telephone* (1950), *What Is Money?* (1947) and *The
