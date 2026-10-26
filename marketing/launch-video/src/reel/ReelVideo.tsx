@@ -7,7 +7,7 @@ import { AppMark } from '../components/Bits';
 import { Phone } from '../components/Phone';
 import { FONT } from '../theme';
 import { DetailLight, EditorLight, PdfV2, ScanPay, SignLight } from '../v2/screens';
-import { BEAT, CLIENTS, FPS, PRICE_AT, SHOTS, TITLES, TOTAL_OWED, WORDS, type Shot } from './timing';
+import { BEAT, CLIENTS, CLOSE_AT, FPS, PRICE_AT, SHOTS, STEPS, TOTAL_OWED, WORDS, type Shot } from './timing';
 
 const CLAMP = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const { midnight: INK, lime: LIME, paper: PAPER, violet: VIOLET } = BRAND;
@@ -90,14 +90,11 @@ const WORD_LOOKS = [
   { bg: INK, ink: PAPER, size: 420 },
   { bg: PAPER, ink: INK, size: 400 },
   { bg: LIME, ink: INK, size: 250 },
-  { bg: INK, ink: LIME, size: 250 },
-  { bg: LIME, ink: INK, size: 330 },
 ];
 
 const Word: React.FC<{ i: number; len: number }> = ({ i, len }) => {
   const f = useCurrentFrame();
   const look = WORD_LOOKS[i];
-  const rule = interpolate(f, [8, 22], [0, 1], { ...CLAMP, easing: EASE_OUT });
   return (
     <AbsoluteFill style={{ background: look.bg, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
       <div style={{ scale: String(interpolate(f, [0, len], [1, 1.03])), transformOrigin: '0% 50%' }}>
@@ -106,17 +103,11 @@ const Word: React.FC<{ i: number; len: number }> = ({ i, len }) => {
         </Reveal>
         {i === 2 && (
           // A dictionary entry under "clients?".
-          <div style={{ marginTop: 50, fontFamily: FONT, color: INK, ...lift(f, 8) }}>
+          <div style={{ marginTop: 50, fontFamily: FONT, color: INK, ...lift(f, 14) }}>
             <div style={{ fontSize: 46, fontWeight: 500 }}>
               <span style={{ fontWeight: 800 }}>cli·ents</span> <span style={{ fontStyle: 'italic', opacity: 0.6 }}>n. pl.</span>
             </div>
             <div style={{ fontSize: 46, fontWeight: 500, marginTop: 8 }}>People who owe you money.</div>
-          </div>
-        )}
-        {i === 4 && (
-          <div style={{ marginTop: 50 }}>
-            <div style={{ height: 12, background: INK, width: `${rule * 100}%` }} />
-            <div style={{ ...meta(INK, 32), marginTop: 30, ...lift(f, 12) }}>Every one of them.</div>
           </div>
         )}
       </div>
@@ -128,8 +119,6 @@ const CARD_LOOKS = [
   { bg: PAPER, ink: INK, muted: MUTED_LIGHT, tag: INK, tagInk: PAPER },
   { bg: INK, ink: PAPER, muted: MUTED_DARK, tag: LIME, tagInk: INK },
   { bg: PAPER, ink: INK, muted: MUTED_LIGHT, tag: VIOLET, tagInk: PAPER },
-  { bg: VIOLET, ink: PAPER, muted: 'rgba(244,241,234,0.7)', tag: PAPER, tagInk: VIOLET },
-  { bg: INK, ink: PAPER, muted: MUTED_DARK, tag: LIME, tagInk: INK },
 ];
 
 /** A client file card: who, for what, how much — not invoiced. */
@@ -163,13 +152,13 @@ const ClientCard: React.FC<{ i: number }> = ({ i }) => {
 /** What the roll adds up to. */
 const Owed: React.FC = () => {
   const f = useCurrentFrame();
-  const owed = interpolate(f, [0, 16], [0, TOTAL_OWED], { ...CLAMP, easing: EASE_OUT });
+  const owed = interpolate(f, [0, 24], [0, TOTAL_OWED], { ...CLAMP, easing: EASE_OUT });
   return (
     <AbsoluteFill style={{ background: INK, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
       <div style={meta(MUTED_DARK, 32)}>Owed to you</div>
       <div style={{ ...figures(250, LIME), marginTop: 30 }}>${Math.round(owed).toLocaleString('en-US')}</div>
       <div style={{ height: 3, background: MUTED_DARK, margin: '50px 0 36px', opacity: 0.6 }} />
-      <div style={{ fontFamily: BRAND_FONT, fontSize: 64, fontWeight: 600, color: PAPER, letterSpacing: '-0.03em', ...lift(f, 10) }}>And not one invoice sent.</div>
+      <div style={{ fontFamily: BRAND_FONT, fontSize: 64, fontWeight: 600, color: PAPER, letterSpacing: '-0.03em', ...lift(f, 16) }}>And not one invoice sent.</div>
     </AbsoluteFill>
   );
 };
@@ -184,75 +173,71 @@ const Pause: React.FC = () => {
   );
 };
 
-const TITLE_LOOKS = [
-  { bg: PAPER, ink: INK, accent: VIOLET, dark: false },
-  { bg: LIME, ink: INK, accent: INK, dark: false },
-  { bg: VIOLET, ink: PAPER, accent: LIME, dark: true },
-  { bg: INK, ink: LIME, accent: LIME, dark: true },
-];
-
-/** One of the four steps, numbered, with a progress rule. */
-const Title: React.FC<{ i: number }> = ({ i }) => {
-  const look = TITLE_LOOKS[i];
-  const muted = look.dark ? MUTED_DARK : MUTED_LIGHT;
+/** The answer, a line per beat. */
+const Answer: React.FC = () => {
+  const f = useCurrentFrame();
+  const rule = interpolate(f, [BEAT * 2, BEAT * 2 + 16], [0, 1], { ...CLAMP, easing: EASE_OUT });
   return (
-    <AbsoluteFill style={{ background: look.bg }}>
-      <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, top: 700 }}>
-        <div style={meta(muted, 32)}>Step {String(i + 1).padStart(2, '0')} / 04</div>
-        <Reveal style={{ marginTop: 24 }}>
-          <div style={headline(i === 3 ? 230 : 270, look.ink)}>{TITLES[i]}.</div>
-        </Reveal>
-        <div style={{ display: 'flex', gap: 14, marginTop: 60 }}>
-          {TITLES.map((_, k) => (
-            <div key={k} style={{ flex: 1, height: 10, background: k <= i ? look.accent : muted, opacity: k <= i ? 1 : 0.35 }} />
-          ))}
-        </div>
-      </div>
+    <AbsoluteFill style={{ background: LIME, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
+      <Reveal>
+        <div style={headline(270, INK)}>Invoice</div>
+      </Reveal>
+      <Reveal at={BEAT} style={{ marginTop: 10 }}>
+        <div style={headline(270, INK)}>them.</div>
+      </Reveal>
+      <div style={{ height: 12, background: INK, width: `${rule * 100}%`, marginTop: 50 }} />
+      <div style={{ ...meta(INK, 32), marginTop: 30, ...lift(f, BEAT * 2 + 4) }}>Every one of them.</div>
     </AbsoluteFill>
   );
 };
 
-/** A product shot: the phone, wide for two beats, then a hard cut to a closer angle for the third.
- * The close angle sits in a window between the masthead and the footer. */
+/** A step in the app: its number and name up top, the phone wide, then a hard cut to a closer
+ * angle. The close angle sits in a window between the heading and the footer. */
 const ProductStage: React.FC<{
+  step: number;
   caption: string;
   close: { scale: number; x: number; y: number };
   children: React.ReactNode;
   bg?: string;
-}> = ({ caption, close, children, bg = PAPER }) => {
+}> = ({ step, caption, close, children, bg = PAPER }) => {
   const f = useCurrentFrame();
-  const closeUp = f >= BEAT * 2;
-  const rise = interpolate(f, [0, 10], [70, 0], { ...CLAMP, easing: EASE_OUT });
+  const closeUp = f >= CLOSE_AT;
+  const rise = interpolate(f, [0, 14], [60, 0], { ...CLAMP, easing: EASE_OUT });
   return (
     <AbsoluteFill style={{ background: bg, overflow: 'hidden' }}>
-      <AbsoluteFill style={{ clipPath: closeUp ? 'inset(290px 0 350px 0)' : undefined }}>
+      <AbsoluteFill style={{ clipPath: closeUp ? 'inset(440px 0 350px 0)' : undefined }}>
         <AbsoluteFill
           style={{
             transformOrigin: `${close.x}px ${close.y}px`,
-            scale: String(closeUp ? close.scale + (f - BEAT * 2) * 0.003 : 1 + f * 0.0012),
+            scale: String(closeUp ? close.scale + (f - CLOSE_AT) * 0.002 : 1 + f * 0.0008),
             translate: `0px ${closeUp ? 0 : rise}px`,
           }}
         >
           {children}
         </AbsoluteFill>
       </AbsoluteFill>
-      <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, top: 230, display: 'flex', gap: 22, alignItems: 'baseline' }}>
-        <span style={{ ...meta(INK, 24), padding: '8px 14px', background: bg === LIME ? PAPER : LIME }}>Fig.</span>
-        <span style={{ fontFamily: FONT, fontSize: 40, fontWeight: 600, color: INK, letterSpacing: '-0.01em' }}>{caption}</span>
+      <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, top: 236 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 26 }}>
+          <span style={{ ...meta(INK, 24), padding: '8px 14px', background: bg === LIME ? PAPER : LIME }}>{String(step + 1).padStart(2, '0')} / 04</span>
+          <Reveal>
+            <span style={headline(110, INK)}>{STEPS[step]}.</span>
+          </Reveal>
+        </div>
+        <div style={{ fontFamily: FONT, fontSize: 38, fontWeight: 500, color: MUTED_LIGHT, marginTop: 14, ...lift(f, 6) }}>{caption}</div>
       </div>
     </AbsoluteFill>
   );
 };
 
-// Every phone sits whole inside the frame, above the footer (bottom ≈ 1460).
-const PHONE = { width: 500, left: 290, top: 330 };
+// Every phone sits whole inside the frame, between the heading and the footer (bottom ≈ 1500).
+const PHONE = { width: 460, left: 310, top: 460 };
 
 const CreateShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Line items in seconds." close={{ scale: 1.75, x: 540, y: 1000 }}>
+    <ProductStage step={0} caption="Line items in seconds." close={{ scale: 1.75, x: 540, y: 1080 }}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
-        <EditorLight f={f} adds={[2, 10, 18]} />
+        <EditorLight f={f} adds={[4, 16, 28]} />
       </Phone>
     </ProductStage>
   );
@@ -261,9 +246,9 @@ const CreateShot: React.FC = () => {
 const SignShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Signed on the spot." close={{ scale: 1.75, x: 540, y: 720 }} bg={LIME}>
+    <ProductStage step={1} caption="Signed on the spot." close={{ scale: 1.75, x: 540, y: 820 }} bg={LIME}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
-        <SignLight f={f} drawStart={2} drawEnd={26} doneAt={30} />
+        <SignLight f={f} drawStart={4} drawEnd={30} doneAt={34} />
       </Phone>
     </ProductStage>
   );
@@ -272,12 +257,12 @@ const SignShot: React.FC = () => {
 const SendShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="A PDF with a pay link." close={{ scale: 1.1, x: 540, y: 900 }}>
-      <div style={{ position: 'absolute', left: 90, top: 340, scale: '0.8', transformOrigin: '0% 0%', rotate: '-3deg' }}>
+    <ProductStage step={2} caption="A PDF with a pay link." close={{ scale: 1.1, x: 540, y: 1000 }}>
+      <div style={{ position: 'absolute', left: 100, top: 480, scale: '0.75', transformOrigin: '0% 0%', rotate: '-3deg' }}>
         <PdfV2 payReveal={1} />
       </div>
-      <Phone width={400} lightScreen shadow={PHONE_SHADOW} style={{ left: 580, top: 560, rotate: '4deg' }}>
-        <ScanPay f={f} detectAt={6} sheetAt={16} payAt={30} />
+      <Phone width={380} lightScreen shadow={PHONE_SHADOW} style={{ left: 590, top: 640, rotate: '4deg' }}>
+        <ScanPay f={f} detectAt={6} sheetAt={18} payAt={32} />
       </Phone>
     </ProductStage>
   );
@@ -286,9 +271,9 @@ const SendShot: React.FC = () => {
 const PaidShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Paid. Tracked. Done." close={{ scale: 1.75, x: 540, y: 760 }}>
+    <ProductStage step={3} caption="Paid. Tracked. Done." close={{ scale: 1.75, x: 540, y: 860 }}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
-        <DetailLight f={f} paidAt={8} />
+        <DetailLight f={f} paidAt={10} />
       </Phone>
     </ProductStage>
   );
@@ -297,12 +282,12 @@ const PaidShot: React.FC = () => {
 /** The payoff: what you were owed, collected. */
 const Collected: React.FC = () => {
   const f = useCurrentFrame();
-  const amount = interpolate(f, [0, 20], [0, TOTAL_OWED], { ...CLAMP, easing: EASE_OUT });
+  const amount = interpolate(f, [0, 24], [0, TOTAL_OWED], { ...CLAMP, easing: EASE_OUT });
   return (
     <AbsoluteFill style={{ background: LIME, justifyContent: 'center', padding: `0 ${MARGIN}px` }}>
-      <div style={meta(INK, 32)}>Collected · 5 clients</div>
+      <div style={meta(INK, 32)}>Collected · 3 clients</div>
       <div style={{ ...figures(250, INK), marginTop: 30 }}>${Math.round(amount).toLocaleString('en-US')}</div>
-      <div style={{ height: 12, background: INK, marginTop: 44, width: `${interpolate(f, [0, 20], [0, 100], { ...CLAMP, easing: EASE_OUT })}%` }} />
+      <div style={{ height: 12, background: INK, marginTop: 44, width: `${interpolate(f, [0, 24], [0, 100], { ...CLAMP, easing: EASE_OUT })}%` }} />
       <Reveal at={BEAT} style={{ marginTop: 40 }}>
         <div style={headline(150, INK)}>Paid in full.</div>
       </Reveal>
@@ -351,8 +336,7 @@ const DARK_BGS: string[] = [INK, VIOLET];
 const isDark = (s: Shot) =>
   s.kind === 'owed' ||
   (s.kind === 'word' && DARK_BGS.includes(WORD_LOOKS[s.i!].bg)) ||
-  (s.kind === 'client' && DARK_BGS.includes(CARD_LOOKS[s.i!].bg)) ||
-  (s.kind === 'title' && TITLE_LOOKS[s.i!].dark);
+  (s.kind === 'client' && DARK_BGS.includes(CARD_LOOKS[s.i!].bg));
 
 const renderShot = (s: Shot) => {
   switch (s.kind) {
@@ -364,8 +348,8 @@ const renderShot = (s: Shot) => {
       return <Owed />;
     case 'pause':
       return <Pause />;
-    case 'title':
-      return <Title i={s.i!} />;
+    case 'answer':
+      return <Answer />;
     case 'create':
       return <CreateShot />;
     case 'sign':

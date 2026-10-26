@@ -5,7 +5,7 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
 
 - **v2, current (`LaunchVideo`, 45.6 s):** a light, multicolor look with a midnight finale,
   calmer pacing and the newest features. It renders to `out/InvoiceThem-Launch-v2-9x16.mp4`.
-- **"You have clients? Invoice them." (`Reel20`, 20 s):** an editorial reel at 120 BPM: hard cuts
+- **"You have clients? Invoice them." (`Reel20`, 20 s):** an editorial reel at 90 BPM: 15 shots, hard cuts
   on the beat, every shot held at least a beat so it reads, a magazine-style frame, a one-beat pause
   before "Invoice them.", and the $0.99 first-month offer and "Powered by NewMux" on the end card.
   It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`. The cut list lives in
