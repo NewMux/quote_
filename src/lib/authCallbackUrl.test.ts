@@ -35,6 +35,14 @@ describe('parseAuthCallbackUrl', () => {
     });
   });
 
+  it('reads the recovery link the site\'s auth page hands over', () => {
+    expect(parseAuthCallbackUrl('quoteapp://auth/callback?token_hash=abc123_-XYZ&type=recovery')).toEqual({
+      kind: 'tokenHash',
+      tokenHash: 'abc123_-XYZ',
+      type: 'recovery',
+    });
+  });
+
   it('reads a token hash', () => {
     expect(parseAuthCallbackUrl('quoteapp://auth/callback?token_hash=h&type=signup')).toEqual({
       kind: 'tokenHash',

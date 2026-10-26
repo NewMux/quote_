@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Invoice Them</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .open { display: block; text-align: center; background: #157a63; color: #fff; font-weight: 600; text-decoration: none; padding: 15px 24px; border-radius: 999px; margin: 20px 0 8px; }
+    .open[hidden], [hidden] { display: none; }
+    .small { color: var(--muted); font-size: 15px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="app">Invoice Them</p>
+    <h1 id="title">Opening the app&hellip;</h1>
+    <p class="meta" id="lead"></p>
+  </header>
+
+  <section>
+    <a class="open" id="open" href="quoteapp://auth/callback" hidden>Open Invoice Them</a>
+    <p class="small" id="hint" hidden>If the app doesn&rsquo;t open on its own, tap the button. This works on the iPhone that has Invoice Them installed.</p>
+    <p id="problem" hidden>This link is incomplete. Go back to the app and request a new one.</p>
+  </section>
+
+  <footer>
+    <a href="support.html">Support</a>
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+</main>
+
+<script>
+// The email link lands here, not on Supabase, so nothing uses up its one-time token until the app
+// itself verifies it. This page only passes the token on: quoteapp://auth/callback?token_hash=…&type=…
+// (the app's auth callback screen accepts that shape). It never contacts Supabase.
+(function () {
+  var TYPES = { signup: ['Confirm your email', 'Open the app to finish confirming your email address.'],
+                recovery: ['Reset your password', 'Open the app to choose a new password.'],
+                email_change: ['Confirm your new email', 'Open the app to confirm your new email address.'],
+                email: ['Sign in to Invoice Them', 'Open the app to finish signing in.'] };
+  var q = new URLSearchParams(location.search);
+  var tokenHash = q.get('token_hash') || '';
+  var type = q.get('type') || '';
+  var title = document.getElementById('title');
+  var lead = document.getElementById('lead');
+
+  if (!/^[A-Za-z0-9_-]{8,256}$/.test(tokenHash) || !TYPES.hasOwnProperty(type)) {
+    title.textContent = 'This link didn’t work';
+    document.getElementById('problem').hidden = false;
+    return;
+  }
+
+  var url = 'quoteapp://auth/callback?token_hash=' + encodeURIComponent(tokenHash) + '&type=' + encodeURIComponent(type);
+  title.textContent = TYPES[type][0];
+  lead.textContent = TYPES[type][1];
+  var open = document.getElementById('open');
+  open.href = url;
+  open.hidden = false;
+  document.getElementById('hint').hidden = false;
+  // Try to open the app straight away on a phone; the button is the dependable route, since some
+  // in-app mail browsers only follow an app link after a tap.
+  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) setTimeout(function () { location.href = url; }, 500);
+})();
+</script>
+</body>
+</html>
