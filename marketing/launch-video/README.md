@@ -5,6 +5,10 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
 
 - **v2, current (`LaunchVideo`, 45.6 s):** a light, multicolor look with a midnight finale,
   calmer pacing and the newest features. It renders to `out/InvoiceThem-Launch-v2-9x16.mp4`.
+- **"You have clients? Invoice them." (`Reel20`, 20 s):** an editorial fast-cut reel at 120 BPM
+  (a cut every beat or half beat) in the brand palette, with a magazine-style frame (masthead, shot
+  counter, timecode). It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`.
+  The cut list lives in `src/reel/timing.ts`, the soundtrack in `scripts/make-music-reel.mjs`.
 - **"What separates the pros" (`Pros`, 20 s):** a motivational-edit style spot (black frame,
   footage in a band, word-by-word subtitles) with a voiceover over the song from the Bond reference
   edit, which dips under each line. It renders to `out/InvoiceThem-Pros-9x16.mp4`.

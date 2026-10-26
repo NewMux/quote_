@@ -9,6 +9,8 @@ import { CreateAd, FinaleAd, HookAd, PayAd, SignAd } from './ad/scenes';
 import { FPS as FPS_AD, SCENES_AD, TOTAL_AD } from './ad/timing';
 import { LaunchVideo } from './LaunchVideo';
 import { ProsVideo } from './pros/ProsVideo';
+import { ReelVideo } from './reel/ReelVideo';
+import { FPS as FPS_REEL, TOTAL_REEL } from './reel/timing';
 import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
 import { LaunchVideoV2 } from './v2/LaunchVideoV2';
 import { BentoV2 } from './v2/scenes/BentoV2';
@@ -51,6 +53,7 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="NightV2" component={NightV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.night} />
       <Composition id="FinaleV2" component={FinaleV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.finale} />
     </Folder>
+    <Composition id="Reel20" component={ReelVideo} width={W} height={H} fps={FPS_REEL} durationInFrames={TOTAL_REEL} />
     <Composition id="Pros" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} />
     <Composition id="ProsVoiceOnly" component={ProsVideo} width={W} height={H} fps={FPS_PROS} durationInFrames={TOTAL_PROS} defaultProps={{ music: false }} />
     <Composition id="Ad15" component={AdVideo} width={W} height={H} fps={FPS_AD} durationInFrames={TOTAL_AD} />
