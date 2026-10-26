@@ -38,11 +38,20 @@ export type StatusKey = keyof typeof STATUS;
 /** The app's avatar palette (src/lib/theme.ts). */
 export const AVATAR_COLORS = ['#157A63', '#A14B08', '#1D5FC4', '#6D3FD1', '#B3261E', '#0B6E8A', '#7A5A06', '#4B5563'];
 
-export const Screen: React.FC<{ children: React.ReactNode; bg?: string }> = ({ children, bg = LIGHT.grouped }) => (
-  <div style={{ position: 'absolute', inset: 0, width: SCREEN_W, height: SCREEN_H, background: bg, fontFamily: FONT, color: LIGHT.label, overflow: 'hidden' }}>
+/** The window the screen is drawn in, in points. Defaults to an iPhone (393 × 852). `inset` is the
+ * side margin of the scrolling content (16 on a phone; larger when a width cap centers a column),
+ * and `responsiveChart` says whether the payments chart follows its container (the PR #7 change). */
+export const ScreenSize = React.createContext({ w: SCREEN_W, h: SCREEN_H, inset: 16, responsiveChart: false });
+export const useScreenSize = () => React.useContext(ScreenSize);
+
+export const Screen: React.FC<{ children: React.ReactNode; bg?: string }> = ({ children, bg = LIGHT.grouped }) => {
+  const { w, h } = useScreenSize();
+  return (
+  <div style={{ position: 'absolute', inset: 0, width: w, height: h, background: bg, fontFamily: FONT, color: LIGHT.label, overflow: 'hidden' }}>
     {children}
   </div>
-);
+  );
+};
 
 /** The Liquid Glass material: a translucent, blurred, lightly lit capsule. */
 export const glass = (extra?: React.CSSProperties): React.CSSProperties => ({
@@ -89,10 +98,13 @@ const TABS: { name: IconName; label: string }[] = [
 ];
 
 /** The iOS 26 system tab bar: a floating glass capsule, the selected tab in a darker pill. */
-export const TabBar: React.FC<{ active: number }> = ({ active }) => (
+export const TabBar: React.FC<{ active: number }> = ({ active }) => {
+  const { w } = useScreenSize();
+  const side = w > 520 ? (w - 480) / 2 : 21;
+  return (
   <>
     <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 150, background: 'linear-gradient(to bottom, rgba(242,242,247,0) 0%, rgba(242,242,247,0.92) 62%)', zIndex: 5 }} />
-    <div style={{ position: 'absolute', left: 21, right: 21, bottom: 27, height: 64, borderRadius: 32, padding: 4, display: 'flex', zIndex: 6, ...glass({ background: 'rgba(250,250,252,0.78)' }) }}>
+    <div style={{ position: 'absolute', left: side, right: side, bottom: 27, height: 64, borderRadius: 32, padding: 4, display: 'flex', zIndex: 6, ...glass({ background: 'rgba(250,250,252,0.78)' }) }}>
       {TABS.map((t, i) => (
         <div
           key={t.label}
@@ -113,9 +125,10 @@ export const TabBar: React.FC<{ active: number }> = ({ active }) => (
         </div>
       ))}
     </div>
-    <div style={{ position: 'absolute', bottom: 8, left: (SCREEN_W - 134) / 2, width: 134, height: 5, borderRadius: 3, background: '#111', zIndex: 7 }} />
+    <div style={{ position: 'absolute', bottom: 8, left: (w - 134) / 2, width: 134, height: 5, borderRadius: 3, background: '#111', zIndex: 7 }} />
   </>
-);
+  );
+};
 
 export const Segmented: React.FC<{ values: string[]; selected: number }> = ({ values, selected }) => (
   <div style={{ position: 'relative', height: 36, borderRadius: 18, background: 'rgba(118,118,128,0.12)', display: 'flex', padding: 2 }}>
