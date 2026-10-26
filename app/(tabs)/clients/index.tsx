@@ -12,6 +12,7 @@ import { addButtonItem, filterButtonItem } from '../../../src/lib/headerItems';
 import { SWIPE_COLORS } from '../../../src/lib/theme';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
 import type { Client } from '../../../src/types/models';
+import { contentColumn } from '../../../src/lib/layout';
 
 function openFilters() {
   router.push('/modals/client-filter');
@@ -118,7 +119,7 @@ export default function ClientsScreen() {
       sections={sections}
       keyExtractor={(item) => item.id}
       stickySectionHeadersEnabled={false}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, flexGrow: 1 }}
+      contentContainerStyle={[contentColumn, { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, flexGrow: 1 }]}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       renderSectionHeader={({ section }) =>
         section.title ? (

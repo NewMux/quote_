@@ -21,6 +21,7 @@ import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
 import { useReportsStore } from '../../../src/stores/useReportsStore';
 import type { ReportGranularity } from '../../../src/db/repositories/reports.repo';
 import type { DocumentListItem } from '../../../src/types/models';
+import { contentColumn } from '../../../src/lib/layout';
 
 const GRANULARITIES: { label: string; value: ReportGranularity }[] = [
   { label: 'Day', value: 'day' },
@@ -149,7 +150,7 @@ export default function SummaryScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+      contentContainerStyle={[contentColumn, { padding: 16, paddingTop: 8 }]}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
     >
       <SegmentedControl

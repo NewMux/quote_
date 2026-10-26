@@ -14,6 +14,7 @@ import { getDisplayStatus, statusLabel } from '../../../../src/lib/statusMachine
 import type { SymbolName } from '../../../../src/lib/symbols';
 import { useClientsStore } from '../../../../src/stores/useClientsStore';
 import type { Client, DocumentListItem } from '../../../../src/types/models';
+import { contentColumn } from '../../../../src/lib/layout';
 
 export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -145,7 +146,7 @@ export default function ClientDetailScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+      contentContainerStyle={[contentColumn, { padding: 16, paddingBottom: 32 }]}
     >
       {/* Contacts-style card: photo, name, and quick actions for reaching the client. */}
       <View className="items-center gap-2 pt-2 pb-6">

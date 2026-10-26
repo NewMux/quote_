@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { useThemeColors } from '../../lib/theme';
@@ -17,7 +18,9 @@ const MAX_LABELS = 6;
 export function LineChart({ data, height = 140, color, accessibilityLabel }: LineChartProps) {
   const colors = useThemeColors();
   const lineColor = color ?? colors.tint;
-  const width = 320;
+  // Drawn at the width it's given, not a fixed 320, so it fills a wide window (the iPhone Duo's
+  // inner display) instead of sitting small in the middle with its labels spread out.
+  const [width, setWidth] = useState(320);
   const paddingX = 12;
   const paddingY = 16;
   const chartWidth = width - paddingX * 2;
@@ -47,7 +50,12 @@ export function LineChart({ data, height = 140, color, accessibilityLabel }: Lin
   const labelStep = Math.ceil(data.length / MAX_LABELS);
 
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
+    <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={accessibilityLabel}
+      onLayout={(e) => setWidth(Math.max(200, Math.round(e.nativeEvent.layout.width)))}
+    >
       <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
         <Defs>
           <LinearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
