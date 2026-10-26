@@ -10,6 +10,18 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
   before "Invoice them.", and the $0.99 first-month offer and "Powered by NewMux" on the end card.
   It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`. The cut list lives in
   `src/reel/timing.ts`, the soundtrack in `scripts/make-music-reel.mjs`.
+- **"A short history of getting paid." (`Doc40`, 40 s):** an editorial documentary reel. It opens on
+  Franklin's "Remember that credit is money." (*Advice to a Young Tradesman*, 1748), then follows
+  three dated chapters of archival film (1925 the counter, 1945 the ledger, 1950s the follow-up
+  call), turns to "Today", and lands on the app and the $0.99 first-month offer. It renders to
+  `out/InvoiceThem-Doc-40s-9x16.mp4` with `npm run render:doc`. The shot list lives in
+  `src/doc/timing.ts`, the score (piano, drone, projector) in `scripts/make-music-doc.mjs`.
+  - Footage, all public domain from the Prelinger Archives (archive.org), trimmed into
+    `public/doc/`: *Troubles of a Merchant and How to Stop Them* (1925; `cash`, `charge`, `slip`,
+    `outstanding`), *Bookkeeping and Accounting* (1945; `office`, `ledger`, `sign`) and *The Town
+    and the Telephone* (1950; `call`, `writing`). The portrait is Joseph Siffred Duplessis's
+    *Benjamin Franklin* (c. 1785, public domain). No living person appears.
+  - Captions are set in Instrument Serif (SIL Open Font License), bundled in `public/fonts`.
 - **"What separates the pros" (`Pros`, 20 s):** a motivational-edit style spot (black frame,
   footage in a band, word-by-word subtitles) with a voiceover over the song from the Bond reference
   edit, which dips under each line. It renders to `out/InvoiceThem-Pros-9x16.mp4`.
