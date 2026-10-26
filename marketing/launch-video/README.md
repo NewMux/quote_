@@ -5,11 +5,11 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
 
 - **v2, current (`LaunchVideo`, 45.6 s):** a light, multicolor look with a midnight finale,
   calmer pacing and the newest features. It renders to `out/InvoiceThem-Launch-v2-9x16.mp4`.
-- **"You have clients? Invoice them." (`Reel20`, 20 s):** a hype fast-cut reel at 120 BPM: cuts on
-  beats, half and quarter beats, camera shake and color split on every hit, a build that cuts to
-  silence before the drop on "INVOICE THEM", and a trap-style soundtrack (808s, claps, risers,
-  impacts). It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`. The cut
-  list and hits live in `src/reel/timing.ts`, the soundtrack in `scripts/make-music-reel.mjs`.
+- **"You have clients? Invoice them." (`Reel20`, 20 s):** an editorial reel at 120 BPM: hard cuts
+  on the beat, every shot held at least a beat so it reads, a magazine-style frame, a one-beat pause
+  before "Invoice them.", and the $0.99 first-month offer and "Powered by NewMux" on the end card.
+  It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`. The cut list lives in
+  `src/reel/timing.ts`, the soundtrack in `scripts/make-music-reel.mjs`.
 - **"What separates the pros" (`Pros`, 20 s):** a motivational-edit style spot (black frame,
   footage in a band, word-by-word subtitles) with a voiceover over the song from the Bond reference
   edit, which dips under each line. It renders to `out/InvoiceThem-Pros-9x16.mp4`.
