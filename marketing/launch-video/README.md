@@ -10,17 +10,18 @@ Vertical (1080×1920, 30 fps) videos for Reels, TikTok and Shorts, built with
   before "Invoice them.", and the $0.99 first-month offer and "Powered by NewMux" on the end card.
   It renders to `out/InvoiceThem-Reel-20s-9x16.mp4` with `npm run render:reel`. The cut list lives in
   `src/reel/timing.ts`, the soundtrack in `scripts/make-music-reel.mjs`.
-- **"A short history of getting paid." (`Doc40`, 40 s):** an editorial documentary reel. It opens on
-  Franklin's "Remember that credit is money." (*Advice to a Young Tradesman*, 1748), then follows
-  three dated chapters of archival film (1925 the counter, 1945 the ledger, 1950s the follow-up
-  call), turns to "Today", and lands on the app and the $0.99 first-month offer. It renders to
-  `out/InvoiceThem-Doc-40s-9x16.mp4` with `npm run render:doc`. The shot list lives in
-  `src/doc/timing.ts`, the score (piano, drone, projector) in `scripts/make-music-doc.mjs`.
+- **"A short history of getting paid." (`DocTrailer`, 19 s):** a documentary-trailer reel at 120 BPM.
+  Full-frame archival film with big serif lines ("For a hundred years, / getting paid / looked like
+  this."), then a word per cut, with the cuts speeding up from a beat to four frames ("Write it. File it.
+  Chase it. Wait. Call. Wait…"), under staccato strings and a ticking clock. Then two beats of
+  silence, "It's 2026. You're still waiting." typed out, a braam on "Invoice them.", the app on a
+  groove with a till's ka-ching, and the $0.99 end card. It renders to
+  `out/InvoiceThem-Doc-Trailer-9x16.mp4` with `npm run render:doc`. The cut lives in
+  `src/doc/timing.ts`, the score and sound design in `scripts/make-music-doc.mjs`.
   - Footage, all public domain from the Prelinger Archives (archive.org), trimmed into
-    `public/doc/`: *Troubles of a Merchant and How to Stop Them* (1925; `cash`, `charge`, `slip`,
-    `outstanding`), *Bookkeeping and Accounting* (1945; `office`, `ledger`, `sign`) and *The Town
-    and the Telephone* (1950; `call`, `writing`). The portrait is Joseph Siffred Duplessis's
-    *Benjamin Franklin* (c. 1785, public domain). No living person appears.
+    `public/doc/`: *Troubles of a Merchant and How to Stop Them* (1925), *Bookkeeping and
+    Accounting* (1945), *The Town and the Telephone* (1950), *What Is Money?* (1947) and *The
+    Secretary's Day* (1947). No living person appears.
   - Captions are set in Instrument Serif (SIL Open Font License), bundled in `public/fonts`.
 - **"What separates the pros" (`Pros`, 20 s):** a motivational-edit style spot (black frame,
   footage in a band, word-by-word subtitles) with a voiceover over the song from the Bond reference
@@ -160,7 +161,8 @@ npm run render:ar
 `AppMark` is the real app icon: the lime mark on a Midnight Ink squircle. The identity lives in
 `src/brand.ts` (colors, typeface, tagline) and `public/brand/` (mark and wordmark as SVG, cut
 from the "Invoice Them Logo Identity" PDF). The brand typeface, Bricolage Grotesque, is bundled
-in `public/fonts`.
+in `public/fonts` and loaded by `src/fonts.ts`, which `package.json` lists under `sideEffects` so the
+bundler keeps it.
 
 ## License note
 

@@ -36,10 +36,11 @@
     "render:ad": "npm run music && remotion render Ad15 out/InvoiceThem-Ad-15s-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
     "render:ar": "npm run music && remotion render AdAr out/InvoiceThem-Ad-AR-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
     "render:reel": "npm run music && remotion render Reel20 out/InvoiceThem-Reel-20s-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k",
-    "render:doc": "npm run music && remotion render Doc40 out/InvoiceThem-Doc-40s-9x16.mp4 --codec=h264 --crf=17 --audio-codec=aac --audio-bitrate=256k",
+    "render:doc": "npm run music && remotion render DocTrailer out/InvoiceThem-Doc-Trailer-9x16.mp4 --codec=h264 --crf=17 --audio-codec=aac --audio-bitrate=256k",
     "render:v1": "npm run music && remotion render LaunchVideoV1 out/InvoiceThem-Launch-9x16.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=256k"
   },
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./src/fonts.ts"
   ]
 }

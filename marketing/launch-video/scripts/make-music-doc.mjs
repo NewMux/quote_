@@ -1,139 +1,343 @@
-// Score for the 40.4 s documentary reel "A short history of getting paid." (src/doc), cued in
-// seconds to src/doc/timing.ts:
-//   0 Franklin: a low drone, a first piano note · 3.5 chapter I (1925): projector clatter, a slow
-//   piano line in D minor · 13.7 chapter II (1945): the line moves to B♭ · 20.9 chapter III
-//   (1950s): F, then C · 25.4 "Today": the projector stops, one held low note · 28.2 "You have
-//   clients?": a heartbeat · 29.7 "Invoice them.": the harmony opens to F major · 31.7 the app: a
-//   light marimba pulse · 36.5 end card: the home chord, a chime under the price at 38.
+// Score and sound design for the 19 s documentary trailer (src/doc), 120 BPM, cued to the frames in
+// src/doc/timing.ts:
+//   0–6.5 s the archive: staccato strings in D minor that open up as the cuts speed up, a clock
+//   ticking on the beat, then eighths, then sixteenths; a boom on each headline, a thud on each
+//   word, a riser into · 6.5–7.5 s dead silence · 7.5 s typewriter keys and a bell under "It's 2026."
+//   · 9 s a heartbeat under "You have clients?" · 10 s a braam on "Invoice them." · 11.5–15.5 s a
+//   groove under the app, a whoosh per step, a till's ka-ching on "Get paid." · 15.5 s the end card,
+//   a hit under the price.
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { bell, kick, marimba, pad, shaker, softHit, swell } from './instruments-v2.mjs';
-import { Biquad, SR, add, bus, noise, normalize, reverb, writeWav } from './synth.mjs';
+import { Biquad, SR, add, bus, noise, normalize, rand, reverb, saw, writeWav } from './synth.mjs';
 
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'audio');
-const DURATION = 40.4;
+const FPS = 30;
+const BEAT = 0.5;
+const DURATION = 570 / FPS;
 const TOTAL = Math.ceil((DURATION + 0.02) * SR);
+const fr = (frames) => frames / FPS;
 
-const CUE = { cash: 3.5, office: 13.7, call: 20.8, now: 25.3, question: 28.1, answer: 29.6, app: 31.6, end: 36.4, price: 37.9 };
+// Frames, from src/doc/timing.ts.
+const LINES = [0, 30, 60];
+const WORDS = [90, 105, 120, 135];
+const FAST = [150, 158, 165, 173];
+const FLICKS = [180, 184, 188, 192];
+const GAP = 195;
+const TYPED = 225;
+const QUESTION = 270;
+const ANSWER = 300;
+const STEPS = [345, 375, 405, 435];
+const END = 465;
+const PRICE = END + 30;
 
-// D minor and its relatives, piano voicings.
-const N = { D2: 73.42, F2: 87.31, A2: 110, Bb1: 58.27, C2: 65.41, D3: 146.83, F3: 174.61, A3: 220, Bb2: 116.54, C3: 130.81, E3: 164.81, G3: 196, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392, A4: 440, Bb3: 233.08, C4: 261.63, C5: 523.25, D5: 587.33 };
+const NOTE = { D2: 73.42, A2: 110, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, Bb3: 233.08, C4: 261.63, D4: 293.66, F4: 349.23, A4: 440, C5: 523.25, F5: 698.46, A5: 880 };
 
-/** A soft felt piano: decaying harmonics, a little hammer, slightly stretched partials. */
-function piano(b, send, t, f, vel = 0.2, pan = 0, len = 3.2) {
+// --- Instruments --------------------------------------------------------------------------------
+
+/** Staccato string section: three detuned saws through a lowpass, a short bowed envelope. */
+function stringStab(b, send, t, f, vel, cutoff, len = 0.11) {
   const s = Math.round(t * SR);
-  const lp = new Biquad('lowpass', 2600, 0.7);
+  const lp = new Biquad('lowpass', cutoff, 0.9);
+  const ph = [0, 0.31, 0.67];
   for (let n = 0; n < len * SR; n++) {
     const tt = n / SR;
     let v = 0;
-    for (let k = 1; k <= 6; k++) {
-      const fk = f * k * (1 + 0.0004 * k * k);
-      v += (Math.sin(2 * Math.PI * fk * tt) / k ** 1.4) * Math.exp(-tt / (1.6 / k ** 0.6));
-    }
-    const hammer = n < 0.01 * SR ? noise() * (1 - n / (0.01 * SR)) * 0.2 : 0;
-    const out = lp.process(v + hammer) * Math.min(1, tt / 0.003) * Math.min(1, (len - tt) / 0.2) * vel;
-    add(b, s + n, out * (1 - pan), out * (1 + pan));
-    add(send, s + n, out * 0.55, out * 0.55);
+    ph.forEach((_, k) => {
+      ph[k] += (f * (1 + (k - 1) * 0.006)) / SR;
+      v += saw(ph[k]);
+    });
+    const env = Math.min(1, tt / 0.006) * Math.exp(-tt / (len * 0.45));
+    const out = lp.process(v / 3) * env * vel;
+    add(b, s + n, out * 0.9, out);
+    add(send, s + n, out * 0.3, out * 0.3);
   }
 }
 
-/** Old projector: the shutter's 24 fps clatter and a faint motor, from `from` to `to` seconds. */
-function projector(b, from, to, vel = 0.05) {
-  const lp = new Biquad('lowpass', 2200, 0.7);
-  const hp = new Biquad('highpass', 300, 0.7);
-  const s0 = Math.round(from * SR);
-  const s1 = Math.round(to * SR);
-  for (let n = s0; n < s1; n++) {
-    const tt = (n - s0) / SR;
-    const phase = (tt * 24) % 1;
-    const click = Math.exp(-phase / 0.06);
-    const motor = Math.sin(2 * Math.PI * 60 * tt) * 0.15 + Math.sin(2 * Math.PI * 120 * tt) * 0.08;
-    const edge = Math.min(1, tt / 0.4) * Math.min(1, (to - from - tt) / 0.15);
-    const v = (hp.process(lp.process(noise())) * click * 0.9 + motor * 0.25 + noise() * 0.04) * vel * edge;
-    add(b, n, v, v * 0.95);
+/** Long low string chord (for swells and the end). */
+function strings(b, send, t, freqs, dur, vel, cutoff = 1800) {
+  const s = Math.round(t * SR);
+  const lp = [new Biquad('lowpass', cutoff, 0.7), new Biquad('lowpass', cutoff, 0.7)];
+  const voices = freqs.flatMap((f) => [-8, 0, 8].map((c) => ({ f: f * 2 ** (c / 1200), ph: (f * c) % 1, pan: c / 12 })));
+  for (let n = 0; n < dur * SR; n++) {
+    const tt = n / SR;
+    const env = Math.min(1, tt / 0.25) * Math.min(1, (dur - tt) / 0.4);
+    let L = 0;
+    let R = 0;
+    for (const v of voices) {
+      v.ph += v.f / SR;
+      const w = saw(v.ph);
+      L += w * (1 - v.pan);
+      R += w * (1 + v.pan);
+    }
+    L = (lp[0].process(L) / voices.length) * env * vel * 2;
+    R = (lp[1].process(R) / voices.length) * env * vel * 2;
+    add(b, s + n, L, R);
+    add(send, s + n, L * 0.5, R * 0.5);
   }
 }
+
+/** Clock tick: a dry woodblock click. */
+function tick(b, t, vel = 0.25, f = 2100) {
+  const s = Math.round(t * SR);
+  const bp = new Biquad('bandpass', f, 6);
+  for (let n = 0; n < 0.05 * SR; n++) {
+    const tt = n / SR;
+    const v = (Math.sin(2 * Math.PI * f * tt) * 0.6 + bp.process(noise()) * 2) * Math.exp(-tt / 0.006) * vel;
+    add(b, s + n, v, v);
+  }
+}
+
+/** A deep cinematic boom: a sub that drops in pitch, plus a dark thump. */
+function boom(b, send, t, vel = 1, len = 2) {
+  const s = Math.round(t * SR);
+  const lp = new Biquad('lowpass', 900, 0.7);
+  let ph = 0;
+  for (let n = 0; n < len * SR; n++) {
+    const tt = n / SR;
+    ph += (34 + 70 * Math.exp(-tt / 0.07)) / SR;
+    const v = (Math.tanh(Math.sin(2 * Math.PI * ph) * 2.2) * Math.exp(-tt / (len * 0.4)) + lp.process(noise()) * Math.exp(-tt / 0.08) * 0.6) * vel;
+    add(b, s + n, v, v);
+    add(send, s + n, v * 0.25, v * 0.25);
+  }
+}
+
+/** A short thud for the word cuts. */
+function thud(b, t, vel = 0.7) {
+  const s = Math.round(t * SR);
+  let ph = 0;
+  for (let n = 0; n < 0.25 * SR; n++) {
+    const tt = n / SR;
+    ph += (55 + 160 * Math.exp(-tt / 0.015)) / SR;
+    const v = (Math.tanh(Math.sin(2 * Math.PI * ph) * 3) * Math.exp(-tt / 0.08) + noise() * Math.exp(-tt / 0.004) * 0.4) * vel;
+    add(b, s + n, v, v);
+  }
+}
+
+/** Rising noise + saw riser ending at `t + dur`. */
+function riser(b, send, t, dur, vel = 0.3) {
+  const s = Math.round(t * SR);
+  const bp = new Biquad('bandpass', 300, 1);
+  let ph = 0;
+  for (let n = 0; n < dur * SR; n++) {
+    const p = n / (dur * SR);
+    if (n % 32 === 0) bp.set('bandpass', 300 * 20 ** p, 1.3);
+    ph += (90 * 10 ** p) / SR;
+    const v = (saw(ph) * 0.15 + bp.process(noise()) * 1.3) * p ** 2.2 * vel;
+    add(b, s + n, v * (1 - p * 0.3), v * (0.7 + p * 0.3));
+    add(send, s + n, v * 0.3, v * 0.3);
+  }
+}
+
+/** Typewriter key: a sharp strike and the typebar's clack. Space is a duller thunk. */
+function key(b, t, vel = 0.5, space = false) {
+  const s = Math.round(t * SR);
+  const bp = new Biquad('bandpass', space ? 700 : 2600, 2);
+  const lp = new Biquad('lowpass', 500, 0.7);
+  for (let n = 0; n < 0.07 * SR; n++) {
+    const tt = n / SR;
+    const strike = bp.process(noise()) * Math.exp(-tt / 0.004) * 2.2;
+    const body = lp.process(noise()) * Math.exp(-tt / 0.02) * 1.2;
+    const v = (strike + body) * vel * (0.85 + rand() * 0.3);
+    add(b, s + n, v, v * 0.92);
+  }
+}
+
+/** Typewriter bell / till bell. */
+function ding(b, send, t, vel = 0.25, f = 2350) {
+  const s = Math.round(t * SR);
+  for (let n = 0; n < 1.4 * SR; n++) {
+    const tt = n / SR;
+    const v = (Math.sin(2 * Math.PI * f * tt) + 0.5 * Math.sin(2 * Math.PI * f * 2.76 * tt) * Math.exp(-tt / 0.1)) * Math.exp(-tt / 0.45) * Math.min(1, tt / 0.001) * vel;
+    add(b, s + n, v, v);
+    add(send, s + n, v * 0.4, v * 0.4);
+  }
+}
+
+/** The till: drawer rattle, then the bell. */
+function kaChing(b, send, t, vel = 0.5) {
+  const s = Math.round(t * SR);
+  const bp = new Biquad('bandpass', 4000, 1.5);
+  for (let n = 0; n < 0.12 * SR; n++) {
+    const tt = n / SR;
+    const rattle = bp.process(noise()) * (0.5 + 0.5 * Math.sin(2 * Math.PI * 90 * tt)) * Math.exp(-tt / 0.05);
+    add(b, s + n, rattle * vel, rattle * vel);
+  }
+  ding(b, send, t + 0.09, 0.35 * vel * 2, 2640);
+  ding(b, send, t + 0.1, 0.2 * vel * 2, 3520);
+}
+
+/** Braam: a huge low brass-like chord, distorted, swelling and decaying. */
+function braam(b, send, t, freqs, dur = 2.4, vel = 0.6) {
+  const s = Math.round(t * SR);
+  const lp = [new Biquad('lowpass', 1200, 0.9), new Biquad('lowpass', 1200, 0.9)];
+  const voices = freqs.flatMap((f) => [-12, 0, 12].map((c) => ({ f: f * 2 ** (c / 1200), ph: 0, pan: c / 18 })));
+  for (let n = 0; n < dur * SR; n++) {
+    const tt = n / SR;
+    if (n % 64 === 0) lp.forEach((x) => x.set('lowpass', 500 + 2200 * Math.exp(-tt / 0.5), 0.9));
+    const env = Math.min(1, tt / 0.03) * Math.exp(-tt / (dur * 0.5));
+    let L = 0;
+    let R = 0;
+    for (const v of voices) {
+      v.ph += v.f / SR;
+      const w = saw(v.ph);
+      L += w * (1 - v.pan);
+      R += w * (1 + v.pan);
+    }
+    L = Math.tanh((lp[0].process(L) / voices.length) * 6) * env * vel;
+    R = Math.tanh((lp[1].process(R) / voices.length) * 6) * env * vel;
+    add(b, s + n, L, R);
+    add(send, s + n, L * 0.5, R * 0.5);
+  }
+}
+
+function whoosh(b, t, dur = 0.35, vel = 0.25) {
+  const s = Math.round(t * SR);
+  const bp = new Biquad('bandpass', 800, 0.8);
+  for (let n = 0; n < dur * SR; n++) {
+    const p = n / (dur * SR);
+    if (n % 32 === 0) bp.set('bandpass', 600 + 4000 * Math.sin(Math.PI * p), 0.8);
+    const v = bp.process(noise()) * Math.sin(Math.PI * p) ** 2 * vel * 2;
+    add(b, s + n, v * (1 - p), v * p);
+  }
+}
+
+function kick(b, t, vel = 1) {
+  const s = Math.round(t * SR);
+  let ph = 0;
+  for (let n = 0; n < 0.3 * SR; n++) {
+    const tt = n / SR;
+    ph += (48 + 180 * Math.exp(-tt / 0.025)) / SR;
+    const v = Math.tanh(Math.sin(2 * Math.PI * ph) * 2.5 * Math.exp(-tt / 0.14)) * 0.85 * vel;
+    add(b, s + n, v, v);
+  }
+}
+
+function clap(b, send, t, vel = 0.7) {
+  const s = Math.round(t * SR);
+  const bp = new Biquad('bandpass', 1500, 1.4);
+  for (let n = 0; n < 0.2 * SR; n++) {
+    const tt = n / SR;
+    const bursts = [0, 0.009, 0.018].reduce((e, o) => e + (tt >= o ? Math.exp(-(tt - o) / 0.006) : 0), 0);
+    const v = bp.process(noise()) * (bursts * 0.7 + Math.exp(-tt / 0.06) * 0.6) * 2 * vel;
+    add(b, s + n, v, v);
+    add(send, s + n, v * 0.3, v * 0.3);
+  }
+}
+
+function hat(b, t, vel = 0.1) {
+  const s = Math.round(t * SR);
+  const hp = new Biquad('highpass', 8000, 0.8);
+  for (let n = 0; n < 0.04 * SR; n++) {
+    const v = hp.process(noise()) * Math.exp(-n / SR / 0.01) * vel;
+    add(b, s + n, v * 0.8, v);
+  }
+}
+
+function bass(b, t, f, dur, vel = 0.4) {
+  const s = Math.round(t * SR);
+  let ph = 0;
+  for (let n = 0; n < dur * SR; n++) {
+    const tt = n / SR;
+    ph += f / SR;
+    const v = Math.tanh(Math.sin(2 * Math.PI * ph) * 1.6) * Math.min(1, tt / 0.005) * Math.min(1, (dur - tt) / 0.02) * vel;
+    add(b, s + n, v, v);
+  }
+}
+
+// --- Arrangement --------------------------------------------------------------------------------
 
 function song() {
-  const keys = bus(TOTAL);
-  const pads = bus(TOTAL);
-  const fx = bus(TOTAL);
-  const drums = bus(TOTAL);
+  const mus = bus(TOTAL);
+  const sfx = bus(TOTAL);
   const send = bus(TOTAL);
+  const archiveEnd = fr(GAP);
 
-  // Cold open: drone and one note.
-  pad(pads, send, 0, [N.D2, N.A2, N.D3], CUE.now + 0.2, 0.12, 700);
-  piano(keys, send, 0.4, N.D4, 0.16, 0, 3);
-  piano(keys, send, 1.9, N.A3, 0.12, -0.2, 3);
-
-  // The archive: projector under all three chapters.
-  projector(fx, CUE.cash - 0.1, CUE.now, 0.05);
-  softHit(fx, send, CUE.cash, 0.35);
-
-  // Chapter I — 1925, D minor.
-  const lineI = [N.F4, N.E4, N.D4, N.A3, N.F4, N.G4, N.A4, N.E4];
-  lineI.forEach((f, i) => piano(keys, send, CUE.cash + 0.2 + i * 1.2, f, 0.15, i % 2 ? 0.2 : -0.2));
-  [0, 4.8].forEach((o) => piano(keys, send, CUE.cash + o, N.D3, 0.13, 0, 4.5));
-
-  // Chapter II — 1945, B♭.
-  softHit(fx, send, CUE.office, 0.35);
-  pad(pads, send, CUE.office, [N.Bb1, N.F2, N.Bb2, N.D3], CUE.call - CUE.office + 0.3, 0.1, 900);
-  const lineII = [N.D4, N.F4, N.Bb3, N.C4, N.D4, N.F4];
-  lineII.forEach((f, i) => piano(keys, send, CUE.office + 0.1 + i * 1.2, f, 0.15, i % 2 ? 0.2 : -0.2));
-  piano(keys, send, CUE.office, N.Bb2, 0.13, 0, 4.5);
-
-  // Chapter III — 1950s, F then C.
-  softHit(fx, send, CUE.call, 0.35);
-  pad(pads, send, CUE.call, [N.F2, N.C3, N.F3, N.A3], 2.4, 0.1, 1100);
-  pad(pads, send, CUE.call + 2.3, [N.C2, N.G3, N.C3, N.E3], CUE.now - CUE.call - 2.1, 0.1, 1100);
-  [N.A4, N.G4, N.F4, N.E4].forEach((f, i) => piano(keys, send, CUE.call + 0.1 + i * 1.1, f, 0.15, i % 2 ? 0.2 : -0.2));
-  piano(keys, send, CUE.call, N.F3, 0.13, 0, 2.4);
-  piano(keys, send, CUE.call + 2.3, N.C3, 0.13, 0, 2.4);
-
-  // Today: the projector stops. One held low D and a high, quiet note.
-  piano(keys, send, CUE.now, N.D3, 0.16, 0, 3);
-  piano(keys, send, CUE.now + 1.4, N.D5, 0.07, 0.3, 2.5);
-  pad(pads, send, CUE.now, [N.D2, N.A2], CUE.question - CUE.now + 0.3, 0.08, 500);
-
-  // "You have clients?": a heartbeat.
-  [0, 0.38, 0.9, 1.28].forEach((o, i) => kick(drums, CUE.question + o, i % 2 ? 0.45 : 0.6));
-  swell(fx, send, CUE.answer - 0.8, 0.8, 0.12);
-
-  // "Invoice them.": the harmony opens.
-  softHit(fx, send, CUE.answer, 0.7);
-  kick(drums, CUE.answer, 0.9);
-  pad(pads, send, CUE.answer, [N.F2, N.C3, N.F3, N.A3, N.C4], CUE.end - CUE.answer + 0.2, 0.13, 2400);
-  [N.F4, N.A4, N.C5].forEach((f, k) => bell(keys, send, CUE.answer + 0.05 + k * 0.12, f, 0.06, k * 0.3 - 0.3));
-
-  // The app: a light marimba pulse, one step every 1.2 s.
-  for (let i = 0; i < 8; i++) {
-    const t = CUE.app + i * 0.6;
-    kick(drums, t, i % 2 ? 0.55 : 0.75);
-    for (let k = 0; k < 4; k++) shaker(drums, t + k * 0.15, k % 2 ? 0.03 : 0.055);
-    marimba(keys, send, t, [N.F4, N.A4, N.C5, N.A4][i % 4], 0.09, i % 2 ? 0.3 : -0.3);
+  // The archive: a D minor ostinato in sixteenths that opens up and gets louder.
+  const pattern = [NOTE.D3, NOTE.D3, NOTE.F3, NOTE.D3, NOTE.A3, NOTE.D3, NOTE.F3, NOTE.E3];
+  const bass2 = [NOTE.D2, NOTE.D2, NOTE.D2, NOTE.D2, 58.27, 58.27, 65.41, 65.41];
+  for (let i = 0; i * 0.125 < archiveEnd - 0.01; i++) {
+    const t = i * 0.125;
+    const p = t / archiveEnd;
+    // The figure climbs a whole step for the last two seconds, and a minor third for the last half.
+    const lift = t >= 6 ? 1.189 : t >= 4 ? 1.122 : 1;
+    stringStab(mus, send, t, pattern[i % 8] * lift, 0.09 + p * 0.13, 700 + p * 3500);
+    if (i % 4 === 0) stringStab(mus, send, t, bass2[Math.floor(i / 4) % 8], 0.12 + p * 0.1, 500 + p * 1200, 0.2);
   }
+  strings(mus, send, 0, [NOTE.D2, NOTE.A2, NOTE.D3], archiveEnd, 0.1, 900);
 
-  // End card: D minor resolved to F, the price chime.
-  softHit(fx, send, CUE.end, 0.6);
-  pad(pads, send, CUE.end, [N.F2, N.C3, N.F3, N.A3, N.D4], DURATION - CUE.end, 0.16, 2600);
-  piano(keys, send, CUE.end, N.F3, 0.16, 0, 4);
-  piano(keys, send, CUE.end + 0.02, N.A3, 0.13, -0.2, 4);
-  piano(keys, send, CUE.end + 0.04, N.C4, 0.12, 0.2, 4);
-  [N.C5, N.F4, N.A4].forEach((f, k) => bell(keys, send, CUE.price + k * 0.12, f * 2, 0.045, k * 0.3 - 0.3));
+  // The clock: beats, then eighths, then sixteenths.
+  for (let t = 0; t < fr(WORDS[0]); t += BEAT) tick(sfx, t, 0.22);
+  for (let t = fr(WORDS[0]); t < fr(FAST[0]); t += BEAT / 2) tick(sfx, t, 0.24);
+  for (let t = fr(FAST[0]); t < archiveEnd - 0.01; t += BEAT / 4) tick(sfx, t, 0.26, 2300);
 
-  const wet = reverb(send, 0.9);
+  // Hits on the cuts.
+  LINES.forEach((f, i) => boom(sfx, send, fr(f), 0.8 + i * 0.1, 1.6));
+  WORDS.forEach((f) => thud(sfx, fr(f), 0.8));
+  FAST.forEach((f) => thud(sfx, fr(f), 0.55));
+  FLICKS.forEach((f) => thud(sfx, fr(f), 0.4));
+  riser(sfx, send, fr(WORDS[2]), archiveEnd - fr(WORDS[2]), 0.32);
+
+  // Silence (GAP → TYPED), then the typewriter.
+  const line1 = 'It’s 2026.';
+  const line2 = 'You’re still waiting.';
+  for (let k = 0; k < line1.length + 4 + line2.length; k++) {
+    const t = fr(TYPED + k * 1.2);
+    if (t >= fr(QUESTION)) break;
+    const ch = k < line1.length ? line1[k] : k < line1.length + 4 ? null : line2[k - line1.length - 4];
+    if (ch === null) continue;
+    key(sfx, t, ch === ' ' ? 0.3 : 0.5, ch === ' ');
+  }
+  ding(sfx, send, fr(TYPED + line1.length * 1.2 + 2), 0.22);
+
+  // "You have clients?": a heartbeat and a low string.
+  [0, 0.32].forEach((o, i) => kick(sfx, fr(QUESTION) + o, i ? 0.55 : 0.75));
+  [0, 0.32].forEach((o, i) => kick(sfx, fr(QUESTION) + 0.5 + o, i ? 0.55 : 0.75));
+  strings(mus, send, fr(QUESTION), [NOTE.D2, NOTE.A2], fr(ANSWER - QUESTION) + 0.1, 0.12, 700);
+  riser(sfx, send, fr(QUESTION) + 0.4, fr(ANSWER - QUESTION) - 0.4, 0.22);
+
+  // "Invoice them.": braam.
+  braam(mus, send, fr(ANSWER), [NOTE.D2, NOTE.A2, NOTE.D3, NOTE.F3], 2.6, 0.55);
+  boom(sfx, send, fr(ANSWER), 1.1, 2.2);
+
+  // The app: a groove in F, a whoosh per step, the till on "Get paid."
+  const prog = [NOTE.F3 / 2, NOTE.D3 / 2, NOTE.Bb3 / 4, NOTE.C4 / 4];
+  for (let beat = 0; beat < 8; beat++) {
+    const t = fr(STEPS[0]) + beat * BEAT;
+    const root = prog[Math.floor(beat / 2) % 4];
+    kick(sfx, t, 0.9);
+    if (beat % 2 === 1) clap(sfx, send, t, 0.6);
+    for (let k = 0; k < 4; k++) hat(sfx, t + (k * BEAT) / 4, k % 2 ? 0.06 : 0.1);
+    bass(mus, t, root, BEAT * 0.4, 0.35);
+    bass(mus, t + BEAT / 2, root * 2, BEAT * 0.35, 0.3);
+    [4, 5, 6].forEach((h) => stringStab(mus, send, t + BEAT / 2, root * h, 0.06, 3500, 0.09));
+  }
+  STEPS.forEach((f) => whoosh(sfx, fr(f) - 0.18, 0.36, 0.22));
+  kaChing(sfx, send, fr(STEPS[3]) + 0.2, 0.55);
+
+  // End card.
+  boom(sfx, send, fr(END), 0.9, 2.4);
+  strings(mus, send, fr(END), [NOTE.F3 / 2, NOTE.C4 / 2, NOTE.F3, NOTE.A3, NOTE.C4], DURATION - fr(END), 0.16, 2400);
+  thud(sfx, fr(PRICE), 0.8);
+  ding(sfx, send, fr(PRICE) + 0.05, 0.12, 1760);
+  ding(sfx, send, fr(PRICE) + 0.17, 0.1, 2637);
+
+  const wet = reverb(send, 0.85);
   const out = bus(TOTAL);
+  const gapFrom = Math.round(fr(GAP) * SR);
+  const gapTo = Math.round(fr(TYPED) * SR);
   for (let n = 0; n < TOTAL; n++) {
+    const silent = n >= gapFrom && n < gapTo;
     for (let ch = 0; ch < 2; ch++) {
-      const v = keys[ch][n] * 0.9 + pads[ch][n] * 0.75 + fx[ch][n] * 0.8 + drums[ch][n] * 0.7 + wet[ch][n] * 0.6;
-      out[ch][n] = Math.tanh(v * 1.1);
+      const dry = mus[ch][n] * 0.85 + sfx[ch][n] * 0.9;
+      const v = (silent ? 0 : dry) + wet[ch][n] * (silent ? 0.15 : 0.5);
+      out[ch][n] = Math.tanh(v * 1.2);
     }
   }
-  normalize(out, 0.9);
-  const fadeStart = (DURATION - 1.5) * SR;
+  normalize(out, 0.93);
+  const fadeStart = (DURATION - 1.2) * SR;
   for (let n = Math.floor(fadeStart); n < TOTAL; n++) {
-    const g = Math.max(0, 1 - (n - fadeStart) / (1.5 * SR));
+    const g = Math.max(0, 1 - (n - fadeStart) / (1.2 * SR));
     out[0][n] *= g;
     out[1][n] *= g;
   }
