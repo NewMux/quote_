@@ -135,18 +135,18 @@ const ClientCard: React.FC<{ i: number }> = ({ i }) => {
   const e = useEnergy();
   const c = CLIENTS[i % CLIENTS.length];
   const look = CARD_LOOKS[i % CARD_LOOKS.length];
-  const nameSize = Math.min(160, 940 / (c.name.length * 0.52));
+  const nameSize = Math.min(150, 880 / (c.name.length * 0.56));
   return (
     <AbsoluteFill style={{ background: look.bg }}>
-      <div style={{ position: 'absolute', left: 70, right: 70, top: [380, 520, 440, 600][i % 4], translate: `${interpolate(f, [0, 3], [i % 2 ? -80 : 80, 0], CLAMP)}px 0px` }}>
+      <div style={{ position: 'absolute', left: 90, right: 90, top: [380, 520, 440, 600][i % 4], translate: `${interpolate(f, [0, 3], [i % 2 ? 40 : -40, 0], CLAMP)}px 0px` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={meta(look.muted, 30)}>Client</span>
           <span style={meta(look.muted, 30)}>No. {String(i + 1).padStart(3, '0')}</span>
         </div>
         <div style={{ height: 3, background: look.ink, margin: '24px 0 44px' }} />
-        <div style={{ ...headline(nameSize, look.ink, 700), whiteSpace: 'normal' }}>{c.name}</div>
+        <div style={headline(nameSize, look.ink, 700)}>{c.name}</div>
         <div style={{ fontFamily: FONT, fontSize: 48, fontWeight: 500, color: look.muted, marginTop: 30 }}>{c.job}</div>
-        <div style={{ fontFamily: FONT, fontSize: 140, fontWeight: 900, letterSpacing: '-0.05em', color: look.ink, marginTop: 50, fontVariantNumeric: 'tabular-nums', ...split(e) }}>
+        <div style={{ fontFamily: FONT, fontSize: fit(c.amount, 880, 140) * 1.05, fontWeight: 900, letterSpacing: '-0.05em', color: look.ink, marginTop: 50, fontVariantNumeric: 'tabular-nums', ...split(e) }}>
           {c.amount}
         </div>
         <div style={{ marginTop: 30, display: 'inline-block', padding: '16px 30px', background: look.tag, rotate: '-3deg', ...meta(look.tagInk, 34) }}>
@@ -269,7 +269,7 @@ const PHONE = { width: 700, left: 190, top: 330 };
 const CreateShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Line items in seconds." angles={[{ scale: 1.8, x: 540, y: 900 }, { scale: 2.1, x: 540, y: 1350 }]}>
+    <ProductStage caption="Line items in seconds." angles={[{ scale: 1.45, x: 540, y: 780 }, { scale: 1.45, x: 540, y: 1260 }]}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
         <EditorLight f={f} adds={[0, 7, 14]} />
       </Phone>
@@ -280,7 +280,7 @@ const CreateShot: React.FC = () => {
 const SignShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Signed on the spot." angles={[{ scale: 1.7, x: 540, y: 1000 }, { scale: 2.4, x: 420, y: 980 }]} bg={LIME}>
+    <ProductStage caption="Signed on the spot." angles={[{ scale: 1.45, x: 540, y: 860 }, { scale: 1.45, x: 540, y: 1180 }]} bg={LIME}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
         <SignLight f={f} drawStart={0} drawEnd={22} doneAt={26} />
       </Phone>
@@ -291,7 +291,7 @@ const SignShot: React.FC = () => {
 const SendShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="A PDF with a pay link." angles={[{ scale: 1.5, x: 300, y: 900 }, { scale: 1.7, x: 780, y: 1350 }]}>
+    <ProductStage caption="A PDF with a pay link." angles={[{ scale: 1.3, x: 380, y: 820 }, { scale: 1.4, x: 790, y: 1300 }]}>
       <div style={{ position: 'absolute', left: 50, top: 340, scale: '0.95', transformOrigin: '0% 0%', rotate: '-3deg' }}>
         <PdfV2 payReveal={1} />
       </div>
@@ -306,19 +306,19 @@ const PaidShot: React.FC = () => {
   const f = useCurrentFrame();
   const stamp = interpolate(f, [BEAT * 2, BEAT * 2 + 4], [0, 1], { ...CLAMP, easing: EASE_OUT });
   return (
-    <ProductStage caption="Paid. Tracked. Done." angles={[{ scale: 1.6, x: 540, y: 820 }, { scale: 1.6, x: 540, y: 820 }]}>
+    <ProductStage caption="Paid. Tracked. Done." angles={[{ scale: 1.45, x: 540, y: 820 }, { scale: 1.45, x: 540, y: 1000 }]}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
         <DetailLight f={f} paidAt={4} />
       </Phone>
       <div
         style={{
           position: 'absolute',
-          left: 560,
-          top: 600,
-          padding: '10px 34px',
+          left: 600,
+          top: 1010,
+          padding: '8px 30px',
           border: `10px solid ${INK}`,
           background: LIME,
-          ...headline(110, INK),
+          ...headline(96, INK),
           rotate: '-9deg',
           scale: String(2 - stamp),
           opacity: stamp,
@@ -381,6 +381,9 @@ const TAG_LOOKS = [
   { bg: VIOLET, ink: PAPER, echo: LIME },
 ];
 
+/** Frames into the end card where the price slams in (beat 36, on a hit). */
+const PRICE_AT = BEAT * 2;
+
 const EndCard: React.FC<{ len: number }> = ({ len }) => {
   const f = useCurrentFrame();
   const e = useEnergy();
@@ -394,20 +397,24 @@ const EndCard: React.FC<{ len: number }> = ({ len }) => {
   return (
     <AbsoluteFill style={{ background: BLACK }}>
       <KineticRows bg={BLACK} opacity={0.12} speed={10} />
-      <AbsoluteFill style={{ alignItems: 'center', paddingTop: 400, scale: String(interpolate(f, [0, len], [1, 1.05])) }}>
-        <AppMark size={240} style={{ scale: String(1.8 - 0.8 * mark), opacity: Math.min(1, mark * 2) }} />
-        <div style={{ marginTop: 90, clipPath: `inset(0 ${100 - wipe}% 0 0)` }}>
+      <AbsoluteFill style={{ alignItems: 'center', paddingTop: 300, scale: String(interpolate(f, [0, len], [1, 1.05])) }}>
+        <AppMark size={200} style={{ scale: String(1.8 - 0.8 * mark), opacity: Math.min(1, mark * 2) }} />
+        <div style={{ marginTop: 70, clipPath: `inset(0 ${100 - wipe}% 0 0)` }}>
           <Img src={staticFile('brand/wordmark.svg')} style={{ width: 880, height: 880 * (51 / 331) }} />
         </div>
-        <div style={{ marginTop: 100, textAlign: 'center', ...line(BEAT) }}>
+        <div style={{ marginTop: 70, textAlign: 'center', ...line(BEAT) }}>
           <div style={{ ...headline(84, PAPER, 700), letterSpacing: '-0.03em' }}>YOU HAVE CLIENTS?</div>
           <div style={{ ...headline(110, LIME), marginTop: 14, ...split(e) }}>INVOICE THEM.</div>
         </div>
-        <div style={{ marginTop: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, ...line(BEAT * 2) }}>
+        <div style={{ marginTop: 70, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: f >= PRICE_AT ? 1 : 0 }}>
+          <div style={meta(PAPER, 34)}>First month</div>
+          <div style={{ ...headline(230, LIME, 900), fontFamily: FONT, letterSpacing: '-0.06em', marginTop: 14, ...slam(f - PRICE_AT, 1.6, 4), ...split(e) }}>$0.99</div>
+        </div>
+        <div style={{ marginTop: 50, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, ...line(PRICE_AT + BEAT) }}>
           <div style={{ padding: '26px 56px', borderRadius: 999, background: LIME, color: INK, fontFamily: FONT, fontSize: 46, fontWeight: 800, letterSpacing: '-0.02em' }}>
             Download on the App Store
           </div>
-          <div style={meta(MUTED_DARK, 28)}>Free for a week</div>
+          <div style={meta(MUTED_DARK, 26)}>Then $9.99/month · Cancel anytime</div>
         </div>
       </AbsoluteFill>
       <AbsoluteFill style={{ background: '#000', opacity: fadeOut }} />

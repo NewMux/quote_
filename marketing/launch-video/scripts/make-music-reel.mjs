@@ -3,7 +3,8 @@
 //   0–2 the question: an impact and an 808 on each word · 2–6 the client roll: half-time groove,
 //   a tick on every card · 6–8 the build: snare roll and riser, cut to silence on the last 16th ·
 //   8 THE DROP: impact, stabs, full groove through the product (8–26) · 26–30 the PAID roll:
-//   16th ticks · 30 impact on the total · 32–34 tagline · 34 end card impact, 808 rings out.
+//   16th ticks · 30 impact on the total · 32–34 tagline · 34 end card impact · 36 impact under the
+//   price, then the 808 rings out.
 // Its own drum kit (808, clap, hats, impact, riser) lives here; pads and bells come from v2's rack.
 
 import path from 'node:path';
@@ -250,7 +251,12 @@ function song() {
   stab(music, send, at(34), [...PROG[0].notes, ...PROG[0].notes.map((f) => f * 2)], 0.35, 0.9);
   k808(low, at(34), PROG[0].root, 2.5, 1);
   pad(music, send, at(34), [...PROG[0].notes, 587.33], at(6), 0.18, 3000);
-  [0, 0.5, 1, 1.5, 2].forEach((beat, k) => bell(music, send, at(36 + beat), PROG[0].notes[k % 3] * 2, 0.06, k % 2 ? 0.3 : -0.3));
+  // The price: $0.99.
+  suck(fx, at(35.5), BEAT / 2, 0.3);
+  impact(fx, send, at(36), 1);
+  stab(music, send, at(36), [...PROG[0].notes, ...PROG[0].notes.map((f) => f * 2)], 0.3, 0.6);
+  k808(low, at(36), PROG[0].root, 1.5, 0.9);
+  [0, 0.5, 1, 1.5, 2].forEach((beat, k) => bell(music, send, at(36.5 + beat), PROG[0].notes[k % 3] * 2, 0.06, k % 2 ? 0.3 : -0.3));
 
   return mix(drums, low, music, fx, send, sidechain);
 }

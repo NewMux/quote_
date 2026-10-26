@@ -86,11 +86,11 @@ export const HITS: { at: number; power: number }[] = [
   { at: b(30), power: 1.4 },
   ...Array.from({ length: 4 }, (_, k) => ({ at: b(32 + k * 0.5), power: 0.8 })),
   { at: b(34), power: 1.5 },
-  { at: b(36), power: 0.5 },
+  { at: b(36), power: 1.3 },
 ];
 
 /** One-frame color inversions on the biggest moments. */
-export const STROBES = [b(1), b(7), b(7.5), b(7.75), b(8), b(9), b(30), b(34)];
+export const STROBES = [b(1), b(7), b(7.5), b(7.75), b(8), b(9), b(30), b(34), b(36)];
 
 /** Frames of total silence before the drop (the music's gap). */
 export const GAP = { from: b(7.75), to: b(8) };
