@@ -47,15 +47,12 @@ const figures = (size: number, color: string): React.CSSProperties => ({
   fontVariantNumeric: 'tabular-nums',
 });
 
-/** A line of type that rises out of a mask on the cut. */
+/** A line of type that settles into place on the cut. It is whole from the first frame — no mask,
+ * so nothing ever reads as cut off. */
 const Reveal: React.FC<{ at?: number; len?: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ at = 0, len = 7, children, style }) => {
   const f = useCurrentFrame();
   const p = interpolate(f, [at, at + len], [0, 1], { ...CLAMP, easing: EASE_OUT });
-  return (
-    <div style={{ overflow: 'hidden', paddingBottom: '0.08em', ...style }}>
-      <div style={{ translate: `0px ${(1 - p) * 105}%` }}>{children}</div>
-    </div>
-  );
+  return <div style={{ translate: `0px ${(1 - p) * 30}px`, opacity: f < at ? 0 : 1, ...style }}>{children}</div>;
 };
 
 /** Fades and lifts in, for secondary lines. */
@@ -247,12 +244,13 @@ const ProductStage: React.FC<{
   );
 };
 
-const PHONE = { width: 700, left: 190, top: 340 };
+// Every phone sits whole inside the frame, above the footer (bottom ≈ 1460).
+const PHONE = { width: 500, left: 290, top: 330 };
 
 const CreateShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Line items in seconds." close={{ scale: 1.45, x: 540, y: 1150 }}>
+    <ProductStage caption="Line items in seconds." close={{ scale: 1.75, x: 540, y: 1000 }}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
         <EditorLight f={f} adds={[2, 10, 18]} />
       </Phone>
@@ -263,7 +261,7 @@ const CreateShot: React.FC = () => {
 const SignShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Signed on the spot." close={{ scale: 1.45, x: 540, y: 900 }} bg={LIME}>
+    <ProductStage caption="Signed on the spot." close={{ scale: 1.75, x: 540, y: 720 }} bg={LIME}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
         <SignLight f={f} drawStart={2} drawEnd={26} doneAt={30} />
       </Phone>
@@ -274,11 +272,11 @@ const SignShot: React.FC = () => {
 const SendShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="A PDF with a pay link." close={{ scale: 1.4, x: 790, y: 1300 }}>
-      <div style={{ position: 'absolute', left: 50, top: 340, scale: '0.95', transformOrigin: '0% 0%', rotate: '-3deg' }}>
+    <ProductStage caption="A PDF with a pay link." close={{ scale: 1.1, x: 540, y: 900 }}>
+      <div style={{ position: 'absolute', left: 90, top: 340, scale: '0.8', transformOrigin: '0% 0%', rotate: '-3deg' }}>
         <PdfV2 payReveal={1} />
       </div>
-      <Phone width={500} lightScreen shadow={PHONE_SHADOW} style={{ left: 540, top: 900, rotate: '4deg' }}>
+      <Phone width={400} lightScreen shadow={PHONE_SHADOW} style={{ left: 580, top: 560, rotate: '4deg' }}>
         <ScanPay f={f} detectAt={6} sheetAt={16} payAt={30} />
       </Phone>
     </ProductStage>
@@ -288,7 +286,7 @@ const SendShot: React.FC = () => {
 const PaidShot: React.FC = () => {
   const f = useCurrentFrame();
   return (
-    <ProductStage caption="Paid. Tracked. Done." close={{ scale: 1.45, x: 540, y: 900 }}>
+    <ProductStage caption="Paid. Tracked. Done." close={{ scale: 1.75, x: 540, y: 760 }}>
       <Phone width={PHONE.width} lightScreen shadow={PHONE_SHADOW} style={{ left: PHONE.left, top: PHONE.top }}>
         <DetailLight f={f} paidAt={8} />
       </Phone>
@@ -339,7 +337,7 @@ const EndCard: React.FC<{ len: number }> = ({ len }) => {
           <div style={meta(MUTED_DARK, 24)}>Then $9.99/month · Cancel anytime</div>
         </div>
       </AbsoluteFill>
-      <div style={{ position: 'absolute', left: 0, right: 0, top: 1640, textAlign: 'center', ...meta(MUTED_DARK, 24), ...lift(f, BEAT) }}>
+      <div style={{ position: 'absolute', left: 0, right: 0, top: 1500, textAlign: 'center', ...meta(MUTED_DARK, 24), ...lift(f, BEAT) }}>
         Powered by <span style={{ color: PAPER, fontWeight: 800 }}>NewMux</span>
       </div>
       <AbsoluteFill style={{ background: '#000', opacity: fadeOut }} />
