@@ -263,8 +263,13 @@ export const DocumentsScreen: React.FC = () => {
 // ---------------------------------------------------------------------------------------------
 // Document detail (an issued invoice)
 
-export const DetailScreen: React.FC = () => {
-  const s = STATUS.issued;
+/** An issued invoice, or an overdue one (where the big button becomes "Send Reminder", as in the app). */
+export const DetailScreen: React.FC<{ variant?: 'issued' | 'overdue' }> = ({ variant = 'issued' }) => {
+  const overdue = variant === 'overdue';
+  const d = overdue
+    ? { client: 'Brightside Dental', number: 'INV-0036', amount: '$1,200.00', issued: 'Sep 18, 2026', due: 'Oct 3, 2026', button: 'Send Reminder', caption: 'Emails the client a payment reminder.' }
+    : { client: 'Harbor Coffee Co.', number: 'INV-0042', amount: '$4,290.00', issued: 'Oct 14, 2026', due: 'Oct 28, 2026', button: 'Log Payment', caption: 'Record a payment you received for this invoice.' };
+  const s = overdue ? STATUS.overdue : STATUS.issued;
   const stages = ['Draft', 'Issued', 'Paid'];
   return (
     <Screen>
@@ -284,10 +289,10 @@ export const DetailScreen: React.FC = () => {
         </GlassSlot>
       </div>
       <div style={{ position: 'absolute', top: 110, left: 16, right: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Avatar name="Harbor Coffee Co." color={AVATAR_COLORS[1]} size={64} />
-        <div style={{ fontSize: 20, lineHeight: '25px', fontWeight: 600, marginTop: 8 }}>Harbor Coffee Co.</div>
-        <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>Invoice INV-0042</div>
-        <div style={{ fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em', marginTop: 12 }}>$4,290.00</div>
+        <Avatar name={d.client} color={AVATAR_COLORS[1]} size={64} />
+        <div style={{ fontSize: 20, lineHeight: '25px', fontWeight: 600, marginTop: 8 }}>{d.client}</div>
+        <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>Invoice {d.number}</div>
+        <div style={{ fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em', marginTop: 12 }}>{d.amount}</div>
         <div style={{ fontSize: 13, color: LIGHT.secondary }}>Balance Due</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, padding: '6px 12px', borderRadius: 999, background: s.bg, color: s.fg, fontSize: 15, fontWeight: 600 }}>
           <Icon name={s.icon} size={14} weight={2.4} color={s.fg} />
@@ -306,8 +311,8 @@ export const DetailScreen: React.FC = () => {
           ))}
         </div>
         <div style={{ alignSelf: 'stretch', marginTop: 20 }}>
-          <AppButton label="Log Payment" variant="filled" large />
-          <div style={{ fontSize: 13, lineHeight: '18px', color: LIGHT.secondary, textAlign: 'center', marginTop: 8 }}>Record a payment you received for this invoice.</div>
+          <AppButton label={d.button} variant="filled" large />
+          <div style={{ fontSize: 13, lineHeight: '18px', color: LIGHT.secondary, textAlign: 'center', marginTop: 8 }}>{d.caption}</div>
         </div>
         <div style={{ alignSelf: 'stretch', marginTop: 12 }}>
           <AppButton label="Share PDF" variant="tinted" icon="share" />
@@ -315,15 +320,15 @@ export const DetailScreen: React.FC = () => {
         <div style={{ alignSelf: 'stretch', marginTop: 28 }}>
           <Section>
             {[
-              ['Client', 'Harbor Coffee Co.', true],
-              ['Issued', 'Oct 14, 2026', false],
-              ['Payment Due', 'Oct 28, 2026', false],
+              ['Client', d.client, true],
+              ['Issued', d.issued, false],
+              ['Payment Due', d.due, false],
             ].map(([k, v, chev], i) => (
               <div key={k as string}>
                 {i > 0 ? <Hairline inset={16} /> : null}
                 <div style={{ display: 'flex', alignItems: 'center', minHeight: 50, padding: '10px 16px', gap: 12 }}>
                   <div style={{ flex: 1, fontSize: 17 }}>{k}</div>
-                  <div style={{ fontSize: 17, color: LIGHT.secondary }}>{v}</div>
+                  <div style={{ fontSize: 17, color: overdue && k === 'Payment Due' ? LIGHT.destructive : LIGHT.secondary }}>{v}</div>
                   {chev ? <Chevron /> : null}
                 </div>
               </div>
@@ -340,7 +345,7 @@ export const DetailScreen: React.FC = () => {
 // Signature sheet (app/modals/sign.tsx)
 
 /** The sheet alone, 393 × 790 pt, for crops that don't need the screen behind it. */
-export const SignSheet: React.FC = () => (
+export const SignSheet: React.FC<{ signatureTop?: number }> = ({ signatureTop = 140 }) => (
   <div style={{ position: 'relative', width: 393, height: 790, background: LIGHT.grouped, borderRadius: '38px 38px 0 0', fontFamily: FONT, color: LIGHT.label, overflow: 'hidden' }}>
     <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px 6px', minHeight: 64 }}>
       <div style={{ flex: 1, display: 'flex' }}>
@@ -353,7 +358,7 @@ export const SignSheet: React.FC = () => (
     </div>
     <div style={{ position: 'absolute', left: 16, right: 16, top: 84, bottom: 40, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ flex: 1, background: '#fff', border: `1px solid ${LIGHT.field}`, borderRadius: 26, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', left: 14, top: 140 }}>
+        <div style={{ position: 'absolute', left: 14, top: signatureTop }}>
           <Signature progress={1} width={340} strokeWidth={3.6} />
         </div>
       </div>

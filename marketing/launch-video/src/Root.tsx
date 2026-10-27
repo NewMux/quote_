@@ -8,6 +8,7 @@ import { LaunchVideo } from './LaunchVideo';
 import { ProsVideo } from './pros/ProsVideo';
 import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
 import { AppProof } from './store/proof';
+import { SLIDES, SLIDE_H, SLIDE_W } from './store/slides';
 import { DUO_H, DUO_W, DuoDocuments, DuoSummary } from './store/duo';
 import { STORE_H, STORE_W } from './store/design';
 import { SHOTS } from './store/shots';
@@ -52,6 +53,11 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="BentoV2" component={BentoV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.bento} />
       <Composition id="NightV2" component={NightV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.night} />
       <Composition id="FinaleV2" component={FinaleV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.finale} />
+    </Folder>
+    <Folder name="TikTok">
+      {SLIDES.map(({ id, Component }) => (
+        <Composition key={id} id={id} component={Component} width={SLIDE_W} height={SLIDE_H} fps={30} durationInFrames={1} />
+      ))}
     </Folder>
     <Folder name="AppStore">
       {SHOTS.map(({ id, Component }) => (
