@@ -98,6 +98,18 @@ If the form offers "Made for Kids", leave it off.
 
 ---
 
+## What's New in 1.0.3 (paste into "What's New in This Version")
+
+```
+• A short welcome tour now shows what Invoice Them does before you sign up.
+• Setup is shorter: it starts right with your business details.
+• The subscription screen explains how your first month works and what you pay afterwards, and the button shows the price you pay today.
+• Signing up with an email that already has an account now tells you, with shortcuts to sign in or reset your password.
+• Clearer messages when an email link was already used or has expired.
+```
+
+---
+
 ## App Review Information
 
 **Sign-in required:** Yes. Enter the demo account's email and password in the Sign-in Information fields. The password is stored in App Store Connect → App Review Information (ask Mohammed).
@@ -112,11 +124,14 @@ Invoice Them lets small businesses create estimates and invoices, collect signat
 DEMO ACCOUNT
 Use the email and password in Sign-in Information. The account has a finished business profile, three clients, catalog items, four invoices (paid, partly paid, overdue and draft) and an estimate.
 
+WELCOME TOUR (first launch)
+On first launch, the app shows a four-page welcome tour before sign-in. To sign in with the demo account, tap "I Already Have an Account" (under the main button on any page; the Skip button at the top right jumps to the last page). This opens Sign In. The tour appears once per device, so later launches go straight to Sign In.
+
 SUBSCRIPTION / PAYWALL
 The app requires the Invoice Them Pro auto-renewable subscription ("Invoice Them Pro" group: quote_pro_monthly and quote_pro_annual, each with a $0.99 1-month introductory offer). The demo account is not subscribed, so the paywall appears right after sign-in.
 To test with a Sandbox account:
 1. Sign in with the demo account. The paywall appears.
-2. Choose Yearly or Monthly and tap Subscribe.
+2. Choose Yearly or Monthly and tap the main button ("Start for $0.99" while the introductory offer is available, otherwise "Subscribe"). A "How It Works" section above the plans explains the introductory price and the renewal price.
 3. Confirm with your Sandbox Apple Account. The app opens to the Summary tab.
 Restore Purchases is at the bottom of the paywall and under Settings > Invoice Them Pro, which also has Manage Subscription. The paywall links to the Privacy Policy and Apple's standard Terms of Use (EULA).
 
