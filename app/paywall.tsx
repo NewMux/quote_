@@ -179,6 +179,23 @@ export default function PaywallScreen() {
           ))}
         </ListSection>
 
+        {/* Spells out the intro offer before the price list, so "what happens after the first month"
+            is answered up front rather than only in the fine print. */}
+        {intro && selected ? (
+          <ListSection header="How It Works">
+            <ListRow
+              icon="checkmark.circle.fill"
+              title="Today"
+              subtitle={`Full access to everything, ${intro}`}
+            />
+            <ListRow
+              icon="arrow.triangle.2.circlepath"
+              title="After That"
+              subtitle={`${selected.product.priceString} per ${selectedKind === 'annual' ? 'year' : 'month'}. Cancel anytime in Settings.`}
+            />
+          </ListSection>
+        ) : null}
+
         {loadError ? (
           <ListSection footer="Couldn’t load subscription options. Check your connection and try again.">
             <ListRow title="Try Again" onPress={fetchOffering} centered />
@@ -237,7 +254,7 @@ export default function PaywallScreen() {
               </Text>
             ) : null}
             <Button
-              label="Subscribe"
+              label={intro && selected?.product.introPrice ? `Start for ${selected.product.introPrice.priceString}` : 'Subscribe'}
               size="large"
               onPress={handlePurchase}
               disabled={!selected}
