@@ -9,6 +9,7 @@ import { ProsVideo } from './pros/ProsVideo';
 import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
 import { AppProof } from './store/proof';
 import { STORE_H, STORE_W } from './store/design';
+import { PAYWALL_H, PAYWALL_W, PaywallNew, WELCOME_H, WELCOME_W, WelcomeTour } from './store/newscreens';
 import { SHOTS } from './store/shots';
 import { STRIP_H, STRIP_W, StoreStrip } from './store/strip';
 import { LaunchVideoV2 } from './v2/LaunchVideoV2';
@@ -51,6 +52,10 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="BentoV2" component={BentoV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.bento} />
       <Composition id="NightV2" component={NightV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.night} />
       <Composition id="FinaleV2" component={FinaleV2} width={W} height={H} fps={FPS_V2} durationInFrames={SCENES_V2.finale} />
+    </Folder>
+    <Folder name="Preview">
+      <Composition id="WelcomeTour" component={WelcomeTour} width={WELCOME_W} height={WELCOME_H} fps={30} durationInFrames={1} />
+      <Composition id="PaywallNew" component={PaywallNew} width={PAYWALL_W} height={PAYWALL_H} fps={30} durationInFrames={1} />
     </Folder>
     <Folder name="AppStore">
       {SHOTS.map(({ id, Component }) => (
