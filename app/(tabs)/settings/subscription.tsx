@@ -6,6 +6,7 @@ import { ListSection } from '../../../src/components/list/ListSection';
 import { formatDisplayDate } from '../../../src/lib/format';
 import { APPLE_MANAGE_SUBSCRIPTIONS_URL, ENTITLEMENT_ID } from '../../../src/lib/subscription';
 import { useSubscriptionStore } from '../../../src/stores/useSubscriptionStore';
+import { contentColumn } from '../../../src/lib/layout';
 
 function planName(productId: string): string {
   if (/annual|year/i.test(productId)) return 'Yearly';
@@ -54,7 +55,7 @@ export default function SubscriptionScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16 }}
+      contentContainerStyle={[contentColumn, { padding: 16 }]}
     >
       {!isAvailable ? (
         <ListSection footer="Subscriptions aren't set up in this build, so every feature is unlocked.">

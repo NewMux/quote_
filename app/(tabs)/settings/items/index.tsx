@@ -9,6 +9,7 @@ import { addButtonItem } from '../../../../src/lib/headerItems';
 import { formatMinor } from '../../../../src/lib/money';
 import { useBusinessProfileStore } from '../../../../src/stores/useBusinessProfileStore';
 import { useItemCatalogStore } from '../../../../src/stores/useItemCatalogStore';
+import { contentColumn } from '../../../../src/lib/layout';
 
 function addItem() {
   router.push('/items/new');
@@ -36,7 +37,7 @@ export default function ItemsScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+      contentContainerStyle={[contentColumn, { padding: 16, flexGrow: 1 }]}
     >
       {items.length === 0 ? (
         <EmptyState

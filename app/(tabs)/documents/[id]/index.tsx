@@ -64,6 +64,7 @@ import type {
   Settlement,
   SignatureRecord,
 } from '../../../../src/types/models';
+import { contentColumn } from '../../../../src/lib/layout';
 
 interface MenuAction {
   label: string;
@@ -398,7 +399,7 @@ export default function DocumentDetailScreen() {
     <View className="flex-1 bg-grouped">
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        contentContainerStyle={[contentColumn, { padding: 16, paddingBottom: 32 }]}
       >
         {/* Receipt-style header: who, how much, where it stands, and the one thing to do next. */}
         <View className="items-center pt-2 pb-7 gap-1">

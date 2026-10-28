@@ -8,6 +8,7 @@ import { ListSection } from '../../../../src/components/list/ListSection';
 import { addButtonItem } from '../../../../src/lib/headerItems';
 import { formatRateBp } from '../../../../src/lib/money';
 import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
+import { contentColumn } from '../../../../src/lib/layout';
 
 function addTaxRate() {
   router.push('/settings/tax-brackets/new');
@@ -35,7 +36,7 @@ export default function TaxBracketsScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+      contentContainerStyle={[contentColumn, { padding: 16, flexGrow: 1 }]}
     >
       {taxBrackets.length === 0 ? (
         <EmptyState

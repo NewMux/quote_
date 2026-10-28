@@ -8,6 +8,7 @@ import { LaunchVideo } from './LaunchVideo';
 import { ProsVideo } from './pros/ProsVideo';
 import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
 import { AppProof } from './store/proof';
+import { DUO_H, DUO_W, DuoDocuments, DuoSummary } from './store/duo';
 import { STORE_H, STORE_W } from './store/design';
 import { SHOTS } from './store/shots';
 import { STRIP_H, STRIP_W, StoreStrip } from './store/strip';
@@ -56,6 +57,8 @@ export const RemotionRoot: React.FC = () => (
       {SHOTS.map(({ id, Component }) => (
         <Composition key={id} id={id} component={Component} width={STORE_W} height={STORE_H} fps={30} durationInFrames={1} />
       ))}
+      <Composition id="DuoSummary" component={DuoSummary} width={DUO_W} height={DUO_H} fps={30} durationInFrames={1} />
+      <Composition id="DuoDocuments" component={DuoDocuments} width={DUO_W} height={DUO_H} fps={30} durationInFrames={1} />
       <Composition id="AppProof" component={AppProof} width={3440} height={1420} fps={30} durationInFrames={1} />
       <Composition id="StoreStrip" component={StoreStrip} width={STRIP_W} height={STRIP_H} fps={30} durationInFrames={1} />
     </Folder>

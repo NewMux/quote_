@@ -18,6 +18,7 @@ import {
   SymbolFill,
   TabBar,
   glass,
+  useScreenSize,
   type StatusKey,
 } from './ui';
 
@@ -99,7 +100,9 @@ const PAID_BY_MONTH = [
 
 /** The app's LineChart (src/components/charts/LineChart.tsx), same geometry. */
 const LineChart: React.FC<{ data: { label: string; value: number }[]; height?: number }> = ({ data, height = 140 }) => {
-  const width = 320;
+  const size = useScreenSize();
+  // The app's chart before PR #7 is a fixed 320 pt viewBox; after it, it draws at its container's width.
+  const width = size.responsiveChart ? size.w - 2 * size.inset - 32 : 320;
   const px = 12;
   const py = 16;
   const cw = width - px * 2;
@@ -133,10 +136,12 @@ const LineChart: React.FC<{ data: { label: string; value: number }[]; height?: n
   );
 };
 
-export const SummaryScreen: React.FC = () => (
+export const SummaryScreen: React.FC = () => {
+  const { inset } = useScreenSize();
+  return (
   <Screen>
     <LargeTitleBar title="Summary" buttons={['plus']} />
-    <div style={{ position: 'absolute', top: 158, left: 16, right: 16 }}>
+    <div style={{ position: 'absolute', top: 158, left: inset, right: inset }}>
       <Segmented values={['Month', '90 Days', 'Year', 'Custom']} selected={0} />
       <div style={{ padding: '24px 4px 20px' }}>
         <div style={{ fontSize: 15, lineHeight: '20px', fontWeight: 600, color: LIGHT.secondary }}>Outstanding</div>
@@ -188,7 +193,8 @@ export const SummaryScreen: React.FC = () => (
     </div>
     <TabBar active={0} />
   </Screen>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------------------------
 // Documents
@@ -206,7 +212,9 @@ export const DOCS: Doc[] = [
   { client: 'Atlas Print Co.', number: 'INV-0035', date: 'Sep 11', total: '$2,880.00', status: 'paid' },
 ];
 
-export const DocumentsScreen: React.FC = () => (
+export const DocumentsScreen: React.FC = () => {
+  const { inset } = useScreenSize();
+  return (
   <Screen>
     <LargeTitleBar title="Documents" buttons={[]} />
     <div style={{ position: 'absolute', top: 58, right: 16, display: 'flex', gap: 10, zIndex: 5 }}>
@@ -217,7 +225,7 @@ export const DocumentsScreen: React.FC = () => (
         <FilterGlyph />
       </GlassSlot>
     </div>
-    <div style={{ position: 'absolute', top: 157, left: 16, right: 16 }}>
+    <div style={{ position: 'absolute', top: 157, left: inset, right: inset }}>
       <SearchField placeholder="Search Documents" />
       <div style={{ height: 12 }} />
       <Segmented values={['All', 'Estimates', 'Invoices']} selected={0} />
@@ -249,7 +257,8 @@ export const DocumentsScreen: React.FC = () => (
     </div>
     <TabBar active={1} />
   </Screen>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------------------------
 // Document detail (an issued invoice)
@@ -388,7 +397,9 @@ const CLIENTS: { letter: string; people: { name: string; detail: string }[] }[] 
 
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
 
-export const ClientsScreen: React.FC = () => (
+export const ClientsScreen: React.FC = () => {
+  const { inset } = useScreenSize();
+  return (
   <Screen>
     <LargeTitleBar title="Clients" buttons={[]} />
     <div style={{ position: 'absolute', top: 58, right: 16, display: 'flex', gap: 10, zIndex: 5 }}>
@@ -399,7 +410,7 @@ export const ClientsScreen: React.FC = () => (
         <FilterGlyph />
       </GlassSlot>
     </div>
-    <div style={{ position: 'absolute', top: 157, left: 16, right: 16 }}>
+    <div style={{ position: 'absolute', top: 157, left: inset, right: inset }}>
       <SearchField placeholder="Search Clients" />
       {CLIENTS.map((section) => (
         <div key={section.letter}>
@@ -423,4 +434,5 @@ export const ClientsScreen: React.FC = () => (
     </div>
     <TabBar active={2} />
   </Screen>
-);
+  );
+};

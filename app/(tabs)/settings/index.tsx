@@ -11,6 +11,7 @@ import { disableReminders, enableReminders, isRemindersEnabled } from '../../../
 import { useThemeColors } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+import { contentColumn } from '../../../src/lib/layout';
 
 /** iOS Settings-style icon backgrounds (white glyphs on system colors). */
 const ICON_COLORS = {
@@ -91,7 +92,7 @@ export default function SettingsScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+      contentContainerStyle={[contentColumn, { padding: 16, paddingTop: 8 }]}
     >
       {/* Apple Account-style header: the business this app is set up for, and who's signed in. */}
       <View className="mb-8">

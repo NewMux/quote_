@@ -25,6 +25,7 @@ import { SWIPE_COLORS } from '../../../src/lib/theme';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
 import type { DocType, DocumentListItem } from '../../../src/types/models';
+import { contentColumn } from '../../../src/lib/layout';
 
 const TYPE_FILTERS: { label: string; value: DocType | undefined }[] = [
   { label: 'All', value: undefined },
@@ -153,7 +154,7 @@ export default function DocumentsScreen() {
       keyboardDismissMode="on-drag"
       data={documents}
       keyExtractor={(item) => item.id}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, flexGrow: 1 }}
+      contentContainerStyle={[contentColumn, { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, flexGrow: 1 }]}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       ListHeaderComponent={
         <View className="gap-2 mb-4">

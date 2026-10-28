@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { ScrollView, type ScrollViewProps } from 'react-native';
+import { contentColumn } from '../../lib/layout';
 
 interface FormScrollViewProps extends ScrollViewProps {
   children: ReactNode;
@@ -16,7 +17,7 @@ export function FormScrollView({ children, contentContainerStyle, ...rest }: For
       automaticallyAdjustKeyboardInsets
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="interactive"
-      contentContainerStyle={[{ padding: 16, paddingTop: 8, paddingBottom: 40 }, contentContainerStyle]}
+      contentContainerStyle={[contentColumn, { padding: 16, paddingTop: 8, paddingBottom: 40 }, contentContainerStyle]}
       {...rest}
     >
       {children}

@@ -7,6 +7,7 @@ import { ListSection } from '../../../src/components/list/ListSection';
 import { listSchedules } from '../../../src/db/repositories/recurring.repo';
 import { formatScheduleDate, frequencyLabel } from '../../../src/lib/recurrence';
 import type { RecurringScheduleListItem } from '../../../src/types/models';
+import { contentColumn } from '../../../src/lib/layout';
 
 export default function RecurringInvoicesScreen() {
   const [schedules, setSchedules] = useState<RecurringScheduleListItem[] | null>(null);
@@ -31,7 +32,7 @@ export default function RecurringInvoicesScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, flexGrow: 1 }}
+      contentContainerStyle={[contentColumn, { padding: 16, flexGrow: 1 }]}
     >
       {schedules.length === 0 ? (
         <EmptyState

@@ -7,6 +7,7 @@ import { createDraftDocument } from '../../src/db/repositories/documents.repo';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
 import type { DocType } from '../../src/types/models';
+import { contentColumn } from '../../src/lib/layout';
 
 export default function NewDocumentScreen() {
   const { type } = useLocalSearchParams<{ type?: DocType }>();
@@ -54,7 +55,7 @@ export default function NewDocumentScreen() {
     <ScrollView
       className="flex-1 bg-grouped"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ padding: 16, paddingTop: 24 }}
+      contentContainerStyle={[contentColumn, { padding: 16, paddingTop: 24 }]}
     >
       <Text className="text-title2 font-bold text-label text-center mb-6" accessibilityRole="header">
         What Would You Like to Create?
