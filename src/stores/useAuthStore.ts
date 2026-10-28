@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { AUTH_CALLBACK_URL } from '../lib/authCallbackUrl';
+import { isExistingAccount } from '../lib/signUpResult';
 import { supabase } from '../lib/supabase';
 
 interface AuthState {
   session: Session | null;
   isLoading: boolean;
   initialize: () => void;
-  signUp: (email: string, password: string) => Promise<void>;
+  /** `accountExists` is true when the address already has an account: no email is sent then. */
+  signUp: (email: string, password: string) => Promise<{ accountExists: boolean }>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resendConfirmation: (email: string) => Promise<void>;
@@ -35,7 +37,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       options: { emailRedirectTo: AUTH_CALLBACK_URL },
     });
     if (error) throw error;
+    if (isExistingAccount(data.user)) return { accountExists: true };
     set({ session: data.session });
+    return { accountExists: false };
   },
   signIn: async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });

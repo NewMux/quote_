@@ -9,7 +9,8 @@ import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 
-const EXPIRED_MESSAGE = 'This link is invalid or has expired. Request a new one and try again.';
+const EXPIRED_MESSAGE =
+  'This link was already used or has expired. If you already confirmed your email, just sign in. Otherwise request a new link and try again.';
 const CONFIRMED_SIGN_IN_MESSAGE = 'Your email is confirmed. Sign in with your email and password to continue.';
 
 /** Where every auth email link (signup confirmation, password recovery) redirects back into the
@@ -37,7 +38,7 @@ export default function AuthCallbackScreen() {
     (async () => {
       try {
         if (payload.kind === 'error') {
-          setError(payload.message);
+          setError(/expired|invalid|already/i.test(payload.message) ? EXPIRED_MESSAGE : payload.message);
           return;
         }
 

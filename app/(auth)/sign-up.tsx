@@ -26,7 +26,16 @@ export default function SignUpScreen() {
     if (!canSubmit) return;
     setIsSubmitting(true);
     try {
-      await signUp(email.trim(), password);
+      const { accountExists } = await signUp(email.trim(), password);
+      if (accountExists) {
+        // No email goes out for an address that's already registered, so don't promise one.
+        Alert.alert('You Already Have an Account', 'There’s already an account for this email. Sign in, or reset your password if you’ve forgotten it.', [
+          { text: 'Sign In', onPress: () => router.replace('/(auth)/sign-in') },
+          { text: 'Reset Password', onPress: () => router.replace('/(auth)/forgot-password') },
+          { text: 'Cancel', style: 'cancel' },
+        ]);
+        return;
+      }
       Alert.alert(
         'Check Your Email',
         'We sent a link to confirm your account. After you confirm, come back and sign in.',
