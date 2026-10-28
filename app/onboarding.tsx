@@ -13,19 +13,14 @@ import { persistPickedFile } from '../src/lib/fileStorage';
 import { newId } from '../src/lib/id';
 import { useSignedUrl } from '../src/lib/useSignedUrl';
 import { parseRateBp } from '../src/lib/money';
-import type { SymbolName } from '../src/lib/symbols';
 import { useSystemColors } from '../src/lib/theme';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../src/stores/useTaxBracketsStore';
 
-const TOTAL_STEPS = 5;
-
-const WELCOME_FEATURES: { icon: SymbolName; title: string; detail: string }[] = [
-  { icon: 'doc.text.fill', title: 'Estimates and Invoices', detail: 'Professional PDFs with your logo, ready to send.' },
-  { icon: 'signature', title: 'Signatures', detail: 'Sign and collect your client’s signature on the spot.' },
-  { icon: 'banknote.fill', title: 'Get Paid', detail: 'Track payments and see what’s overdue at a glance.' },
-];
+// The welcome tour (app/welcome.tsx) already showed what the app does, so setup starts with the
+// business itself.
+const TOTAL_STEPS = 4;
 
 export default function OnboardingScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
@@ -34,7 +29,7 @@ export default function OnboardingScreen() {
   const setDefaultTaxRate = useTaxBracketsStore((s) => s.setDefault);
   const system = useSystemColors();
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [businessName, setBusinessName] = useState('');
   const [chargesTax, setChargesTax] = useState(false);
   const [taxName, setTaxName] = useState('');
@@ -132,42 +127,14 @@ export default function OnboardingScreen() {
           <View
             className="flex-row gap-1.5 justify-center"
             accessible
-            accessibilityLabel={`Step ${step + 1} of ${TOTAL_STEPS}`}
+            accessibilityLabel={`Step ${step} of ${TOTAL_STEPS}`}
           >
             {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-              <View key={i} className={`h-1.5 w-8 rounded-full ${i <= step ? 'bg-brand' : 'bg-fill'}`} />
+              <View key={i} className={`h-1.5 w-8 rounded-full ${i < step ? 'bg-brand' : 'bg-fill'}`} />
             ))}
           </View>
 
           <View className="flex-1 justify-center gap-6">
-            {step === 0 ? (
-              <View className="gap-8">
-                <View className="items-center gap-3">
-                  <View
-                    className="w-20 h-20 rounded-[22px] bg-brand items-center justify-center mb-1"
-                    style={{ borderCurve: 'continuous' }}
-                  >
-                    <Icon name="doc.text.fill" size={40} color="#FFFFFF" />
-                  </View>
-                  <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
-                    Welcome to Invoice Them
-                  </Text>
-                </View>
-                {/* Apple's welcome-screen pattern: three tinted symbols, each with a one-line promise. */}
-                <View className="gap-5 px-2">
-                  {WELCOME_FEATURES.map((feature) => (
-                    <View key={feature.title} className="flex-row items-center gap-4">
-                      <Icon name={feature.icon} size={30} />
-                      <View className="flex-1">
-                        <Text className="text-headline font-semibold text-label">{feature.title}</Text>
-                        <Text className="text-subhead text-secondary">{feature.detail}</Text>
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ) : null}
-
             {step === 1 ? (
               <View className="gap-5">
                 <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
@@ -301,7 +268,6 @@ export default function OnboardingScreen() {
           </View>
 
           <View className="gap-2">
-            {step === 0 ? <Button label="Get Started" size="large" onPress={() => setStep(1)} /> : null}
             {step === 1 ? (
               <>
                 <Button
@@ -311,7 +277,6 @@ export default function OnboardingScreen() {
                   loading={isSaving}
                   onPress={handleContinueBusinessBasics}
                 />
-                <Button label="Back" variant="plain" onPress={() => setStep(0)} />
               </>
             ) : null}
             {step === 2 ? (
