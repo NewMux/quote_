@@ -8,6 +8,7 @@ import { ListRow } from './list/ListRow';
 import { ListSection } from './list/ListSection';
 import { MoneyInput } from './MoneyInput';
 import type { LineItemEditable, TaxBracket } from '../types/models';
+import { t } from '../lib/i18n';
 
 interface LineItemEditorProps {
   line: LineItemEditable;
@@ -26,17 +27,17 @@ export function LineItemEditor({ line, position, taxBrackets, currencyCode, onCh
   const [quantityText, setQuantityText] = useState(String(line.quantity));
 
   return (
-    <ListSection header={`Item ${position}`}>
+    <ListSection header={t('Item {position}', { position })}>
       <FormRow
-        label="Description"
+        label={t('Description')}
         value={line.description}
         onChangeText={(description) => onChange({ description })}
-        placeholder="What you're billing for"
+        placeholder={t("What you're billing for")}
         multiline
         maxLength={200}
       />
       <FormRow
-        label="Quantity"
+        label={t('Quantity')}
         keyboardType="decimal-pad"
         value={quantityText}
         onChangeText={(text) => {
@@ -47,21 +48,21 @@ export function LineItemEditor({ line, position, taxBrackets, currencyCode, onCh
         onEndEditing={() => setQuantityText(String(line.quantity))}
       />
       <FormRow
-        label="Unit"
+        label={t('Unit')}
         value={line.unitLabel ?? ''}
         onChangeText={(unitLabel) => onChange({ unitLabel: unitLabel || null })}
-        placeholder="hour, item"
+        placeholder={t('hour, item')}
         autoCapitalize="none"
         maxLength={20}
       />
       <MoneyInput
-        label="Price"
+        label={t('Price')}
         valueMinor={line.unitPriceMinor}
         currencyCode={currencyCode}
         onChangeMinor={(unitPriceMinor) => onChange({ unitPriceMinor })}
       />
       <ListRow
-        title="Taxable"
+        title={t('Taxable')}
         switchValue={line.isTaxable}
         onSwitchChange={(isTaxable) =>
           onChange({
@@ -80,8 +81,8 @@ export function LineItemEditor({ line, position, taxBrackets, currencyCode, onCh
           }
         />
       ) : null}
-      <ListRow title="Line Total" value={formatMinor(computed.lineTotalMinor, currencyCode)} emphasized />
-      <ListRow title="Remove Item" onPress={onRemove} destructive centered />
+      <ListRow title={t('Line Total')} value={formatMinor(computed.lineTotalMinor, currencyCode)} emphasized />
+      <ListRow title={t('Remove Item')} onPress={onRemove} destructive centered />
     </ListSection>
   );
 }
@@ -105,7 +106,7 @@ function TaxRateChips({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8, alignItems: 'center' }}
         accessibilityRole="radiogroup"
-        accessibilityLabel="Tax rate"
+        accessibilityLabel={t('Tax rate')}
       >
         {taxBrackets.map((bracket) => {
           const selected = bracket.id === selectedId;
@@ -130,7 +131,7 @@ function TaxRateChips({
             accessibilityRole="button"
             className="min-h-[44px] justify-center px-1"
           >
-            <Text className="text-tint text-subhead font-medium">Add Tax Rate</Text>
+            <Text className="text-tint text-subhead font-medium">{t('Add Tax Rate')}</Text>
           </Pressable>
         ) : null}
       </ScrollView>

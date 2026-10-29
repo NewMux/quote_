@@ -10,6 +10,7 @@ import { useBusinessProfileStore } from '../stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../stores/useTaxBracketsStore';
 import type { ItemInput } from '../db/repositories/itemCatalog.repo';
 import type { ItemCatalogEntry } from '../types/models';
+import { t } from '../lib/i18n';
 
 interface ItemFormProps {
   initial?: ItemCatalogEntry;
@@ -47,41 +48,41 @@ export function ItemForm({ initial, onStateChange, footer }: ItemFormProps) {
 
   return (
     <FormScrollView>
-      <ListSection footer="The description appears under the item on invoices.">
+      <ListSection footer={t('The description appears under the item on invoices.')}>
         <FormRow
-          label="Name"
+          label={t('Name')}
           value={name}
           onChangeText={setName}
-          placeholder="e.g. Consultation"
+          placeholder={t('e.g. Consultation')}
           autoCapitalize="words"
           maxLength={100}
         />
         <FormRow
-          label="Description"
+          label={t('Description')}
           value={description}
           onChangeText={setDescription}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           multiline
           maxLength={200}
         />
       </ListSection>
 
-      <ListSection footer="The price and unit fill in when you add this item to a document; you can change them there.">
-        <MoneyInput label="Price" valueMinor={priceMinor} currencyCode={currencyCode} onChangeMinor={setPriceMinor} />
+      <ListSection footer={t('The price and unit fill in when you add this item to a document; you can change them there.')}>
+        <MoneyInput label={t('Price')} valueMinor={priceMinor} currencyCode={currencyCode} onChangeMinor={setPriceMinor} />
         <FormRow
-          label="Unit"
+          label={t('Unit')}
           value={unitLabel}
           onChangeText={setUnitLabel}
-          placeholder="hour, item"
+          placeholder={t('hour, item')}
           autoCapitalize="none"
           maxLength={20}
         />
       </ListSection>
 
       <ListSection
-        footer={isTaxable ? 'Choose the tax rate applied when you add this item to a document.' : undefined}
+        footer={isTaxable ? t('Choose the tax rate applied when you add this item to a document.') : undefined}
       >
-        <ListRow title="Taxable" switchValue={isTaxable} onSwitchChange={setIsTaxable} />
+        <ListRow title={t('Taxable')} switchValue={isTaxable} onSwitchChange={setIsTaxable} />
         {isTaxable
           ? taxBrackets.map((bracket) => (
               <ListRow

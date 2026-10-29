@@ -3,6 +3,7 @@ import { Pressable, Switch, Text, View } from 'react-native';
 import { Icon } from '../Icon';
 import type { SymbolName } from '../../lib/symbols';
 import { BRAND, useThemeColors } from '../../lib/theme';
+import { isRTL } from '../../lib/i18n';
 
 interface ListRowProps {
   title: string;
@@ -93,7 +94,7 @@ export function ListRow({
           {subtitle ? <Text className="text-subhead text-secondary mt-0.5">{subtitle}</Text> : null}
         </View>
         {value ? (
-          <Text className={`text-body max-w-[55%] text-right ${valueClassName ?? (emphasized ? 'text-label font-semibold' : 'text-secondary')}`} numberOfLines={1}>
+          <Text className={`text-body max-w-[55%] ${isRTL() ? 'text-left' : 'text-right'} ${valueClassName ?? (emphasized ? 'text-label font-semibold' : 'text-secondary')}`} numberOfLines={1}>
             {value}
           </Text>
         ) : null}

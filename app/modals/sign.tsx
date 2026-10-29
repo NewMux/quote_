@@ -11,6 +11,7 @@ import { upsertSignature } from '../../src/db/repositories/signatures.repo';
 import { newId } from '../../src/lib/id';
 import { persistPickedFile } from '../../src/lib/fileStorage';
 import type { SignerRole } from '../../src/types/models';
+import { t } from '../../src/lib/i18n';
 
 export default function SignModal() {
   const { documentId, role } = useLocalSearchParams<{ documentId: string; role: SignerRole }>();
@@ -30,7 +31,7 @@ export default function SignModal() {
       router.back();
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Save Signature', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Signature'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -38,8 +39,8 @@ export default function SignModal() {
     <SheetScreen
       header={
         <SheetHeader
-          title={role === 'merchant' ? 'Your Signature' : "Client's Signature"}
-          actionLabel="Done"
+          title={role === 'merchant' ? t('Your Signature') : t("Client's Signature")}
+          actionLabel={t('Done')}
           onAction={() => padRef.current?.readSignature()}
           actionDisabled={isSaving}
         />
@@ -49,7 +50,7 @@ export default function SignModal() {
         <SignaturePad
           ref={padRef}
           onSave={handleSave}
-          onEmpty={() => Alert.alert('Nothing to Save', 'Draw a signature in the box first.')}
+          onEmpty={() => Alert.alert(t('Nothing to Save'), t('Draw a signature in the box first.'))}
         />
       </View>
     </SheetScreen>

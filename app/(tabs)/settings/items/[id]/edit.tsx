@@ -10,6 +10,7 @@ import { useSaveHeader } from '../../../../../src/lib/useSaveHeader';
 import { useUnsavedChangesGuard } from '../../../../../src/lib/useUnsavedChangesGuard';
 import { useItemCatalogStore } from '../../../../../src/stores/useItemCatalogStore';
 import type { ItemCatalogEntry } from '../../../../../src/types/models';
+import { t } from '../../../../../src/lib/i18n';
 
 export default function EditItemScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -31,17 +32,17 @@ export default function EditItemScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Save Item', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Item'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   useSaveHeader({ onSave: handleSave, disabled: !form?.canSubmit || !form.isDirty || isSaving });
 
   function confirmArchive() {
-    Alert.alert(`Archive ${item?.name ?? 'Item'}?`, "It won't appear in your item catalog anymore.", [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('Archive {name}?', { name: item?.name ?? t('Item') }), t('It won’t appear in your item catalog anymore.'), [
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: 'Archive',
+        text: t('Archive'),
         style: 'destructive',
         onPress: async () => {
           await archive(id, true);
@@ -54,7 +55,7 @@ export default function EditItemScreen() {
   if (!item) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator accessibilityLabel="Loading" />
+        <ActivityIndicator accessibilityLabel={t('Loading')} />
       </View>
     );
   }
@@ -65,7 +66,7 @@ export default function EditItemScreen() {
       onStateChange={setForm}
       footer={
         <ListSection>
-          <ListRow title="Archive Item" onPress={confirmArchive} destructive centered />
+          <ListRow title={t('Archive Item')} onPress={confirmArchive} destructive centered />
         </ListSection>
       }
     />

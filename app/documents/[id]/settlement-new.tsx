@@ -17,6 +17,7 @@ import {
 } from '../../../src/db/repositories/settlements.repo';
 import { useUnsavedChangesGuard } from '../../../src/lib/useUnsavedChangesGuard';
 import type { DocumentRecord, Settlement } from '../../../src/types/models';
+import { t } from '../../../src/lib/i18n';
 
 export default function SettlementFormScreen() {
   const { id, settlementId } = useLocalSearchParams<{ id: string; settlementId?: string }>();
@@ -26,7 +27,7 @@ export default function SettlementFormScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // A new payment starts pre-filled, so leaving it untouched is fine; any edit is worth protecting.
   const leave = useUnsavedChangesGuard(!!form?.isDirty && !isSubmitting);
-  const title = settlementId ? 'Edit Payment' : 'Log Payment';
+  const title = settlementId ? t('Edit Payment') : t('Log Payment');
 
   useEffect(() => {
     getDocument(id).then(setDocument);
@@ -47,23 +48,23 @@ export default function SettlementFormScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSubmitting(false);
-      Alert.alert('Couldn’t Save Payment', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Payment'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   function handleDelete() {
     if (!settlementId) return;
-    Alert.alert('Delete This Payment?', "The invoice's balance will be updated. This can't be undone.", [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('Delete This Payment?'), t("The invoice's balance will be updated. This can't be undone."), [
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('Delete'),
         style: 'destructive',
         onPress: async () => {
           try {
             await deleteSettlement(settlementId, id);
             leave(() => router.back());
           } catch (err) {
-            Alert.alert('Couldn’t Delete Payment', err instanceof Error ? err.message : 'Something went wrong.');
+            Alert.alert(t('Couldn’t Delete Payment'), err instanceof Error ? err.message : t('Something went wrong.'));
           }
         },
       },
@@ -77,7 +78,7 @@ export default function SettlementFormScreen() {
       header={
         <SheetHeader
           title={title}
-          actionLabel={settlementId ? 'Save' : 'Add'}
+          actionLabel={settlementId ? t('Save') : t('Add')}
           onAction={handleSave}
           actionDisabled={isLoading || !form?.canSubmit || isSubmitting}
         />
@@ -85,7 +86,7 @@ export default function SettlementFormScreen() {
     >
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator accessibilityLabel="Loading" />
+          <ActivityIndicator accessibilityLabel={t('Loading')} />
         </View>
       ) : (
         <FormScrollView>
@@ -97,7 +98,7 @@ export default function SettlementFormScreen() {
           />
           {settlementId ? (
             <ListSection>
-              <ListRow title="Delete Payment" onPress={handleDelete} destructive centered />
+              <ListRow title={t('Delete Payment')} onPress={handleDelete} destructive centered />
             </ListSection>
           ) : null}
         </FormScrollView>

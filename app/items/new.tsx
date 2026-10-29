@@ -8,6 +8,7 @@ import { SheetScreen } from '../../src/components/SheetScreen';
 import { useUnsavedChangesGuard } from '../../src/lib/useUnsavedChangesGuard';
 import { useItemCatalogStore } from '../../src/stores/useItemCatalogStore';
 import type { ItemInput } from '../../src/db/repositories/itemCatalog.repo';
+import { t } from '../../src/lib/i18n';
 
 export default function NewItemScreen() {
   const create = useItemCatalogStore((s) => s.create);
@@ -23,13 +24,13 @@ export default function NewItemScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Add Item', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Item'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   return (
     <SheetScreen
-      header={<SheetHeader title="New Item" actionLabel="Add" onAction={handleAdd} actionDisabled={!form?.canSubmit || isSaving} />}
+      header={<SheetHeader title={t('New Item')} actionLabel={t('Add')} onAction={handleAdd} actionDisabled={!form?.canSubmit || isSaving} />}
     >
       <ItemForm onStateChange={setForm} />
     </SheetScreen>

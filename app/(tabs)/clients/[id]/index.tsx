@@ -14,6 +14,7 @@ import { getDisplayStatus, statusLabel } from '../../../../src/lib/statusMachine
 import type { SymbolName } from '../../../../src/lib/symbols';
 import { useClientsStore } from '../../../../src/stores/useClientsStore';
 import type { Client, DocumentListItem } from '../../../../src/types/models';
+import { t } from '../../../../src/lib/i18n';
 
 export default function ClientDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,19 +40,19 @@ export default function ClientDetailScreen() {
     const headerItems = (): NativeStackHeaderItem[] => [
       {
         type: 'menu',
-        label: 'More',
+        label: t('More'),
         icon: { type: 'sfSymbol', name: 'ellipsis.circle' },
         menu: {
           items: [
             {
               type: 'action',
-              label: 'Archive Client',
+              label: t('Archive Client'),
               icon: { type: 'sfSymbol', name: 'archivebox' },
               onPress: () => confirmArchiveRef.current(),
             },
             {
               type: 'action',
-              label: 'Delete Client',
+              label: t('Delete Client'),
               icon: { type: 'sfSymbol', name: 'trash' },
               destructive: true,
               onPress: () => confirmDeleteRef.current(),
@@ -59,7 +60,7 @@ export default function ClientDetailScreen() {
           ],
         },
       },
-      { type: 'button', label: 'Edit', onPress: openEditor },
+      { type: 'button', label: t('Edit'), onPress: openEditor },
     ];
     navigation.setOptions({
       title: client.display_name,
@@ -69,15 +70,15 @@ export default function ClientDetailScreen() {
           ? undefined
           : () => (
               <View className="flex-row">
-                <HeaderButton icon="pencil" label="Edit" onPress={openEditor} />
+                <HeaderButton icon="pencil" label={t('Edit')} onPress={openEditor} />
                 <HeaderButton
                   icon="ellipsis.circle"
-                  label="More"
+                  label={t('More')}
                   onPress={() =>
                     Alert.alert(client.display_name, undefined, [
-                      { text: 'Archive Client', onPress: () => confirmArchiveRef.current() },
-                      { text: 'Delete Client', style: 'destructive', onPress: () => confirmDeleteRef.current() },
-                      { text: 'Cancel', style: 'cancel' },
+                      { text: t('Archive Client'), onPress: () => confirmArchiveRef.current() },
+                      { text: t('Delete Client'), style: 'destructive', onPress: () => confirmDeleteRef.current() },
+                      { text: t('Cancel'), style: 'cancel' },
                     ])
                   }
                 />
@@ -89,7 +90,7 @@ export default function ClientDetailScreen() {
   if (!client) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator accessibilityLabel="Loading" />
+        <ActivityIndicator accessibilityLabel={t('Loading')} />
       </View>
     );
   }
@@ -97,12 +98,12 @@ export default function ClientDetailScreen() {
   function confirmArchive() {
     if (!client) return;
     Alert.alert(
-      `Archive ${client.display_name}?`,
-      "They'll no longer appear when you create new documents. Their existing documents aren't changed.",
+      t('Archive {name}?', { name: client.display_name }),
+      t("They'll no longer appear when you create new documents. Their existing documents aren't changed."),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Archive',
+          text: t('Archive'),
           onPress: async () => {
             await archiveClient(id, true);
             router.back();
@@ -115,12 +116,12 @@ export default function ClientDetailScreen() {
   function confirmDelete() {
     if (!client) return;
     Alert.alert(
-      `Delete ${client.display_name}?`,
-      "Their past documents are kept but no longer linked to them. This can't be undone.",
+      t('Delete {name}?', { name: client.display_name }),
+      t("Their past documents are kept but no longer linked to them. This can't be undone."),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             await deleteClient(id);
@@ -157,10 +158,10 @@ export default function ClientDetailScreen() {
         {client.phone || client.email ? (
           <View className="flex-row gap-3 mt-3">
             {client.phone ? (
-              <QuickAction icon="phone.fill" label="Call" onPress={() => Linking.openURL(`tel:${phoneDigits}`)} />
+              <QuickAction icon="phone.fill" label={t('Call')} onPress={() => Linking.openURL(`tel:${phoneDigits}`)} />
             ) : null}
             {client.email ? (
-              <QuickAction icon="envelope.fill" label="Mail" onPress={() => Linking.openURL(`mailto:${client.email}`)} />
+              <QuickAction icon="envelope.fill" label={t('Mail')} onPress={() => Linking.openURL(`mailto:${client.email}`)} />
             ) : null}
           </View>
         ) : null}
@@ -170,40 +171,40 @@ export default function ClientDetailScreen() {
         <ListSection>
           {client.email ? (
             <ListRow
-              title="Email"
+              title={t('Email')}
               subtitle={client.email}
               onPress={() => Linking.openURL(`mailto:${client.email}`)}
               accessory="none"
-              accessibilityHint="Opens Mail"
+              accessibilityHint={t('Opens Mail')}
             />
           ) : null}
           {client.phone ? (
             <ListRow
-              title="Phone"
+              title={t('Phone')}
               subtitle={client.phone}
               onPress={() => Linking.openURL(`tel:${phoneDigits}`)}
               accessory="none"
-              accessibilityHint="Calls this number"
+              accessibilityHint={t('Calls this number')}
             />
           ) : null}
-          {client.address ? <ListRow title="Address" subtitle={client.address} /> : null}
+          {client.address ? <ListRow title={t('Address')} subtitle={client.address} /> : null}
           {client.tax_registration_number ? (
-            <ListRow title="Tax / VAT Number" subtitle={client.tax_registration_number} />
+            <ListRow title={t('Tax / VAT Number')} subtitle={client.tax_registration_number} />
           ) : null}
         </ListSection>
       ) : null}
 
       {client.notes ? (
-        <ListSection header="Notes">
+        <ListSection header={t('Notes')}>
           <ListRow title={client.notes} />
         </ListSection>
       ) : null}
 
       <ListSection
-        header="Documents"
+        header={t('Documents')}
         footer={
           outstandingMinor > 0 && currencyCode
-            ? `${formatMinor(outstandingMinor, currencyCode)} outstanding across unpaid invoices.`
+            ? t('{amount} outstanding across unpaid invoices.', { amount: formatMinor(outstandingMinor, currencyCode) })
             : undefined
         }
       >
@@ -220,7 +221,7 @@ export default function ClientDetailScreen() {
             />
           ))
         ) : (
-          <ListRow title="No documents for this client yet" />
+          <ListRow title={t('No documents for this client yet')} />
         )}
       </ListSection>
     </ScrollView>

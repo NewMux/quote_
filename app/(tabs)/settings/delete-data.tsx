@@ -10,6 +10,7 @@ import { wipeAllData } from '../../../src/db/repositories/dataManagement.repo';
 import { wipeAllFiles } from '../../../src/lib/fileStorage';
 import { clearUserData } from '../../../src/stores/resetUserState';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+import { t } from '../../../src/lib/i18n';
 
 const CONFIRM_WORD = 'DELETE';
 
@@ -29,7 +30,7 @@ export default function DeleteDataScreen() {
       router.replace('/onboarding');
     } catch (err) {
       setIsDeleting(false);
-      Alert.alert('Couldn’t Delete Data', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Delete Data'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -38,17 +39,15 @@ export default function DeleteDataScreen() {
       <View className="items-center gap-2 pt-2">
         <Icon name="exclamationmark.triangle.fill" size={48} color={colors.destructive} />
         <Text className="text-title2 font-semibold text-label text-center" accessibilityRole="header">
-          This Can’t Be Undone
+          {t('This Can’t Be Undone')}
         </Text>
         <Text className="text-body text-secondary text-center">
-          This permanently erases every client, invoice, estimate, item, tax rate, signature, photo,
-          and payment record in your account, and resets your business profile. Your account and
-          sign-in stay the same.
+          {t('This permanently erases every client, invoice, estimate, item, tax rate, signature, photo, and payment record in your account, and resets your business profile. Your account and sign-in stay the same.')}
         </Text>
       </View>
 
       <FormField
-        label={`Type ${CONFIRM_WORD} to Confirm`}
+        label={t('Type {word} to Confirm', { word: CONFIRM_WORD })}
         value={confirmText}
         onChangeText={setConfirmText}
         autoCapitalize="characters"
@@ -58,7 +57,7 @@ export default function DeleteDataScreen() {
       />
 
       <Button
-        label="Delete All Data"
+        label={t('Delete All Data')}
         variant="destructive"
         size="large"
         disabled={!canDelete}

@@ -6,6 +6,7 @@ import { Button } from '../../src/components/Button';
 import { FormField } from '../../src/components/form/FormField';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
+import { t } from '../../src/lib/i18n';
 
 function isEmailNotConfirmed(err: unknown): boolean {
   return typeof err === 'object' && err !== null && (err as { code?: string }).code === 'email_not_confirmed';
@@ -14,9 +15,9 @@ function isEmailNotConfirmed(err: unknown): boolean {
 async function handleResend(email: string) {
   try {
     await useAuthStore.getState().resendConfirmation(email);
-    Alert.alert('Check Your Email', `We sent a new confirmation link to ${email}.`);
+    Alert.alert(t('Check Your Email'), t('We sent a new confirmation link to {email}.', { email }));
   } catch (err) {
-    Alert.alert('Couldn’t Send Email', err instanceof Error ? err.message : 'Something went wrong.');
+    Alert.alert(t('Couldn’t Send Email'), err instanceof Error ? err.message : t('Something went wrong.'));
   }
 }
 
@@ -40,16 +41,16 @@ export default function SignInScreen() {
     } catch (err) {
       if (isEmailNotConfirmed(err)) {
         Alert.alert(
-          'Confirm Your Email',
-          'Tap the link in the email we sent when you signed up. If it expired or never arrived, we can send a new one.',
+          t('Confirm Your Email'),
+          t('Tap the link in the email we sent when you signed up. If it expired or never arrived, we can send a new one.'),
           [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Resend Email', onPress: () => handleResend(email.trim()) },
+            { text: t('Cancel'), style: 'cancel' },
+            { text: t('Resend Email'), onPress: () => handleResend(email.trim()) },
           ]
         );
         return;
       }
-      Alert.alert('Couldn’t Sign In', err instanceof Error ? err.message : 'Check your email and password, then try again.');
+      Alert.alert(t('Couldn’t Sign In'), err instanceof Error ? err.message : t('Check your email and password, then try again.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -57,21 +58,21 @@ export default function SignInScreen() {
 
   return (
     <AuthScreen
-      title="Welcome Back"
-      subtitle="Sign in to Invoice Them"
+      title={t('Welcome Back')}
+      subtitle={t('Sign in to Invoice Them')}
       actions={
         <>
-          <Button label="Sign In" size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSignIn} />
-          <TextLink label="Forgot Password?" onPress={() => router.push('/(auth)/forgot-password')} />
-          <TextLink label="New to Invoice Them? Create an Account" onPress={() => router.replace('/(auth)/sign-up')} />
+          <Button label={t('Sign In')} size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSignIn} />
+          <TextLink label={t('Forgot Password?')} onPress={() => router.push('/(auth)/forgot-password')} />
+          <TextLink label={t('New to Invoice Them? Create an Account')} onPress={() => router.replace('/(auth)/sign-up')} />
         </>
       }
     >
       <FormField
-        label="Email"
+        label={t('Email')}
         value={email}
         onChangeText={setEmail}
-        placeholder="you@example.com"
+        placeholder={t('you@example.com')}
         keyboardType="email-address"
         textContentType="username"
         autoComplete="email"
@@ -83,7 +84,7 @@ export default function SignInScreen() {
       />
       <FormField
         ref={passwordRef}
-        label="Password"
+        label={t('Password')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry

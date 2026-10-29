@@ -8,10 +8,11 @@ import { parseAuthCallbackUrl } from '../../src/lib/authCallbackUrl';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
+import { t } from '../../src/lib/i18n';
 
 const EXPIRED_MESSAGE =
-  'This link was already used or has expired. If you already confirmed your email, just sign in. Otherwise request a new link and try again.';
-const CONFIRMED_SIGN_IN_MESSAGE = 'Your email is confirmed. Sign in with your email and password to continue.';
+  t('This link was already used or has expired. If you already confirmed your email, just sign in. Otherwise request a new link and try again.');
+const CONFIRMED_SIGN_IN_MESSAGE = t('Your email is confirmed. Sign in with your email and password to continue.');
 
 /** Where every auth email link (signup confirmation, password recovery) redirects back into the
  * app. Turns whatever Supabase appended to the link (implicit-flow tokens in the fragment, a PKCE
@@ -88,7 +89,7 @@ export default function AuthCallbackScreen() {
             ? CONFIRMED_SIGN_IN_MESSAGE
             : err instanceof Error
               ? err.message
-              : 'Something went wrong. Please try again.'
+              : t('Something went wrong. Please try again.')
         );
       }
     })();
@@ -98,7 +99,7 @@ export default function AuthCallbackScreen() {
   useEffect(() => {
     if (payload.kind !== 'none') return;
     const timer = setTimeout(() => {
-      if (!handled.current) setError('This link is missing required information. Request a new one and try again.');
+      if (!handled.current) setError(t('This link is missing required information. Request a new one and try again.'));
     }, 3000);
     return () => clearTimeout(timer);
   }, [payload.kind]);
@@ -107,11 +108,11 @@ export default function AuthCallbackScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-grouped px-6 gap-4">
         <Text className="text-title2 font-semibold text-label text-center" accessibilityRole="header">
-          {error === CONFIRMED_SIGN_IN_MESSAGE ? 'Email Confirmed' : 'This Link Didn’t Work'}
+          {error === CONFIRMED_SIGN_IN_MESSAGE ? t('Email Confirmed') : t('This Link Didn’t Work')}
         </Text>
         <Text className="text-body text-secondary text-center">{error}</Text>
         <Button
-          label={error === CONFIRMED_SIGN_IN_MESSAGE ? 'Sign In' : 'Back to Sign In'}
+          label={error === CONFIRMED_SIGN_IN_MESSAGE ? t('Sign In') : t('Back to Sign In')}
           variant="tinted"
           onPress={() => router.replace('/(auth)/sign-in')}
         />
@@ -122,7 +123,7 @@ export default function AuthCallbackScreen() {
   return (
     <View className="flex-1 items-center justify-center bg-grouped gap-3">
       <ActivityIndicator size="large" />
-      <Text className="text-body text-secondary">Signing You In…</Text>
+      <Text className="text-body text-secondary">{t('Signing You In…')}</Text>
     </View>
   );
 }

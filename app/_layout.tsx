@@ -14,6 +14,7 @@ import { supabase } from '../src/lib/supabase';
 import { Button } from '../src/components/Button';
 import { resetUserState } from '../src/stores/resetUserState';
 import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
+import { t } from '../src/lib/i18n';
 
 // Keep the branded launch screen up until auth and the business profile have loaded, so launch
 // goes straight from the logo to the first screen instead of flashing a spinner in between.
@@ -130,12 +131,12 @@ export default function RootLayout() {
     return (
       <ThemeRoot>
         <View className="flex-1 items-center justify-center bg-grouped px-8 gap-4">
-          <Text className="text-title3 font-semibold text-label text-center">Couldn’t Load Your Account</Text>
+          <Text className="text-title3 font-semibold text-label text-center">{t('Couldn’t Load Your Account')}</Text>
           <Text className="text-body text-secondary text-center">
-            Check your internet connection, then try again.
+            {t('Check your internet connection, then try again.')}
           </Text>
           <Button
-            label="Try Again"
+            label={t('Try Again')}
             onPress={() => {
               setLaunchError(false);
               setLaunchAttempt((n) => n + 1);
@@ -143,7 +144,7 @@ export default function RootLayout() {
           />
           {/* A way out if the account itself is broken (e.g. its profile row is missing), not
               just the network. */}
-          <Button label="Sign Out" variant="plain" onPress={() => useAuthStore.getState().signOut()} />
+          <Button label={t('Sign Out')} variant="plain" onPress={() => useAuthStore.getState().signOut()} />
         </View>
       </ThemeRoot>
     );
@@ -153,7 +154,7 @@ export default function RootLayout() {
     return (
       <ThemeRoot>
         <View className="flex-1 items-center justify-center bg-grouped">
-          <ActivityIndicator size="large" accessibilityLabel="Loading" />
+          <ActivityIndicator size="large" accessibilityLabel={t('Loading')} />
         </View>
       </ThemeRoot>
     );
@@ -168,10 +169,10 @@ export default function RootLayout() {
         <Stack.Screen name="welcome" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="paywall" options={{ headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy', presentation: 'modal' }} />
-        <Stack.Screen name="delete-account" options={{ title: 'Delete Account' }} />
+        <Stack.Screen name="privacy-policy" options={{ title: t('Privacy Policy'), presentation: 'modal' }} />
+        <Stack.Screen name="delete-account" options={{ title: t('Delete Account') }} />
         <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
-        <Stack.Screen name="documents/new" options={{ title: 'New Document' }} />
+        <Stack.Screen name="documents/new" options={{ title: t('New Document') }} />
         <Stack.Screen
           name="documents/[id]/settlement-new"
           options={{

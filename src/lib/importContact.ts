@@ -4,10 +4,11 @@ import { contactToClientInput } from './contactMapping';
 import { persistPickedFile } from './fileStorage';
 import { newId } from './id';
 import type { ClientInput } from '../db/repositories/clients.repo';
+import { t } from './i18n';
 
 export class ContactsAccessDeniedError extends Error {
   constructor() {
-    super('Allow Contacts access for Invoice Them in the Settings app to add clients from your contacts.');
+    super(t('Allow Contacts access for Invoice Them in the Settings app to add clients from your contacts.'));
   }
 }
 

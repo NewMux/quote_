@@ -4,6 +4,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColors } from '../../src/lib/theme';
 import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
+import { t } from '../../src/lib/i18n';
 
 export default function TabsLayout() {
   const colors = useThemeColors();
@@ -15,7 +16,7 @@ export default function TabsLayout() {
   if (!isSubscriptionReady) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator size="large" accessibilityLabel="Loading" />
+        <ActivityIndicator size="large" accessibilityLabel={t('Loading')} />
       </View>
     );
   }
@@ -33,28 +34,28 @@ export default function TabsLayout() {
           sf={{ default: 'house', selected: 'house.fill' }}
           src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="home" />}
         />
-        <NativeTabs.Trigger.Label>Summary</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('Summary')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="documents">
         <NativeTabs.Trigger.Icon
           sf={{ default: 'doc.text', selected: 'doc.text.fill' }}
           src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="document-text" />}
         />
-        <NativeTabs.Trigger.Label>Documents</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('Documents')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="clients">
         <NativeTabs.Trigger.Icon
           sf={{ default: 'person.2', selected: 'person.2.fill' }}
           src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="people" />}
         />
-        <NativeTabs.Trigger.Label>Clients</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('Clients')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Icon
           sf={{ default: 'gearshape', selected: 'gearshape.fill' }}
           src={<NativeTabs.Trigger.VectorIcon family={Ionicons} name="settings" />}
         />
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t('Settings')}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

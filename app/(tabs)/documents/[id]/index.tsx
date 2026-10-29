@@ -64,6 +64,7 @@ import type {
   Settlement,
   SignatureRecord,
 } from '../../../../src/types/models';
+import { t } from '../../../../src/lib/i18n';
 
 interface MenuAction {
   label: string;
@@ -97,7 +98,7 @@ export default function DocumentDetailScreen() {
   const reload = useCallback(async () => {
     const doc = await getDocument(id);
     if (!doc) {
-      setLoadError('This document no longer exists.');
+      setLoadError(t('This document no longer exists.'));
       return;
     }
     setLoadError(null);
@@ -114,7 +115,7 @@ export default function DocumentDetailScreen() {
   useFocusEffect(
     useCallback(() => {
       reload().catch((err) => {
-        setLoadError(err instanceof Error ? err.message : 'Something went wrong.');
+        setLoadError(err instanceof Error ? err.message : t('Something went wrong.'));
       });
     }, [reload])
   );
@@ -135,7 +136,7 @@ export default function DocumentDetailScreen() {
       const items: NativeStackHeaderItem[] = [
         {
           type: 'menu',
-          label: 'More',
+          label: t('More'),
           icon: { type: 'sfSymbol', name: 'ellipsis.circle' },
           menu: {
             items: menuActionsRef.current().map((action) => ({
@@ -149,7 +150,7 @@ export default function DocumentDetailScreen() {
         },
       ];
       if (canEdit(doc)) {
-        items.push({ type: 'button', label: 'Edit', icon: { type: 'sfSymbol', name: 'pencil' }, onPress: openEditor });
+        items.push({ type: 'button', label: t('Edit'), icon: { type: 'sfSymbol', name: 'pencil' }, onPress: openEditor });
       }
       return items;
     };
@@ -161,8 +162,8 @@ export default function DocumentDetailScreen() {
           ? undefined
           : () => (
               <View className="flex-row">
-                {canEdit(doc) ? <HeaderButton icon="pencil" label="Edit" onPress={openEditor} /> : null}
-                <HeaderButton icon="ellipsis.circle" label="More" onPress={() => openActionsMenuRef.current()} />
+                {canEdit(doc) ? <HeaderButton icon="pencil" label={t('Edit')} onPress={openEditor} /> : null}
+                <HeaderButton icon="ellipsis.circle" label={t('More')} onPress={() => openActionsMenuRef.current()} />
               </View>
             ),
     });
@@ -173,7 +174,7 @@ export default function DocumentDetailScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-grouped px-8 gap-4">
         <Text className="text-body text-secondary text-center">{loadError}</Text>
-        <Button label="Try Again" onPress={() => reload().catch(() => {})} />
+        <Button label={t('Try Again')} onPress={() => reload().catch(() => {})} />
       </View>
     );
   }
@@ -181,7 +182,7 @@ export default function DocumentDetailScreen() {
   if (!document) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator accessibilityLabel="Loading" />
+        <ActivityIndicator accessibilityLabel={t('Loading')} />
       </View>
     );
   }
@@ -192,22 +193,22 @@ export default function DocumentDetailScreen() {
       await fn();
       await reload();
     } catch (err) {
-      Alert.alert('Something Went Wrong', err instanceof Error ? err.message : 'Please try again.');
+      Alert.alert(t('Something Went Wrong'), err instanceof Error ? err.message : t('Please try again.'));
     } finally {
       setBusy(false);
     }
   }
 
   function checkReadyToSend(): string | null {
-    if (lines.length === 0) return 'Add at least one item before sending this document.';
-    if (!client && !document?.client_name_snapshot) return 'Add a client before sending this document.';
+    if (lines.length === 0) return t('Add at least one item before sending this document.');
+    if (!client && !document?.client_name_snapshot) return t('Add a client before sending this document.');
     return null;
   }
 
   async function handleIssue() {
     const problem = checkReadyToSend();
     if (problem) {
-      Alert.alert('Not Ready to Send', problem);
+      Alert.alert(t('Not Ready to Send'), problem);
       return;
     }
     await withBusy(() => issueDocument(id));
@@ -220,26 +221,25 @@ export default function DocumentDetailScreen() {
   }
 
   function handleClearSignature(role: 'merchant' | 'client') {
-    const whose = role === 'merchant' ? 'Your' : "The client's";
-    Alert.alert('Clear Signature?', `${whose} signature will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Clear', style: 'destructive', onPress: () => withBusy(() => deleteSignature(id, role)) },
+    const message = role === 'merchant' ? t('Your signature will be removed.') : t('The client’s signature will be removed.');
+    Alert.alert(t('Clear Signature?'), message, [
+      { text: t('Cancel'), style: 'cancel' },
+      { text: t('Clear'), style: 'destructive', onPress: () => withBusy(() => deleteSignature(id, role)) },
     ]);
   }
 
   function handleVoid() {
     if (!document) return;
-    const label = document.doc_type === 'estimate' ? 'Estimate' : 'Invoice';
     if (Platform.OS === 'ios') {
       Alert.prompt(
-        `Cancel This ${label}?`,
-        "It stays on record but can't be edited, sent, or paid anymore. Add a reason if you like.",
+        document.doc_type === 'estimate' ? t('Cancel This Estimate?') : t('Cancel This Invoice?'),
+        t("It stays on record but can't be edited, sent, or paid anymore. Add a reason if you like."),
         [
-          { text: `Don't Cancel`, style: 'cancel' },
+          { text: t('Don’t Cancel'), style: 'cancel' },
           {
-            text: `Cancel ${label}`,
+            text: document.doc_type === 'estimate' ? t('Cancel Estimate') : t('Cancel Invoice'),
             style: 'destructive',
-            onPress: (reason?: string) => withBusy(() => voidDocument(id, reason?.trim() || 'No reason given')),
+            onPress: (reason?: string) => withBusy(() => voidDocument(id, reason?.trim() || t('No reason given'))),
           },
         ],
         'plain-text',
@@ -254,25 +254,25 @@ export default function DocumentDetailScreen() {
 
   async function confirmVoid() {
     setVoidPromptVisible(false);
-    await withBusy(() => voidDocument(id, voidReason.trim() || 'No reason given'));
+    await withBusy(() => voidDocument(id, voidReason.trim() || t('No reason given')));
   }
 
   function handleDelete() {
     if (!document) return;
     Alert.alert(
-      `Delete ${document.doc_number}?`,
-      "This permanently deletes the document with its line items, signatures, and payment records. This can't be undone.",
+      t('Delete {number}?', { number: document.doc_number }),
+      t("This permanently deletes the document with its line items, signatures, and payment records. This can't be undone."),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteDocument(id);
               router.replace('/(tabs)/documents');
             } catch (err) {
-              Alert.alert('Couldn’t Delete', err instanceof Error ? err.message : 'Something went wrong.');
+              Alert.alert(t('Couldn’t Delete'), err instanceof Error ? err.message : t('Something went wrong.'));
             }
           },
         },
@@ -296,46 +296,55 @@ export default function DocumentDetailScreen() {
     const link = currentPaymentLink();
     if (!document || !link) return;
     const balance = formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code);
-    await Share.share({ message: `Invoice ${document.doc_number} (${balance}). You can pay online here: ${link}` });
+    await Share.share({ message: t('Invoice {number} ({balance}). You can pay online here: {link}', { number: document.doc_number, balance, link }) });
   }
 
   /** The document's secondary actions: a native menu on iOS, a dialog list on Android. */
   function getMenuActions() {
     if (!document) return [];
-    const label = document.doc_type === 'estimate' ? 'Estimate' : 'Invoice';
     const actions: MenuAction[] = [
-      { label: 'Share PDF', symbol: 'square.and.arrow.up', onPress: () => handleGeneratePdfAnd('view') },
+      { label: t('Share PDF'), symbol: 'square.and.arrow.up', onPress: () => handleGeneratePdfAnd('view') },
     ];
     if (currentPaymentLink()) {
-      actions.push({ label: 'Share Payment Link', symbol: 'link', onPress: handleSharePaymentLink });
+      actions.push({ label: t('Share Payment Link'), symbol: 'link', onPress: handleSharePaymentLink });
     }
     if (canMarkViewed(document)) {
-      actions.push({ label: 'Mark as Viewed', symbol: 'eye', onPress: handleMarkViewed });
+      actions.push({ label: t('Mark as Viewed'), symbol: 'eye', onPress: handleMarkViewed });
     }
     if (document.doc_type === 'invoice' && document.status !== 'void') {
       actions.push({
-        label: schedule ? 'Edit Recurring' : 'Make Recurring',
+        label: schedule ? t('Edit Recurring') : t('Make Recurring'),
         symbol: 'repeat',
         onPress: () => router.push({ pathname: '/modals/recurring', params: { documentId: id } }),
       });
     }
     if (canVoid(document)) {
-      actions.push({ label: `Cancel ${label}`, symbol: 'xmark.circle', onPress: handleVoid, destructive: true });
+      actions.push({
+        label: document.doc_type === 'estimate' ? t('Cancel Estimate') : t('Cancel Invoice'),
+        symbol: 'xmark.circle',
+        onPress: handleVoid,
+        destructive: true,
+      });
     }
     if (canDelete(document)) {
-      actions.push({ label: `Delete ${label}`, symbol: 'trash', onPress: handleDelete, destructive: true });
+      actions.push({
+        label: document.doc_type === 'estimate' ? t('Delete Estimate') : t('Delete Invoice'),
+        symbol: 'trash',
+        onPress: handleDelete,
+        destructive: true,
+      });
     }
     return actions;
   }
 
   function openActionsMenu() {
-    Alert.alert(document?.doc_number ?? 'Document', undefined, [
+    Alert.alert(document?.doc_number ?? t('Document'), undefined, [
       ...getMenuActions().map((a) => ({
         text: a.label,
         style: a.destructive ? ('destructive' as const) : undefined,
         onPress: a.onPress,
       })),
-      { text: 'Cancel', style: 'cancel' as const },
+      { text: t('Cancel'), style: 'cancel' as const },
     ]);
   }
 
@@ -354,28 +363,35 @@ export default function DocumentDetailScreen() {
     if (!document) return;
     const problem = checkReadyToSend();
     if (problem) {
-      Alert.alert('Not Ready to Send', problem);
+      Alert.alert(t('Not Ready to Send'), problem);
       return;
     }
     const docType = document.doc_type;
     const docNumber = document.doc_number;
     const overdue = isOverdue(document);
     const payLink = currentPaymentLink();
-    const payLine = payLink ? `\n\nPay online: ${payLink}` : '';
+    const payLine = payLink ? `\n\n${t('Pay online: {link}', { link: payLink })}` : '';
     await withBusy(async () => {
       const pdfUri = await generateDocumentPdf(id);
       if (action === 'view') {
         await sharePdf(id, pdfUri);
       } else {
-        const label = docType === 'estimate' ? 'Estimate' : 'Invoice';
+        const label = docType === 'estimate' ? t('Estimate') : t('Invoice');
         await emailPdf({
           documentId: id,
           pdfUri,
           recipientEmail: client?.email ?? null,
-          subject: overdue ? `Payment Reminder: ${label} ${docNumber}` : `${label} ${docNumber}`,
+          subject: overdue ? t('Payment Reminder: {type} {number}', { type: label, number: docNumber }) : `${label} ${docNumber}`,
           body: (overdue
-            ? `This is a friendly reminder that ${label.toLowerCase()} ${docNumber} for ${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)} is overdue. Please arrange payment at your earliest convenience.\n\nThank you!`
-            : `Please find attached ${docType} ${docNumber}.`) + payLine,
+            ? t(
+                'This is a friendly reminder that {type} {number} for {amount} is overdue. Please arrange payment at your earliest convenience.\n\nThank you!',
+                {
+                  type: label.toLowerCase(),
+                  number: docNumber,
+                  amount: formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code),
+                }
+              )
+            : t('Please find attached {type} {number}.', { type: label.toLowerCase(), number: docNumber })) + payLine,
         });
       }
     });
@@ -388,9 +404,9 @@ export default function DocumentDetailScreen() {
     onEmail: () => handleGeneratePdfAnd('email'),
   });
 
-  const clientName = client?.display_name ?? document.client_name_snapshot ?? 'No Client';
+  const clientName = client?.display_name ?? document.client_name_snapshot ?? t('No Client');
   const balanceMinor = document.total_minor - document.amount_paid_minor;
-  const amountLabel = document.doc_type === 'invoice' ? 'Balance Due' : 'Total';
+  const amountLabel = document.doc_type === 'invoice' ? t('Balance Due') : t('Total');
   const dueDate = document.doc_type === 'invoice' ? document.due_date : document.expiry_date;
   const typeLabel = docTypeLabel(document.doc_type);
 
@@ -432,49 +448,49 @@ export default function DocumentDetailScreen() {
           {document.status !== 'void' ? (
             <View className="self-stretch mt-3">
               <Button
-                label="Share PDF"
+                label={t('Share PDF')}
                 icon="square.and.arrow.up"
                 variant="tinted"
                 onPress={() => handleGeneratePdfAnd('view')}
-                accessibilityHint="Opens the share sheet to send, print or save the PDF to Files"
+                accessibilityHint={t('Opens the share sheet to send, print or save the PDF to Files')}
               />
             </View>
           ) : null}
         </View>
 
         {document.status === 'void' ? (
-          <ListSection header="Canceled">
+          <ListSection header={t('Canceled')}>
             <ListRow
-              title={document.void_reason ?? 'No reason given'}
-              subtitle={document.voided_at ? `On ${formatDisplayDate(document.voided_at)}` : undefined}
+              title={document.void_reason ?? t('No reason given')}
+              subtitle={document.voided_at ? t('On {date}', { date: formatDisplayDate(document.voided_at) }) : undefined}
             />
           </ListSection>
         ) : null}
 
         <ListSection>
           <ListRow
-            title="Client"
+            title={t('Client')}
             value={clientName}
             onPress={client ? () => router.push(`/clients/${client.id}`) : undefined}
           />
-          <ListRow title="Issued" value={document.issue_date ? formatDisplayDate(document.issue_date) : 'Not Yet'} />
+          <ListRow title={t('Issued')} value={document.issue_date ? formatDisplayDate(document.issue_date) : t('Not Yet')} />
           <ListRow
-            title={document.doc_type === 'invoice' ? 'Payment Due' : 'Valid Until'}
+            title={document.doc_type === 'invoice' ? t('Payment Due') : t('Valid Until')}
             value={dueDate ? formatDisplayDate(dueDate) : '—'}
             valueClassName={isOverdue(document) ? 'text-destructive' : undefined}
           />
           {schedule ? (
             <ListRow
               icon="repeat"
-              title="Repeats"
+              title={t('Repeats')}
               subtitle={describeSchedule(schedule.frequency, schedule.next_run_date)}
               onPress={() => router.push({ pathname: '/modals/recurring', params: { documentId: id } })}
-              accessibilityHint="Edit the repeat schedule"
+              accessibilityHint={t('Edit the repeat schedule')}
             />
           ) : null}
         </ListSection>
 
-        <ListSection header="Items">
+        <ListSection header={t('Items')}>
           {lines.length > 0 ? (
             lines.map((line) => (
               <ListRow
@@ -486,36 +502,36 @@ export default function DocumentDetailScreen() {
               />
             ))
           ) : (
-            <ListRow title="No items yet" subtitle={canEdit(document) ? 'Tap Edit to add some.' : undefined} />
+            <ListRow title={t('No items yet')} subtitle={canEdit(document) ? t('Tap Edit to add some.') : undefined} />
           )}
         </ListSection>
 
         <ListSection
           footer={
             !canEdit(document) && document.status !== 'void'
-              ? `Editing is locked because this ${document.doc_type} has been issued.`
+              ? t('Editing is locked because this {type} has been issued.', { type: docTypeLabel(document.doc_type).toLowerCase() })
               : undefined
           }
         >
-          <ListRow title="Subtotal" value={formatMinor(document.subtotal_minor, document.currency_code)} />
+          <ListRow title={t('Subtotal')} value={formatMinor(document.subtotal_minor, document.currency_code)} />
           {document.discount_amount_minor > 0 ? (
-            <ListRow title="Discount" value={formatMinor(-document.discount_amount_minor, document.currency_code)} />
+            <ListRow title={t('Discount')} value={formatMinor(-document.discount_amount_minor, document.currency_code)} />
           ) : null}
           <ListRow
             title={getTaxLabel(lines.map((l) => ({ isTaxable: l.is_taxable === 1, taxName: l.tax_bracket_name_snapshot })))}
             value={formatMinor(document.tax_total_minor, document.currency_code)}
           />
           {document.amount_paid_minor > 0 ? (
-            <ListRow title="Total" value={formatMinor(document.total_minor, document.currency_code)} />
+            <ListRow title={t('Total')} value={formatMinor(document.total_minor, document.currency_code)} />
           ) : null}
           {document.amount_paid_minor > 0 ? (
-            <ListRow title="Paid" value={formatMinor(-document.amount_paid_minor, document.currency_code)} />
+            <ListRow title={t('Paid')} value={formatMinor(-document.amount_paid_minor, document.currency_code)} />
           ) : null}
           <ListRow title={amountLabel} value={formatMinor(balanceMinor, document.currency_code)} emphasized />
         </ListSection>
 
         {settlements.length > 0 ? (
-          <ListSection header="Payments" footer="Tap a payment to edit or delete it.">
+          <ListSection header={t('Payments')} footer={t('Tap a payment to edit or delete it.')}>
             {settlements.map((s) => (
               <ListRow
                 key={s.id}
@@ -530,23 +546,23 @@ export default function DocumentDetailScreen() {
           </ListSection>
         ) : null}
 
-        <ListSection header="Signatures">
+        <ListSection header={t('Signatures')}>
           {(['merchant', 'client'] as const).map((role) => {
             const sig = signatures.find((s) => s.signer_role === role);
-            const who = role === 'merchant' ? 'You' : 'Client';
+            const who = role === 'merchant' ? t('You') : t('Client');
             return (
               <ListRow
                 key={role}
                 icon="signature"
                 iconColor={sig ? undefined : colors.secondary}
                 title={who}
-                subtitle={sig ? `Signed ${formatDisplayDate(sig.signed_at)}` : 'Not signed'}
+                subtitle={sig ? t('Signed {date}', { date: formatDisplayDate(sig.signed_at) }) : t('Not signed')}
                 trailing={
                   sig ? (
-                    <Button label="Clear" variant="plain" size="small" onPress={() => handleClearSignature(role)} />
+                    <Button label={t('Clear')} variant="plain" size="small" onPress={() => handleClearSignature(role)} />
                   ) : (
                     <Button
-                      label={role === 'merchant' ? 'Sign' : 'Get Signature'}
+                      label={role === 'merchant' ? t('Sign') : t('Get Signature')}
                       variant="tinted"
                       size="small"
                       onPress={() => router.push({ pathname: '/modals/sign', params: { documentId: id, role } })}
@@ -558,14 +574,14 @@ export default function DocumentDetailScreen() {
           })}
         </ListSection>
 
-        <GroupedCard header="Activity">
+        <GroupedCard header={t('Activity')}>
           <ActivityLogList entries={activity} />
         </GroupedCard>
       </ScrollView>
 
       {busy ? (
         <View className="absolute inset-0 items-center justify-center bg-card/60">
-          <ActivityIndicator size="large" accessibilityLabel="Working" />
+          <ActivityIndicator size="large" accessibilityLabel={t('Working')} />
         </View>
       ) : null}
 
@@ -578,10 +594,10 @@ export default function DocumentDetailScreen() {
             <Text className="text-body text-secondary">
               It stays on record but can&apos;t be edited, sent, or paid anymore.
             </Text>
-            <FormField label="Reason" hint="Optional" value={voidReason} onChangeText={setVoidReason} autoFocus />
+            <FormField label={t('Reason')} hint={t('Optional')} value={voidReason} onChangeText={setVoidReason} autoFocus />
             <View className="flex-row gap-2 justify-end mt-1">
-              <Button label="Don't Cancel" variant="plain" onPress={() => setVoidPromptVisible(false)} />
-              <Button label={`Cancel ${docTypeLabel(document.doc_type)}`} variant="destructive" onPress={confirmVoid} />
+              <Button label={t("Don't Cancel")} variant="plain" onPress={() => setVoidPromptVisible(false)} />
+              <Button label={document.doc_type === 'estimate' ? t('Cancel Estimate') : t('Cancel Invoice')} variant="destructive" onPress={confirmVoid} />
             </View>
           </View>
         </View>
@@ -603,27 +619,30 @@ function getPrimaryAction(
 ): { label: string; caption: string; onPress: () => void } | null {
   if (canIssue(document)) {
     return {
-      label: document.doc_type === 'estimate' ? 'Issue Estimate' : 'Issue Invoice',
-      caption: 'Finalizes the number and locks editing.',
+      label: document.doc_type === 'estimate' ? t('Issue Estimate') : t('Issue Invoice'),
+      caption: t('Finalizes the number and locks editing.'),
       onPress: handlers.onIssue,
     };
   }
   if (canConvertToInvoice(document)) {
     return {
-      label: 'Convert to Invoice',
-      caption: 'Turn this accepted estimate into a billable invoice.',
+      label: t('Convert to Invoice'),
+      caption: t('Turn this accepted estimate into a billable invoice.'),
       onPress: handlers.onConvert,
     };
   }
   if (canLogSettlement(document)) {
-    return { label: 'Log Payment', caption: 'Record a payment you received for this invoice.', onPress: handlers.onLogPayment };
+    return { label: t('Log Payment'), caption: t('Record a payment you received for this invoice.'), onPress: handlers.onLogPayment };
   }
   if (document.status === 'void') return null;
   return isOverdue(document)
-    ? { label: 'Send Reminder', caption: 'Emails the client a payment reminder.', onPress: handlers.onEmail }
+    ? { label: t('Send Reminder'), caption: t('Emails the client a payment reminder.'), onPress: handlers.onEmail }
     : {
-        label: `Email ${docTypeLabel(document.doc_type)}`,
-        caption: `Sends this ${document.doc_type} to the client by email.`,
+        label: document.doc_type === 'estimate' ? t('Email Estimate') : t('Email Invoice'),
+        caption:
+          document.doc_type === 'estimate'
+            ? t('Sends this estimate to the client by email.')
+            : t('Sends this invoice to the client by email.'),
         onPress: handlers.onEmail,
       };
 }

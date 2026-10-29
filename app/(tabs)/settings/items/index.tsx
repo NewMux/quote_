@@ -9,6 +9,7 @@ import { addButtonItem } from '../../../../src/lib/headerItems';
 import { formatMinor } from '../../../../src/lib/money';
 import { useBusinessProfileStore } from '../../../../src/stores/useBusinessProfileStore';
 import { useItemCatalogStore } from '../../../../src/stores/useItemCatalogStore';
+import { t } from '../../../../src/lib/i18n';
 
 function addItem() {
   router.push('/items/new');
@@ -21,8 +22,8 @@ export default function ItemsScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      unstable_headerRightItems: () => [addButtonItem('Add Item', addItem)],
-      headerRight: Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="plus" label="Add Item" onPress={addItem} />,
+      unstable_headerRightItems: () => [addButtonItem(t('Add Item'), addItem)],
+      headerRight: Platform.OS === 'ios' ? undefined : () => <HeaderButton icon="plus" label={t('Add Item')} onPress={addItem} />,
     });
   }, [navigation]);
 
@@ -41,13 +42,13 @@ export default function ItemsScreen() {
       {items.length === 0 ? (
         <EmptyState
           icon="tag"
-          title="No Items Yet"
-          subtitle="Save the items and services you bill often, then add them to a document in one tap."
-          actionLabel="Add Item"
+          title={t('No Items Yet')}
+          subtitle={t('Save the items and services you bill often, then add them to a document in one tap.')}
+          actionLabel={t('Add Item')}
           onAction={addItem}
         />
       ) : (
-        <ListSection footer="Tap an item to edit it.">
+        <ListSection footer={t('Tap an item to edit it.')}>
           {items.map((item) => (
             <ListRow
               key={item.id}

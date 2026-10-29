@@ -13,12 +13,13 @@ import { toStoredDate } from '../lib/format';
 import { useSignedUrl } from '../lib/useSignedUrl';
 import { newId } from '../lib/id';
 import type { Settlement, SettlementMethod } from '../types/models';
+import { t } from '../lib/i18n';
 
 const METHODS: { value: SettlementMethod; label: string }[] = [
-  { value: 'cash', label: 'Cash' },
-  { value: 'bank_transfer', label: 'Bank' },
-  { value: 'check', label: 'Check' },
-  { value: 'other', label: 'Other' },
+  { value: 'cash', label: t('Cash') },
+  { value: 'bank_transfer', label: t('Bank') },
+  { value: 'check', label: t('Check') },
+  { value: 'other', label: t('Other') },
 ];
 
 export interface SettlementFormValue {
@@ -66,7 +67,7 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
   async function pickReceiptPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to attach a receipt.');
+      Alert.alert(t('Photo Access Needed'), t('Allow photo access in the Settings app to attach a receipt.'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
@@ -76,7 +77,7 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
       const persistedUri = await persistPickedFile(result.assets[0].uri, 'receipts', `${newId()}.jpg`);
       setReceiptUri(persistedUri);
     } catch (err) {
-      Alert.alert('Couldn’t Add Receipt', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Receipt'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsUploading(false);
     }
@@ -89,48 +90,48 @@ export function SettlementForm({ defaultAmountMinor, currencyCode, initial, onSt
           values={METHODS.map((m) => m.label)}
           selectedIndex={METHODS.findIndex((m) => m.value === method)}
           onChange={(e) => setMethod(METHODS[e.nativeEvent.selectedSegmentIndex].value)}
-          accessibilityLabel="Payment method"
+          accessibilityLabel={t('Payment method')}
         />
       </View>
 
       <ListSection>
         <MoneyInput
-          label="Amount"
+          label={t('Amount')}
           valueMinor={amountMinor}
           currencyCode={currencyCode}
           onChangeMinor={setAmountMinor}
-          error={amountMinor > 0 ? null : 'Enter an amount greater than zero.'}
+          error={amountMinor > 0 ? null : t('Enter an amount greater than zero.')}
         />
-        <DateField label="Date" value={settledDate} onChange={setSettledDate} />
+        <DateField label={t('Date')} value={settledDate} onChange={setSettledDate} />
       </ListSection>
 
-      <ListSection footer="Optional, such as a check number or transaction ID.">
+      <ListSection footer={t('Optional, such as a check number or transaction ID.')}>
         <FormRow
-          label="Reference"
+          label={t('Reference')}
           value={referenceNumber}
           onChangeText={setReferenceNumber}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={60}
         />
-        <FormRow label="Notes" value={notes} onChangeText={setNotes} placeholder="Optional" multiline maxLength={500} />
+        <FormRow label={t('Notes')} value={notes} onChangeText={setNotes} placeholder={t('Optional')} multiline maxLength={500} />
       </ListSection>
 
-      <ListSection header="Receipt">
+      <ListSection header={t('Receipt')}>
         {signedReceiptUrl ? (
           <Image
             source={{ uri: signedReceiptUrl }}
             className="w-full h-44"
             resizeMode="cover"
-            accessibilityLabel="Receipt photo"
+            accessibilityLabel={t('Receipt photo')}
           />
         ) : null}
         <ListRow
           icon="photo"
-          title={receiptUri ? 'Change Photo' : 'Attach Photo'}
+          title={receiptUri ? t('Change Photo') : t('Attach Photo')}
           onPress={isUploading ? undefined : pickReceiptPhoto}
-          trailing={isUploading ? <ActivityIndicator accessibilityLabel="Uploading Photo" /> : undefined}
+          trailing={isUploading ? <ActivityIndicator accessibilityLabel={t('Uploading Photo')} /> : undefined}
           accessory="none"
         />
       </ListSection>

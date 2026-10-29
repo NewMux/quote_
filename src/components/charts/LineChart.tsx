@@ -2,6 +2,7 @@ import { Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { useThemeColors } from '../../lib/theme';
 import type { ChartPoint } from '../../types/models';
+import { t } from '../../lib/i18n';
 
 interface LineChartProps {
   data: ChartPoint[];
@@ -26,7 +27,7 @@ export function LineChart({ data, height = 140, color, accessibilityLabel }: Lin
   if (data.length === 0) {
     return (
       <View style={{ height }} className="items-center justify-center">
-        <Text className="text-subhead text-secondary">No Data Yet</Text>
+        <Text className="text-subhead text-secondary">{t('No Data Yet')}</Text>
       </View>
     );
   }
@@ -47,7 +48,7 @@ export function LineChart({ data, height = 140, color, accessibilityLabel }: Lin
   const labelStep = Math.ceil(data.length / MAX_LABELS);
 
   return (
-    <View accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
+    <View style={{ direction: 'ltr' }} accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
       <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
         <Defs>
           <LinearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">

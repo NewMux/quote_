@@ -1,5 +1,6 @@
 import { applyDiscount, applyTaxBp } from './money';
 import type { DiscountType } from '../types/models';
+import { t } from './i18n';
 
 export interface LineItemDraft {
   id: string;
@@ -91,5 +92,5 @@ export function getTaxLabel(items: { isTaxable: boolean; taxName: string | null 
   const names = new Set(
     items.filter((i) => i.isTaxable && i.taxName).map((i) => i.taxName as string)
   );
-  return names.size === 1 ? [...names][0] : 'Tax';
+  return names.size === 1 ? [...names][0] : t('Tax');
 }

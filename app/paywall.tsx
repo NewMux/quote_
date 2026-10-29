@@ -15,12 +15,13 @@ import { useSignedUrl } from '../src/lib/useSignedUrl';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../src/stores/useSubscriptionStore';
+import { t } from '../src/lib/i18n';
 
 const BENEFITS: { icon: SymbolName; title: string; detail: string }[] = [
-  { icon: 'doc.on.doc.fill', title: 'Unlimited Documents', detail: 'Estimates and invoices, as many as you need' },
-  { icon: 'signature', title: 'Your Brand', detail: 'PDFs with your logo and signatures' },
-  { icon: 'banknote.fill', title: 'Get Paid', detail: 'Payment tracking and overdue reminders' },
-  { icon: 'repeat', title: 'Recurring Invoices', detail: 'Drafts created for you on schedule' },
+  { icon: 'doc.on.doc.fill', title: t('Unlimited Documents'), detail: t('Estimates and invoices, as many as you need') },
+  { icon: 'signature', title: t('Your Brand'), detail: t('PDFs with your logo and signatures') },
+  { icon: 'banknote.fill', title: t('Get Paid'), detail: t('Payment tracking and overdue reminders') },
+  { icon: 'repeat', title: t('Recurring Invoices'), detail: t('Drafts created for you on schedule') },
 ];
 
 type PlanKind = 'annual' | 'monthly';
@@ -82,7 +83,7 @@ export default function PaywallScreen() {
     try {
       await purchase(selected);
     } catch (err) {
-      Alert.alert('Purchase Didn’t Go Through', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Purchase Didn’t Go Through'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsWorking(false);
     }
@@ -94,12 +95,12 @@ export default function PaywallScreen() {
       const restored = await restore();
       if (!restored) {
         Alert.alert(
-          'Nothing to Restore',
-          'No active subscription was found for the Apple ID signed in on this device.'
+          t('Nothing to Restore'),
+          t('No active subscription was found for the Apple ID signed in on this device.')
         );
       }
     } catch (err) {
-      Alert.alert('Couldn’t Restore Purchases', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Restore Purchases'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsWorking(false);
     }
@@ -110,14 +111,17 @@ export default function PaywallScreen() {
       await signOut();
       router.replace('/(auth)/sign-in');
     } catch (err) {
-      Alert.alert('Couldn’t Sign Out', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Sign Out'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
+  const period = selectedKind === 'annual' ? t('year') : t('month');
   const renewalText = selected
-    ? `${intro ? `${intro}, then ` : ''}${selected.product.priceString} per ${
-        selectedKind === 'annual' ? 'year' : 'month'
-      }. Payment is charged to your Apple ID. The subscription renews automatically unless you turn it off at least 24 hours before the end of the current period. Manage or cancel anytime in your App Store account settings.`
+    ? `${
+        intro
+          ? t('{intro}, then {price} per {period}.', { intro, price: selected.product.priceString, period })
+          : t('{price} per {period}.', { price: selected.product.priceString, period })
+      } ${t('Payment is charged to your Apple ID. The subscription renews automatically unless you turn it off at least 24 hours before the end of the current period. Manage or cancel anytime in your App Store account settings.')}`
     : null;
 
   return (
@@ -140,7 +144,7 @@ export default function PaywallScreen() {
               className="w-full bg-card rounded-3xl p-4 mb-3 flex-row items-center gap-3"
               style={{ borderCurve: 'continuous' }}
               accessible
-              accessibilityLabel={`Invoice preview for ${businessName}`}
+              accessibilityLabel={t('Invoice preview for {name}', { name: businessName })}
             >
               {logoUrl ? (
                 <Image source={{ uri: logoUrl }} className="w-14 h-14 rounded-xl bg-white" resizeMode="contain" />
@@ -151,7 +155,7 @@ export default function PaywallScreen() {
                 <Text className="text-headline font-semibold text-label" numberOfLines={1}>
                   {businessName}
                 </Text>
-                <Text className="text-footnote text-secondary">Invoice · Ready to send</Text>
+                <Text className="text-footnote text-secondary">{t('Invoice · Ready to send')}</Text>
               </View>
               <Icon name="checkmark.circle.fill" size={28} />
             </View>
@@ -164,12 +168,12 @@ export default function PaywallScreen() {
             </View>
           )}
           <Text className="text-largetitle font-bold text-label text-center" accessibilityRole="header">
-            Invoice Them Pro
+            {t('Invoice Them Pro')}
           </Text>
           <Text className="text-body text-secondary text-center">
             {businessName
-              ? `${businessName} is all set up. Subscribe to send your first invoice.`
-              : 'Everything you need to quote, invoice, and get paid.'}
+              ? t('{name} is all set up. Subscribe to send your first invoice.', { name: businessName })
+              : t('Everything you need to quote, invoice, and get paid.')}
           </Text>
         </View>
 
@@ -182,34 +186,34 @@ export default function PaywallScreen() {
         {/* Spells out the intro offer before the price list, so "what happens after the first month"
             is answered up front rather than only in the fine print. */}
         {intro && selected ? (
-          <ListSection header="How It Works">
+          <ListSection header={t('How It Works')}>
             <ListRow
               icon="checkmark.circle.fill"
-              title="Today"
-              subtitle={`Full access to everything, ${intro}`}
+              title={t('Today')}
+              subtitle={t('Full access to everything, {intro}', { intro })}
             />
             <ListRow
               icon="arrow.triangle.2.circlepath"
-              title="After That"
-              subtitle={`${selected.product.priceString} per ${selectedKind === 'annual' ? 'year' : 'month'}. Cancel anytime in Settings.`}
+              title={t('After That')}
+              subtitle={t('{price} per {period}. Cancel anytime in Settings.', { price: selected.product.priceString, period })}
             />
           </ListSection>
         ) : null}
 
         {loadError ? (
-          <ListSection footer="Couldn’t load subscription options. Check your connection and try again.">
-            <ListRow title="Try Again" onPress={fetchOffering} centered />
+          <ListSection footer={t('Couldn’t load subscription options. Check your connection and try again.')}>
+            <ListRow title={t('Try Again')} onPress={fetchOffering} centered />
           </ListSection>
         ) : !offering ? (
-          <ActivityIndicator style={{ paddingVertical: 24 }} accessibilityLabel="Loading plans" />
+          <ActivityIndicator style={{ paddingVertical: 24 }} accessibilityLabel={t('Loading plans')} />
         ) : (
-          <ListSection header="Choose a Plan">
+          <ListSection header={t('Choose a Plan')}>
             {annual ? (
               <ListRow
-                title="Yearly"
+                title={t('Yearly')}
                 subtitle={[
-                  savings ? `Save ${savings}%` : null,
-                  annual.product.pricePerMonthString ? `${annual.product.pricePerMonthString}/month` : null,
+                  savings ? t('Save {percent}%', { percent: savings }) : null,
+                  annual.product.pricePerMonthString ? t('{price}/month', { price: annual.product.pricePerMonthString }) : null,
                 ]
                   .filter(Boolean)
                   .join(' · ') || undefined}
@@ -221,7 +225,7 @@ export default function PaywallScreen() {
             ) : null}
             {monthly ? (
               <ListRow
-                title="Monthly"
+                title={t('Monthly')}
                 value={monthly.product.priceString}
                 valueClassName="text-label font-semibold"
                 onPress={() => setPlan('monthly')}
@@ -234,10 +238,10 @@ export default function PaywallScreen() {
         {renewalText ? <Text className="text-footnote text-secondary px-4">{renewalText}</Text> : null}
 
         <View className="flex-row flex-wrap justify-center gap-x-4 mt-3">
-          <FooterLink label="Privacy Policy" onPress={() => router.push('/privacy-policy')} />
-          <FooterLink label="Terms of Use" onPress={() => Linking.openURL(APPLE_EULA_URL)} />
-          <FooterLink label="Sign Out" onPress={handleSignOut} />
-          <FooterLink label="Delete Account" onPress={() => router.push('/delete-account')} />
+          <FooterLink label={t('Privacy Policy')} onPress={() => router.push('/privacy-policy')} />
+          <FooterLink label={t('Terms of Use')} onPress={() => Linking.openURL(APPLE_EULA_URL)} />
+          <FooterLink label={t('Sign Out')} onPress={handleSignOut} />
+          <FooterLink label={t('Delete Account')} onPress={() => router.push('/delete-account')} />
         </View>
       </ScrollView>
 
@@ -250,17 +254,17 @@ export default function PaywallScreen() {
           <GlassBar>
             {intro && selected ? (
               <Text className="text-footnote text-secondary text-center pt-1">
-                {`${intro}, then ${selected.product.priceString}/${selectedKind === 'annual' ? 'year' : 'month'}`}
+                {t('{intro}, then {price}/{period}', { intro, price: selected.product.priceString, period })}
               </Text>
             ) : null}
             <Button
-              label={intro && selected?.product.introPrice ? `Start for ${selected.product.introPrice.priceString}` : 'Subscribe'}
+              label={intro && selected?.product.introPrice ? t('Start for {price}', { price: selected.product.introPrice.priceString }) : t('Subscribe')}
               size="large"
               onPress={handlePurchase}
               disabled={!selected}
               loading={isWorking}
             />
-            <Button label="Restore Purchases" variant="plain" size="small" onPress={handleRestore} disabled={isWorking} />
+            <Button label={t('Restore Purchases')} variant="plain" size="small" onPress={handleRestore} disabled={isWorking} />
           </GlassBar>
         </View>
       </View>

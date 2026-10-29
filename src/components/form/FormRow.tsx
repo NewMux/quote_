@@ -1,6 +1,7 @@
 import { forwardRef, useId } from 'react';
 import { InputAccessoryView, Keyboard, Platform, Pressable, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { useThemeColors } from '../../lib/theme';
+import { t } from '../../lib/i18n';
 
 export interface FormRowProps extends TextInputProps {
   label: string;
@@ -69,7 +70,7 @@ export const FormRow = forwardRef<TextInput, FormRowProps>(function FormRow(
         <InputAccessoryView nativeID={accessoryId}>
           <View className="flex-row justify-end bg-elevated border-t border-separator px-4">
             <Pressable onPress={() => Keyboard.dismiss()} accessibilityRole="button" className="min-h-[44px] justify-center px-2">
-              <Text className="text-body font-semibold text-tint">Done</Text>
+              <Text className="text-body font-semibold text-tint">{t('Done')}</Text>
             </Pressable>
           </View>
         </InputAccessoryView>

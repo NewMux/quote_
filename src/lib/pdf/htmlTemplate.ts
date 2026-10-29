@@ -3,15 +3,22 @@ import { getTaxLabel } from '../documentCalculations';
 import { formatMinor, formatRateBp } from '../money';
 import { resolvePaymentLink } from '../paymentLink';
 import { qrSvg } from './qrSvg';
+import { dateLocale, datePattern } from '../i18n/dates';
+import { getLocale, t } from '../i18n';
 import type { BusinessProfile, Client, DocumentRecord, LineItem, SignatureRecord } from '../../types/models';
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
   try {
-    return format(parseISO(iso), 'MMM d, yyyy');
+    return format(parseISO(iso), datePattern('MMM d, yyyy'), { locale: dateLocale() });
   } catch {
     return iso;
   }
+}
+
+/** Phone numbers and emails keep their left-to-right order inside right-to-left text. */
+function ltr(value: string): string {
+  return `<bdi dir="ltr">${escapeHtml(value)}</bdi>`;
 }
 
 function escapeHtml(value: string): string {
@@ -38,12 +45,15 @@ export interface BuildDocumentHtmlInput {
 export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
   const { document, lines, profile, client, signatures, logoBase64, signatureImagesBase64 } = input;
   const accent = profile.accent_color || '#2563EB';
-  const docTitle = document.doc_type === 'estimate' ? 'Estimate' : 'Invoice';
+  const docTitle = document.doc_type === 'estimate' ? t('Estimate') : t('Invoice');
+  // The PDF follows the app's language. Arabic runs right to left, and its letters join, so the
+  // letter-spaced capitals used for the English headings are switched off.
+  const rtl = getLocale() === 'ar';
 
   const merchantSig = signatures.find((s) => s.signer_role === 'merchant');
   const clientSig = signatures.find((s) => s.signer_role === 'client');
-  const businessName = profile.business_name || 'Your Business';
-  const clientName = client?.display_name ?? document.client_name_snapshot ?? 'Client';
+  const businessName = profile.business_name || t('Your Business');
+  const clientName = client?.display_name ?? document.client_name_snapshot ?? t('Client');
 
   const balanceMinor = document.total_minor - document.amount_paid_minor;
   const payLink =
@@ -58,7 +68,7 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
   const signatureBlock = (sig: SignatureRecord | undefined, name: string, role: string) => `
     <div class="signature-block">
       <div class="signature-ink">${sig && signatureImagesBase64[sig.id] ? `<img src="data:image/png;base64,${signatureImagesBase64[sig.id]}" />` : ''}</div>
-      <div class="signature-line"><strong>${escapeHtml(name)}</strong>${sig ? ` · Signed ${formatDate(sig.signed_at)}` : ` · ${role} signature`}</div>
+      <div class="signature-line"><strong>${escapeHtml(name)}</strong>${sig ? ` · ${t('Signed {date}', { date: formatDate(sig.signed_at) })}` : ` · ${role}`}</div>
     </div>`;
 
   const rowsHtml = lines
@@ -76,7 +86,7 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
 
   return `
 <!DOCTYPE html>
-<html>
+<html lang="${rtl ? 'ar' : 'en'}" dir="${rtl ? 'rtl' : 'ltr'}">
 <head>
 <meta charset="utf-8" />
 <style>
@@ -87,20 +97,20 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
   .doc-title { font-size: 28px; font-weight: 700; color: ${accent}; margin: 0; }
   .doc-number { font-size: 14px; color: #6b7280; }
   .section { margin-bottom: 20px; }
-  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 4px; }
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: ${rtl ? '0' : '0.05em'}; color: #6b7280; margin-bottom: 4px; }
   .two-col { display: flex; justify-content: space-between; gap: 24px; }
   table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-  th { text-align: left; font-size: 11px; text-transform: uppercase; color: #6b7280; border-bottom: 2px solid #e5e7eb; padding: 8px 4px; }
+  th { text-align: start; font-size: 11px; text-transform: uppercase; color: #6b7280; border-bottom: 2px solid #e5e7eb; padding: 8px 4px; }
   td { padding: 8px 4px; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
-  .num { text-align: right; }
-  .totals { margin-top: 16px; margin-left: auto; width: 260px; }
+  .num { text-align: end; }
+  .totals { margin-top: 16px; margin-inline-start: auto; width: 260px; }
   .totals-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
   .totals-row.total { font-size: 16px; font-weight: 700; border-top: 2px solid ${accent}; margin-top: 6px; padding-top: 8px; }
   .footer { margin-top: 32px; font-size: 12px; color: #6b7280; white-space: pre-wrap; }
   .signatures { display: flex; gap: 40px; margin-top: 40px; page-break-inside: avoid; }
   .signature-block { flex: 1; }
   .signature-ink { height: 110px; display: flex; align-items: flex-end; }
-  .signature-ink img { height: 110px; max-width: 100%; object-fit: contain; object-position: left bottom; }
+  .signature-ink img { height: 110px; max-width: 100%; object-fit: contain; object-position: ${rtl ? 'right' : 'left'} bottom; }
   .signature-line { border-top: 1px solid #9ca3af; margin-top: 6px; padding-top: 6px; font-size: 12px; color: #6b7280; }
   .signature-line strong { color: #111827; font-weight: 600; }
   .pay { display: flex; align-items: center; gap: 20px; margin-top: 28px; padding: 18px; border: 1.5px solid ${accent}; border-radius: 14px; page-break-inside: avoid; }
@@ -113,9 +123,9 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
 <body>
   <div class="header">
     <div>
-      ${logoBase64 ? `<img class="logo" src="data:image/png;base64,${logoBase64}" />` : `<div style="font-size:20px;font-weight:700;">${escapeHtml(profile.business_name || 'Your Business')}</div>`}
+      ${logoBase64 ? `<img class="logo" src="data:image/png;base64,${logoBase64}" />` : `<div style="font-size:20px;font-weight:700;">${escapeHtml(profile.business_name || t('Your Business'))}</div>`}
     </div>
-    <div style="text-align:right;">
+    <div style="text-align:end;">
       <p class="doc-title">${docTitle}</p>
       <div class="doc-number">${escapeHtml(document.doc_number)}</div>
     </div>
@@ -123,62 +133,62 @@ export function buildDocumentHtml(input: BuildDocumentHtmlInput): string {
 
   <div class="two-col section">
     <div>
-      <div class="section-title">From</div>
+      <div class="section-title">${t('From')}</div>
       <div>${escapeHtml(profile.business_name || '')}</div>
       ${profile.address ? `<div>${escapeHtml(profile.address)}</div>` : ''}
-      ${profile.email ? `<div>${escapeHtml(profile.email)}</div>` : ''}
-      ${profile.phone ? `<div>${escapeHtml(profile.phone)}</div>` : ''}
-      ${profile.tax_registration_number ? `<div>Tax ID: ${escapeHtml(profile.tax_registration_number)}</div>` : ''}
+      ${profile.email ? `<div>${ltr(profile.email)}</div>` : ''}
+      ${profile.phone ? `<div>${ltr(profile.phone)}</div>` : ''}
+      ${profile.tax_registration_number ? `<div>${t('Tax ID: {id}', { id: escapeHtml(profile.tax_registration_number) })}</div>` : ''}
     </div>
     <div>
-      <div class="section-title">Bill To</div>
+      <div class="section-title">${t('Bill To')}</div>
       <div>${escapeHtml(client?.display_name ?? document.client_name_snapshot ?? '—')}</div>
       ${client?.address ? `<div>${escapeHtml(client.address)}</div>` : ''}
-      ${client?.email ? `<div>${escapeHtml(client.email)}</div>` : ''}
-      ${client?.phone ? `<div>${escapeHtml(client.phone)}</div>` : ''}
+      ${client?.email ? `<div>${ltr(client.email)}</div>` : ''}
+      ${client?.phone ? `<div>${ltr(client.phone)}</div>` : ''}
     </div>
     <div>
-      <div class="section-title">Details</div>
-      <div>Issued: ${formatDate(document.issue_date)}</div>
-      ${document.doc_type === 'invoice' ? `<div>Due: ${formatDate(document.due_date)}</div>` : `<div>Valid until: ${formatDate(document.expiry_date)}</div>`}
+      <div class="section-title">${t('Details')}</div>
+      <div>${t('Issued: {date}', { date: formatDate(document.issue_date) })}</div>
+      ${document.doc_type === 'invoice' ? `<div>${t('Due: {date}', { date: formatDate(document.due_date) })}</div>` : `<div>${t('Valid until: {date}', { date: formatDate(document.expiry_date) })}</div>`}
     </div>
   </div>
 
   <table>
     <thead>
-      <tr><th>Description</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Tax</th><th class="num">Amount</th></tr>
+      <tr><th>${t('Description')}</th><th class="num">${t('Qty')}</th><th class="num">${t('Rate')}</th><th class="num">${t('Tax')}</th><th class="num">${t('Amount')}</th></tr>
     </thead>
     <tbody>${rowsHtml}</tbody>
   </table>
 
   <div class="totals">
-    <div class="totals-row"><span>Subtotal</span><span>${formatMinor(document.subtotal_minor, document.currency_code)}</span></div>
-    ${document.discount_amount_minor > 0 ? `<div class="totals-row"><span>Discount</span><span>-${formatMinor(document.discount_amount_minor, document.currency_code)}</span></div>` : ''}
+    <div class="totals-row"><span>${t('Subtotal')}</span><span>${formatMinor(document.subtotal_minor, document.currency_code)}</span></div>
+    ${document.discount_amount_minor > 0 ? `<div class="totals-row"><span>${t('Discount')}</span><span dir="ltr">-${formatMinor(document.discount_amount_minor, document.currency_code)}</span></div>` : ''}
     <div class="totals-row"><span>${escapeHtml(getTaxLabel(lines.map((l) => ({ isTaxable: l.is_taxable === 1, taxName: l.tax_bracket_name_snapshot }))))}</span><span>${formatMinor(document.tax_total_minor, document.currency_code)}</span></div>
-    <div class="totals-row total"><span>Total</span><span>${formatMinor(document.total_minor, document.currency_code)}</span></div>
-    ${document.amount_paid_minor > 0 ? `<div class="totals-row"><span>Paid</span><span>${formatMinor(document.amount_paid_minor, document.currency_code)}</span></div>
-    <div class="totals-row"><span>Balance Due</span><span>${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}</span></div>` : ''}
+    <div class="totals-row total"><span>${t('Total')}</span><span>${formatMinor(document.total_minor, document.currency_code)}</span></div>
+    ${document.amount_paid_minor > 0 ? `<div class="totals-row"><span>${t('Paid')}</span><span>${formatMinor(document.amount_paid_minor, document.currency_code)}</span></div>
+    <div class="totals-row"><span>${t('Balance Due')}</span><span>${formatMinor(document.total_minor - document.amount_paid_minor, document.currency_code)}</span></div>` : ''}
   </div>
 
   ${payLink ? `
   <div class="pay">
     ${qrSvg(payLink, 112)}
     <div>
-      <p class="pay-title">Pay online</p>
-      <p class="pay-text">Scan the code with your phone's camera, or tap the button.</p>
-      <a class="pay-button" href="${escapeHtml(payLink)}">Pay ${formatMinor(balanceMinor, document.currency_code)}</a>
+      <p class="pay-title">${t('Pay online')}</p>
+      <p class="pay-text">${t('Scan the code with your phone’s camera, or tap the button.')}</p>
+      <a class="pay-button" href="${escapeHtml(payLink)}">${t('Pay {amount}', { amount: ltr(formatMinor(balanceMinor, document.currency_code)) })}</a>
       <div class="pay-url">${escapeHtml(payLink)}</div>
     </div>
   </div>` : ''}
 
   ${merchantSig || clientSig ? `
   <div class="signatures">
-    ${signatureBlock(merchantSig, businessName, 'Authorized')}
-    ${signatureBlock(clientSig, clientName, 'Client')}
+    ${signatureBlock(merchantSig, businessName, t('Authorized signature'))}
+    ${signatureBlock(clientSig, clientName, t('Client signature'))}
   </div>` : ''}
 
-  ${document.notes ? `<div class="footer"><strong>Notes</strong>\n${escapeHtml(document.notes)}</div>` : ''}
-  ${profile.payment_instructions ? `<div class="footer"><strong>Payment Instructions</strong>\n${escapeHtml(profile.payment_instructions)}</div>` : ''}
+  ${document.notes ? `<div class="footer"><strong>${t('Notes')}</strong>\n${escapeHtml(document.notes)}</div>` : ''}
+  ${profile.payment_instructions ? `<div class="footer"><strong>${t('Payment Instructions')}</strong>\n${escapeHtml(profile.payment_instructions)}</div>` : ''}
   <div class="footer">${escapeHtml(document.terms_override || profile.footer_terms || '')}</div>
 </body>
 </html>`;

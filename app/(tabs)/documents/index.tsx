@@ -25,11 +25,12 @@ import { SWIPE_COLORS } from '../../../src/lib/theme';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
 import { useDocumentsStore } from '../../../src/stores/useDocumentsStore';
 import type { DocType, DocumentListItem } from '../../../src/types/models';
+import { t } from '../../../src/lib/i18n';
 
 const TYPE_FILTERS: { label: string; value: DocType | undefined }[] = [
-  { label: 'All', value: undefined },
-  { label: 'Estimates', value: 'estimate' },
-  { label: 'Invoices', value: 'invoice' },
+  { label: t('All'), value: undefined },
+  { label: t('Estimates'), value: 'estimate' },
+  { label: t('Invoices'), value: 'invoice' },
 ];
 
 function openFilters() {
@@ -58,15 +59,15 @@ export default function DocumentsScreen() {
               <View className="flex-row">
                 <HeaderButton
                   icon={hasActiveFilter ? 'line.3.horizontal.decrease.circle.fill' : 'line.3.horizontal.decrease.circle'}
-                  label="Filter"
+                  label={t('Filter')}
                   selected={hasActiveFilter}
                   onPress={openFilters}
                 />
-                <HeaderButton icon="plus" label="New Document" onPress={showNewDocumentChooser} />
+                <HeaderButton icon="plus" label={t('New Document')} onPress={showNewDocumentChooser} />
               </View>
             ),
       headerSearchBarOptions: {
-        placeholder: 'Search Documents',
+        placeholder: t('Search Documents'),
         autoCapitalize: 'none',
         onChangeText: (event: { nativeEvent: { text: string } }) => {
           const current = useDocumentsStore.getState().filter;
@@ -98,26 +99,26 @@ export default function DocumentsScreen() {
       const pdfUri = await generateDocumentPdf(item.id);
       await sharePdf(item.id, pdfUri);
     } catch (err) {
-      Alert.alert('Couldn’t Share', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Share'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   function handleDelete(item: DocumentListItem, swipeable?: SwipeableMethods) {
     swipeable?.close();
     Alert.alert(
-      `Delete ${item.doc_number}?`,
-      "This permanently deletes the document with its line items, signatures, and payment records. This can't be undone.",
+      t('Delete {number}?', { number: item.doc_number }),
+      t("This permanently deletes the document with its line items, signatures, and payment records. This can't be undone."),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('Cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('Delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await deleteDocument(item.id);
               load();
             } catch (err) {
-              Alert.alert('Couldn’t Delete', err instanceof Error ? err.message : 'Something went wrong.');
+              Alert.alert(t('Couldn’t Delete'), err instanceof Error ? err.message : t('Something went wrong.'));
             }
           },
         },
@@ -133,7 +134,7 @@ export default function DocumentsScreen() {
       load();
       router.push(`/documents/${invoice.id}`);
     } catch (err) {
-      Alert.alert('Couldn’t Convert', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Convert'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -176,7 +177,7 @@ export default function DocumentsScreen() {
                 hitSlop={8}
                 className="min-h-[44px] justify-center"
               >
-                <Text className="text-subhead text-tint">Clear Filters</Text>
+                <Text className="text-subhead text-tint">{t('Clear Filters')}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -184,27 +185,27 @@ export default function DocumentsScreen() {
       }
       ListEmptyComponent={
         isNarrowed ? (
-          <EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a different search or filter." />
+          <EmptyState icon="magnifyingglass" title={t('No Results')} subtitle={t('Try a different search or filter.')} />
         ) : (
           <EmptyState
             icon="doc.text"
-            title="No Documents"
-            subtitle="Estimates and invoices you create appear here."
-            actionLabel="New Invoice"
+            title={t('No Documents')}
+            subtitle={t('Estimates and invoices you create appear here.')}
+            actionLabel={t('New Invoice')}
             onAction={() => startNewDocument('invoice')}
           />
         )
       }
       renderItem={({ item, index }) => {
         const status = statusLabel(getDisplayStatus(item));
-        const client = item.client_name ?? 'No Client';
+        const client = item.client_name ?? t('No Client');
         const total = formatMinor(item.total_minor, item.currency_code);
         const date = formatShortDate(item.issue_date ?? item.created_at);
         const actions = [
-          { name: 'share', label: 'Share PDF', run: () => handleShare(item) },
-          ...(canConvertToInvoice(item) ? [{ name: 'convert', label: 'Convert to Invoice', run: () => handleConvert(item) }] : []),
-          ...(canLogSettlement(item) ? [{ name: 'payment', label: 'Log Payment', run: () => handleLogPayment(item) }] : []),
-          ...(canDelete(item) ? [{ name: 'delete', label: 'Delete', run: () => handleDelete(item) }] : []),
+          { name: 'share', label: t('Share PDF'), run: () => handleShare(item) },
+          ...(canConvertToInvoice(item) ? [{ name: 'convert', label: t('Convert to Invoice'), run: () => handleConvert(item) }] : []),
+          ...(canLogSettlement(item) ? [{ name: 'payment', label: t('Log Payment'), run: () => handleLogPayment(item) }] : []),
+          ...(canDelete(item) ? [{ name: 'delete', label: t('Delete'), run: () => handleDelete(item) }] : []),
         ];
         return (
           <GroupedRow index={index} count={documents.length}>
@@ -212,14 +213,14 @@ export default function DocumentsScreen() {
               renderRightActions={(_progress, _translation, swipeable) => (
                 <View className="flex-row">
                   <SwipeAction
-                    label="Share"
+                    label={t('Share')}
                     icon="square.and.arrow.up"
                     color={SWIPE_COLORS.share}
                     onPress={() => handleShare(item, swipeable)}
                   />
                   {canConvertToInvoice(item) ? (
                     <SwipeAction
-                      label="Convert"
+                      label={t('Convert')}
                       icon="arrow.left.arrow.right"
                       color={SWIPE_COLORS.convert}
                       onPress={() => handleConvert(item, swipeable)}
@@ -227,7 +228,7 @@ export default function DocumentsScreen() {
                   ) : null}
                   {canLogSettlement(item) ? (
                     <SwipeAction
-                      label="Payment"
+                      label={t('Payment')}
                       icon="banknote"
                       color={SWIPE_COLORS.payment}
                       onPress={() => handleLogPayment(item, swipeable)}
@@ -235,7 +236,7 @@ export default function DocumentsScreen() {
                   ) : null}
                   {canDelete(item) ? (
                     <SwipeAction
-                      label="Delete"
+                      label={t('Delete')}
                       icon="trash"
                       color={SWIPE_COLORS.delete}
                       onPress={() => handleDelete(item, swipeable)}

@@ -1,4 +1,6 @@
 import { format } from 'date-fns';
+import { t } from './i18n';
+import { dateLocale, datePattern } from './i18n/dates';
 
 export type ReportPeriod =
   | { kind: 'month' }
@@ -38,12 +40,12 @@ export function formatPeriodLabel(period: ReportPeriod): string {
   const now = new Date();
   switch (period.kind) {
     case 'month':
-      return now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      return format(now, datePattern('MMMM yyyy'), { locale: dateLocale() });
     case 'last90':
-      return 'Last 90 Days';
+      return t('Last 90 Days');
     case 'year':
       return String(now.getFullYear());
     case 'custom':
-      return `${format(new Date(period.startIso), 'MMM d')} – ${format(new Date(period.endIso), 'MMM d, yyyy')}`;
+      return `${format(new Date(period.startIso), datePattern('MMM d'), { locale: dateLocale() })} – ${format(new Date(period.endIso), datePattern('MMM d, yyyy'), { locale: dateLocale() })}`;
   }
 }

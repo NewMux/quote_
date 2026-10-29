@@ -9,6 +9,7 @@ import { SheetScreen } from '../../../src/components/SheetScreen';
 import { parseRateBp } from '../../../src/lib/money';
 import { useUnsavedChangesGuard } from '../../../src/lib/useUnsavedChangesGuard';
 import { useTaxBracketsStore } from '../../../src/stores/useTaxBracketsStore';
+import { t } from '../../../src/lib/i18n';
 
 export default function NewTaxBracketScreen() {
   const create = useTaxBracketsStore((s) => s.create);
@@ -27,19 +28,19 @@ export default function NewTaxBracketScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Add Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Tax Rate'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   return (
     <SheetScreen
-      header={<SheetHeader title="New Tax Rate" actionLabel="Add" onAction={handleAdd} actionDisabled={!canAdd} />}
+      header={<SheetHeader title={t('New Tax Rate')} actionLabel={t('Add')} onAction={handleAdd} actionDisabled={!canAdd} />}
     >
       <FormScrollView>
-        <ListSection footer="Use the name your customers know, such as Sales Tax or VAT; it prints on documents.">
+        <ListSection footer={t('Use the name your customers know, such as Sales Tax or VAT; it prints on documents.')}>
           <FormRow
-            label="Name"
-            placeholder="e.g. Sales Tax"
+            label={t('Name')}
+            placeholder={t('e.g. Sales Tax')}
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -50,8 +51,8 @@ export default function NewTaxBracketScreen() {
           />
           <FormRow
             ref={rateRef}
-            label="Rate (%)"
-            placeholder="e.g. 8.25"
+            label={t('Rate (%)')}
+            placeholder={t('e.g. 8.25')}
             keyboardType="decimal-pad"
             value={rate}
             onChangeText={setRate}

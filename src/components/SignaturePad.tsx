@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { Text, View } from 'react-native';
 import SignatureView, { type SignatureViewRef } from 'react-native-signature-canvas';
 import { Button } from './Button';
+import { t } from '../lib/i18n';
 
 interface SignaturePadProps {
   onSave: (dataUrl: string) => void;
@@ -20,7 +21,7 @@ export const SignaturePad = forwardRef<SignatureViewRef, SignaturePadProps>(func
       <View
         className="flex-1 border border-field rounded-[26px] overflow-hidden"
         style={{ backgroundColor: '#FFFFFF' }}
-        accessibilityLabel="Signature area. Draw your signature with your finger."
+        accessibilityLabel={t('Signature area. Draw your signature with your finger.')}
       >
         <SignatureView
           ref={ref}
@@ -32,9 +33,9 @@ export const SignaturePad = forwardRef<SignatureViewRef, SignaturePadProps>(func
         />
       </View>
       <View className="flex-row items-center justify-between">
-        <Text className="text-subhead text-secondary">Sign above with your finger.</Text>
+        <Text className="text-subhead text-secondary">{t('Sign above with your finger.')}</Text>
         <Button
-          label="Clear"
+          label={t('Clear')}
           variant="plain"
           onPress={() => (ref && typeof ref !== 'function' ? ref.current?.clearSignature() : undefined)}
         />

@@ -14,6 +14,7 @@ import { formatMinor, getCurrencySymbol, minorToDecimalString, parseRateBp, pars
 import { useSaveHeader } from '../../../../src/lib/useSaveHeader';
 import { useDocumentEditorStore } from '../../../../src/stores/useDocumentEditorStore';
 import { useTaxBracketsStore } from '../../../../src/stores/useTaxBracketsStore';
+import { t } from '../../../../src/lib/i18n';
 
 export default function EditDocumentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,8 +30,8 @@ export default function EditDocumentScreen() {
         // The screen is already gone, so a failure can only be reported, not retried here.
         state.save().catch((err) => {
           Alert.alert(
-            'Couldn’t Save Your Last Changes',
-            `${err instanceof Error ? err.message : 'Something went wrong.'} Open the draft again to check it.`
+            t('Couldn’t Save Your Last Changes'),
+            t('{message} Open the draft again to check it.', { message: err instanceof Error ? err.message : t('Something went wrong.') })
           );
         });
       }
@@ -56,14 +57,14 @@ export default function EditDocumentScreen() {
       try {
         await useDocumentEditorStore.getState().save();
       } catch (err) {
-        Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Something went wrong.');
+        Alert.alert(t('Couldn’t Save'), err instanceof Error ? err.message : t('Something went wrong.'));
         return;
       }
     }
     router.back();
   }
 
-  useSaveHeader({ title: editor.docNumber ? `Edit ${editor.docNumber}` : undefined, label: 'Done', onSave: handleDone });
+  useSaveHeader({ title: editor.docNumber ? t('Edit {number}', { number: editor.docNumber }) : undefined, label: t('Done'), onSave: handleDone });
 
   if (editor.loadError) {
     return (
@@ -76,7 +77,7 @@ export default function EditDocumentScreen() {
   if (editor.isLoading || !editor.documentId) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator accessibilityLabel="Loading" />
+        <ActivityIndicator accessibilityLabel={t('Loading')} />
       </View>
     );
   }
@@ -86,23 +87,23 @@ export default function EditDocumentScreen() {
   return (
     <FormScrollView>
       <ListSection
-        header="Client"
-        footer={editor.saveError ? `Couldn’t save: ${editor.saveError}` : 'Changes save automatically.'}
+        header={t('Client')}
+        footer={editor.saveError ? t('Couldn’t save: {error}', { error: editor.saveError }) : t('Changes save automatically.')}
       >
         <ListRow
           icon="person.crop.circle.fill"
-          title={editor.clientNameSnapshot ?? 'Choose Client'}
+          title={editor.clientNameSnapshot ?? t('Choose Client')}
           onPress={() => router.push('/modals/client-picker')}
-          accessibilityHint="Opens your client list"
+          accessibilityHint={t('Opens your client list')}
         />
       </ListSection>
 
-      <ListSection header="Dates">
-        <DateField label="Issue Date" value={editor.issueDate} onChange={editor.setIssueDate} />
+      <ListSection header={t('Dates')}>
+        <DateField label={t('Issue Date')} value={editor.issueDate} onChange={editor.setIssueDate} />
         {editor.docType === 'invoice' ? (
-          <DateField label="Due Date" value={editor.dueDate} onChange={editor.setDueDate} />
+          <DateField label={t('Due Date')} value={editor.dueDate} onChange={editor.setDueDate} />
         ) : (
-          <DateField label="Valid Until" value={editor.expiryDate} onChange={editor.setExpiryDate} />
+          <DateField label={t('Valid Until')} value={editor.expiryDate} onChange={editor.setExpiryDate} />
         )}
       </ListSection>
 
@@ -118,10 +119,10 @@ export default function EditDocumentScreen() {
         />
       ))}
 
-      <ListSection footer={editor.lines.length === 0 ? 'Add what you’re billing for from your item catalog or as a one-off.' : undefined}>
+      <ListSection footer={editor.lines.length === 0 ? t('Add what you’re billing for from your item catalog or as a one-off.') : undefined}>
         <ListRow
           icon="plus.circle.fill"
-          title="Add Item"
+          title={t('Add Item')}
           onPress={() => router.push('/modals/item-picker')}
           accessory="none"
         />
@@ -134,42 +135,42 @@ export default function EditDocumentScreen() {
         onChange={editor.setDocumentDiscount}
       />
 
-      <ListSection header="Summary">
-        <ListRow title="Subtotal" value={formatMinor(totals.subtotalMinor, editor.currencyCode)} />
+      <ListSection header={t('Summary')}>
+        <ListRow title={t('Subtotal')} value={formatMinor(totals.subtotalMinor, editor.currencyCode)} />
         {totals.discountAmountMinor > 0 ? (
-          <ListRow title="Discount" value={formatMinor(-totals.discountAmountMinor, editor.currencyCode)} />
+          <ListRow title={t('Discount')} value={formatMinor(-totals.discountAmountMinor, editor.currencyCode)} />
         ) : null}
         <ListRow
           title={getTaxLabel(editor.lines.map((l) => ({ isTaxable: l.isTaxable, taxName: l.taxBracketNameSnapshot })))}
           value={formatMinor(totals.taxTotalMinor, editor.currencyCode)}
         />
-        <ListRow title="Total" value={formatMinor(totals.totalMinor, editor.currencyCode)} emphasized />
+        <ListRow title={t('Total')} value={formatMinor(totals.totalMinor, editor.currencyCode)} emphasized />
       </ListSection>
 
-      <ListSection footer="Terms: leave blank to use the default terms from your Business Profile.">
-        <FormRow label="Notes" value={editor.notes} onChangeText={editor.setNotes} placeholder="Shown on the document" multiline />
+      <ListSection footer={t('Terms: leave blank to use the default terms from your Business Profile.')}>
+        <FormRow label={t('Notes')} value={editor.notes} onChangeText={editor.setNotes} placeholder={t('Shown on the document')} multiline />
         <FormRow
-          label="Terms"
+          label={t('Terms')}
           value={editor.termsOverride}
           onChangeText={editor.setTermsOverride}
-          placeholder="Default terms"
+          placeholder={t('Default terms')}
           multiline
         />
       </ListSection>
 
       {editor.docType === 'invoice' ? (
-        <ListSection footer="Clients can scan or tap this link on the PDF to pay. Leave blank to use the payment link from your Business Profile.">
+        <ListSection footer={t('Clients can scan or tap this link on the PDF to pay. Leave blank to use the payment link from your Business Profile.')}>
           <FormRow
-            label="Payment Link"
+            label={t('Payment Link')}
             value={editor.paymentLink}
             onChangeText={editor.setPaymentLink}
-            placeholder="Default link"
+            placeholder={t('Default link')}
             keyboardType="url"
             textContentType="URL"
             autoCapitalize="none"
             autoCorrect={false}
             maxLength={500}
-            error={editor.paymentLink.trim() && !normalizePaymentLink(editor.paymentLink) ? 'Enter a web link, like paypal.me/yourname.' : null}
+            error={editor.paymentLink.trim() && !normalizePaymentLink(editor.paymentLink) ? t('Enter a web link, like paypal.me/yourname.') : null}
           />
         </ListSection>
       ) : null}
@@ -192,14 +193,14 @@ function DocumentDiscountEditor({
   return (
     <ListSection>
       <ListRow
-        title="Discount"
+        title={t('Discount')}
         switchValue={enabled}
         onSwitchChange={(value) => onChange(value ? 'fixed' : null, value ? 0 : null)}
       />
       {enabled ? (
         <View className="px-4 py-2.5">
           <SegmentedControl
-            values={['Percent', `Amount (${getCurrencySymbol(currencyCode)})`]}
+            values={[t('Percent'), t('Amount ({symbol})', { symbol: getCurrencySymbol(currencyCode) })]}
             selectedIndex={discountType === 'percent' ? 0 : 1}
             onChange={(e) => onChange(e.nativeEvent.selectedSegmentIndex === 0 ? 'percent' : 'fixed', 0)}
           />
@@ -239,7 +240,7 @@ function DiscountValueRow({
 
   return (
     <FormRow
-      label={discountType === 'percent' ? 'Percent' : 'Amount'}
+      label={discountType === 'percent' ? t('Percent') : t('Amount')}
       prefix={discountType === 'percent' ? undefined : getCurrencySymbol(currencyCode)}
       keyboardType="decimal-pad"
       placeholder="0"

@@ -9,14 +9,15 @@ import { SheetScreen } from '../../src/components/SheetScreen';
 import { getClient } from '../../src/db/repositories/clients.repo';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
 import type { DocStatus } from '../../src/types/models';
+import { t } from '../../src/lib/i18n';
 
 const STATUS_OPTIONS: { label: string; value: DocStatus | 'overdue' | undefined }[] = [
-  { label: 'All Statuses', value: undefined },
-  { label: 'Draft', value: 'draft' },
-  { label: 'Issued', value: 'issued' },
-  { label: 'Paid', value: 'paid' },
-  { label: 'Overdue', value: 'overdue' },
-  { label: 'Canceled', value: 'void' },
+  { label: t('All Statuses'), value: undefined },
+  { label: t('Draft'), value: 'draft' },
+  { label: t('Issued'), value: 'issued' },
+  { label: t('Paid'), value: 'paid' },
+  { label: t('Overdue'), value: 'overdue' },
+  { label: t('Canceled'), value: 'void' },
 ];
 
 /** Every control applies immediately to the Documents list (like its search field and type
@@ -45,16 +46,16 @@ export default function DocumentFilterModal() {
     <SheetScreen
       header={
         <SheetHeader
-          title="Filter Documents"
-          closeLabel="Reset"
+          title={t('Filter Documents')}
+          closeLabel={t('Reset')}
           onClose={reset}
-          actionLabel="Done"
+          actionLabel={t('Done')}
           onAction={() => router.back()}
         />
       }
     >
       <ScrollView contentInsetAdjustmentBehavior="never" contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
-        <ListSection header="Status">
+        <ListSection header={t('Status')}>
           {STATUS_OPTIONS.map((opt) => (
             <ListRow
               key={opt.label}
@@ -68,23 +69,23 @@ export default function DocumentFilterModal() {
         <ListSection>
           <ListRow
             icon="person.crop.circle.fill"
-            title="Client"
-            value={clientName ?? 'All Clients'}
+            title={t('Client')}
+            value={clientName ?? t('All Clients')}
             onPress={() => router.push({ pathname: '/modals/client-picker', params: { mode: 'filter' } })}
           />
         </ListSection>
 
-        <ListSection header="Issue Date">
+        <ListSection header={t('Issue Date')}>
           <DateField
-            label="From"
+            label={t('From')}
             value={filter.dateFrom ?? null}
-            emptyLabel="Any Date"
+            emptyLabel={t('Any Date')}
             onChange={(d) => setFilter({ ...filter, dateFrom: d })}
           />
           <DateField
-            label="To"
+            label={t('To')}
             value={filter.dateTo ?? null}
-            emptyLabel="Any Date"
+            emptyLabel={t('Any Date')}
             onChange={(d) => setFilter({ ...filter, dateTo: d })}
           />
         </ListSection>

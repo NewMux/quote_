@@ -17,6 +17,7 @@ import { useSystemColors } from '../src/lib/theme';
 import { useAuthStore } from '../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../src/stores/useBusinessProfileStore';
 import { useTaxBracketsStore } from '../src/stores/useTaxBracketsStore';
+import { t } from '../src/lib/i18n';
 
 // The welcome tour (app/welcome.tsx) already showed what the app does, so setup starts with the
 // business itself.
@@ -51,7 +52,7 @@ export default function OnboardingScreen() {
       await updateProfile({ business_name: businessName.trim() });
       setStep(2);
     } catch (err) {
-      Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
+      Alert.alert(t('Couldn’t Save'), err instanceof Error ? err.message : t('Check your connection and try again.'));
     } finally {
       setIsSaving(false);
     }
@@ -61,7 +62,7 @@ export default function OnboardingScreen() {
   async function pickLogo() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to add your logo.');
+      Alert.alert(t('Photo Access Needed'), t('Allow photo access in the Settings app to add your logo.'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
@@ -71,7 +72,7 @@ export default function OnboardingScreen() {
       const path = await persistPickedFile(result.assets[0].uri, 'branding', `logo-${newId()}.jpg`);
       await updateProfile({ logo_uri: path });
     } catch (err) {
-      Alert.alert('Couldn’t Add Logo', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Logo'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsUploadingLogo(false);
     }
@@ -85,7 +86,7 @@ export default function OnboardingScreen() {
       await updateProfile({ email: email.trim() || null, phone: phone.trim() || null, address: address.trim() || null });
       setStep(3);
     } catch (err) {
-      Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
+      Alert.alert(t('Couldn’t Save'), err instanceof Error ? err.message : t('Check your connection and try again.'));
     } finally {
       setIsSaving(false);
     }
@@ -99,7 +100,7 @@ export default function OnboardingScreen() {
         await setDefaultTaxRate(bracket.id);
       } catch (err) {
         setIsSaving(false);
-        Alert.alert('Couldn’t Save', err instanceof Error ? err.message : 'Check your connection and try again.');
+        Alert.alert(t('Couldn’t Save'), err instanceof Error ? err.message : t('Check your connection and try again.'));
         return;
       }
       setIsSaving(false);
@@ -127,7 +128,7 @@ export default function OnboardingScreen() {
           <View
             className="flex-row gap-1.5 justify-center"
             accessible
-            accessibilityLabel={`Step ${step} of ${TOTAL_STEPS}`}
+            accessibilityLabel={t('Step {step} of {total}', { step, total: TOTAL_STEPS })}
           >
             {Array.from({ length: TOTAL_STEPS }, (_, i) => (
               <View key={i} className={`h-1.5 w-8 rounded-full ${i < step ? 'bg-brand' : 'bg-fill'}`} />
@@ -138,14 +139,14 @@ export default function OnboardingScreen() {
             {step === 1 ? (
               <View className="gap-5">
                 <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
-                  Your Business
+                  {t('Your Business')}
                 </Text>
-                <ListSection footer="Your business name appears on every document. The currency is used for new documents; you can change both later in Settings.">
+                <ListSection footer={t('Your business name appears on every document. The currency is used for new documents; you can change both later in Settings.')}>
                   <FormRow
-                    label="Name"
+                    label={t('Name')}
                     value={businessName}
                     onChangeText={setBusinessName}
-                    placeholder="e.g. Sam's Plumbing"
+                    placeholder={t("e.g. Sam's Plumbing")}
                     textContentType="organizationName"
                     autoCapitalize="words"
                     maxLength={100}
@@ -153,7 +154,7 @@ export default function OnboardingScreen() {
                     autoFocus
                   />
                   <ListRow
-                    title="Currency"
+                    title={t('Currency')}
                     value={`${getCurrencyName(currencyCode)} (${currencyCode})`}
                     onPress={() => router.push('/modals/currency-picker')}
                   />
@@ -164,7 +165,7 @@ export default function OnboardingScreen() {
             {step === 2 ? (
               <View className="gap-5">
                 <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
-                  Your Details
+                  {t('Your Details')}
                 </Text>
                 <Text className="text-body text-secondary">
                   These go on every invoice, so clients know who it&apos;s from and how to reach you.
@@ -174,7 +175,7 @@ export default function OnboardingScreen() {
                     onPress={pickLogo}
                     disabled={isUploadingLogo}
                     accessibilityRole="button"
-                    accessibilityLabel={logoUrl ? 'Change Logo' : 'Add Logo'}
+                    accessibilityLabel={logoUrl ? t('Change Logo') : t('Add Logo')}
                     className="w-24 h-24 rounded-3xl bg-card items-center justify-center overflow-hidden"
                     style={{ borderCurve: 'continuous' }}
                   >
@@ -189,14 +190,14 @@ export default function OnboardingScreen() {
                       </View>
                     ) : null}
                   </Pressable>
-                  <Button label={logoUrl ? 'Change Logo' : 'Add Logo'} variant="plain" size="small" disabled={isUploadingLogo} onPress={pickLogo} />
+                  <Button label={logoUrl ? t('Change Logo') : t('Add Logo')} variant="plain" size="small" disabled={isUploadingLogo} onPress={pickLogo} />
                 </View>
-                <ListSection footer="All optional. You can change them later in Settings → Business Profile.">
+                <ListSection footer={t('All optional. You can change them later in Settings → Business Profile.')}>
                   <FormRow
-                    label="Email"
+                    label={t('Email')}
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="Optional"
+                    placeholder={t('Optional')}
                     keyboardType="email-address"
                     textContentType="emailAddress"
                     autoComplete="email"
@@ -205,20 +206,20 @@ export default function OnboardingScreen() {
                     maxLength={150}
                   />
                   <FormRow
-                    label="Phone"
+                    label={t('Phone')}
                     value={phone}
                     onChangeText={setPhone}
-                    placeholder="Optional"
+                    placeholder={t('Optional')}
                     keyboardType="phone-pad"
                     textContentType="telephoneNumber"
                     autoComplete="tel"
                     maxLength={30}
                   />
                   <FormRow
-                    label="Address"
+                    label={t('Address')}
                     value={address}
                     onChangeText={setAddress}
-                    placeholder="Optional"
+                    placeholder={t('Optional')}
                     multiline
                     textContentType="fullStreetAddress"
                     autoComplete="street-address"
@@ -231,19 +232,19 @@ export default function OnboardingScreen() {
             {step === 3 ? (
               <View className="gap-5">
                 <Text className="text-largetitle font-bold text-label" accessibilityRole="header">
-                  Sales Tax
+                  {t('Sales Tax')}
                 </Text>
-                <Text className="text-body text-secondary">Do you charge sales tax or VAT on what you sell?</Text>
+                <Text className="text-body text-secondary">{t('Do you charge sales tax or VAT on what you sell?')}</Text>
                 <ListSection
-                  footer={chargesTax ? undefined : 'No problem — you can add tax rates anytime in Settings.'}
+                  footer={chargesTax ? undefined : t('No problem — you can add tax rates anytime in Settings.')}
                 >
-                  <ListRow title="I Charge Sales Tax or VAT" switchValue={chargesTax} onSwitchChange={setChargesTax} />
+                  <ListRow title={t('I Charge Sales Tax or VAT')} switchValue={chargesTax} onSwitchChange={setChargesTax} />
                 </ListSection>
                 {chargesTax ? (
                   <ListSection>
-                    <FormRow label="Name" placeholder="e.g. Sales Tax" value={taxName} onChangeText={setTaxName} />
+                    <FormRow label={t('Name')} placeholder={t('e.g. Sales Tax')} value={taxName} onChangeText={setTaxName} />
                     <FormRow
-                      label="Rate (%)"
+                      label={t('Rate (%)')}
                       placeholder="8.25"
                       keyboardType="decimal-pad"
                       value={taxRate}
@@ -261,7 +262,7 @@ export default function OnboardingScreen() {
                   You&apos;re All Set
                 </Text>
                 <Text className="text-body text-secondary text-center">
-                  You can change numbering and tax rates anytime in Settings.
+                  {t('You can change numbering and tax rates anytime in Settings.')}
                 </Text>
               </View>
             ) : null}
@@ -271,7 +272,7 @@ export default function OnboardingScreen() {
             {step === 1 ? (
               <>
                 <Button
-                  label="Continue"
+                  label={t('Continue')}
                   size="large"
                   disabled={!businessName.trim()}
                   loading={isSaving}
@@ -281,26 +282,26 @@ export default function OnboardingScreen() {
             ) : null}
             {step === 2 ? (
               <>
-                <Button label={hasDetails ? 'Continue' : 'Skip'} size="large" loading={isSaving} disabled={isUploadingLogo} onPress={handleContinueDetails} />
-                <Button label="Back" variant="plain" onPress={() => setStep(1)} />
+                <Button label={hasDetails ? t('Continue') : t('Skip')} size="large" loading={isSaving} disabled={isUploadingLogo} onPress={handleContinueDetails} />
+                <Button label={t('Back')} variant="plain" onPress={() => setStep(1)} />
               </>
             ) : null}
             {step === 3 ? (
               <>
                 <Button
-                  label={chargesTax ? 'Continue' : 'Skip'}
+                  label={chargesTax ? t('Continue') : t('Skip')}
                   size="large"
                   disabled={chargesTax && !taxName.trim()}
                   loading={isSaving}
                   onPress={handleContinueTaxRate}
                 />
-                <Button label="Back" variant="plain" onPress={() => setStep(2)} />
+                <Button label={t('Back')} variant="plain" onPress={() => setStep(2)} />
               </>
             ) : null}
             {step === 4 ? (
               <>
-                <Button label="Create Your First Invoice" size="large" onPress={() => finish('invoice')} />
-                <Button label="Explore the App" variant="plain" onPress={() => finish('home')} />
+                <Button label={t('Create Your First Invoice')} size="large" onPress={() => finish('invoice')} />
+                <Button label={t('Explore the App')} variant="plain" onPress={() => finish('home')} />
               </>
             ) : null}
           </View>

@@ -1,6 +1,7 @@
 import { Text, View } from 'react-native';
 import { useThemeColors } from '../../lib/theme';
 import type { ChartPoint } from '../../types/models';
+import { t } from '../../lib/i18n';
 
 interface BarChartProps {
   data: ChartPoint[];
@@ -17,7 +18,7 @@ export function BarChart({ data, height = 140, color, accessibilityLabel }: BarC
   if (data.length === 0) {
     return (
       <View style={{ height }} className="items-center justify-center">
-        <Text className="text-subhead text-secondary">No Data Yet</Text>
+        <Text className="text-subhead text-secondary">{t('No Data Yet')}</Text>
       </View>
     );
   }
@@ -26,7 +27,8 @@ export function BarChart({ data, height = 140, color, accessibilityLabel }: BarC
 
   return (
     <View
-      style={{ height }}
+      // Time runs left to right in both layout directions, matching the line chart.
+      style={{ height, direction: 'ltr' }}
       className="flex-row items-end gap-2"
       accessible
       accessibilityRole="image"

@@ -12,6 +12,7 @@ import { pickContactAsClient } from '../../src/lib/importContact';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
 import { useDocumentsStore } from '../../src/stores/useDocumentsStore';
+import { t } from '../../src/lib/i18n';
 
 export default function ClientPickerModal() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
@@ -57,7 +58,7 @@ export default function ClientPickerModal() {
       selectClient(client.id, client.display_name);
     } catch (err) {
       setIsCreating(false);
-      Alert.alert('Couldn’t Add Client', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Client'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -75,12 +76,12 @@ export default function ClientPickerModal() {
       selectClient(client.id, client.display_name);
     } catch (err) {
       setIsCreating(false);
-      Alert.alert('Couldn’t Add Client', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Client'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   return (
-    <SheetScreen header={<SheetHeader title={isFilterMode ? 'Filter by Client' : 'Choose Client'} />}>
+    <SheetScreen header={<SheetHeader title={isFilterMode ? t('Filter by Client') : t('Choose Client')} />}>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
@@ -91,13 +92,13 @@ export default function ClientPickerModal() {
         ListHeaderComponent={
           <View>
             <View className="mb-4">
-              <SearchField value={query} onChangeText={setQuery} placeholder="Search Clients" />
+              <SearchField value={query} onChangeText={setQuery} placeholder={t('Search Clients')} />
             </View>
             {canQuickAdd ? (
-              <ListSection footer="Adds a client with just this name. You can fill in their details later.">
+              <ListSection footer={t('Adds a client with just this name. You can fill in their details later.')}>
                 <ListRow
                   icon="person.badge.plus"
-                  title={`Add “${trimmedQuery}”`}
+                  title={t('Add “{name}”', { name: trimmedQuery })}
                   onPress={quickAddClient}
                   accessory="none"
                 />
@@ -107,9 +108,9 @@ export default function ClientPickerModal() {
               <ListSection>
                 <ListRow
                   icon="person.badge.plus"
-                  title="Add from Contacts"
+                  title={t('Add from Contacts')}
                   onPress={addFromContacts}
-                  trailing={isCreating ? <ActivityIndicator accessibilityLabel="Adding Client" /> : undefined}
+                  trailing={isCreating ? <ActivityIndicator accessibilityLabel={t('Adding Client')} /> : undefined}
                   accessory="none"
                 />
               </ListSection>
@@ -117,7 +118,7 @@ export default function ClientPickerModal() {
             {isFilterMode ? (
               <ListSection>
                 <ListRow
-                  title="All Clients"
+                  title={t('All Clients')}
                   onPress={() => selectClient(undefined)}
                   accessory={!filter.clientId ? 'checkmark' : 'none'}
                 />
@@ -129,8 +130,8 @@ export default function ClientPickerModal() {
           canQuickAdd ? null : (
             <EmptyState
               icon="person.2"
-              title={trimmedQuery ? 'No Results' : 'No Clients Yet'}
-              subtitle={trimmedQuery ? undefined : 'Type a name above to add your first client.'}
+              title={trimmedQuery ? t('No Results') : t('No Clients Yet')}
+              subtitle={trimmedQuery ? undefined : t('Type a name above to add your first client.')}
             />
           )
         }

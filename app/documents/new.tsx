@@ -7,6 +7,7 @@ import { createDraftDocument } from '../../src/db/repositories/documents.repo';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
 import { useSubscriptionStore } from '../../src/stores/useSubscriptionStore';
 import type { DocType } from '../../src/types/models';
+import { t } from '../../src/lib/i18n';
 
 export default function NewDocumentScreen() {
   const { type } = useLocalSearchParams<{ type?: DocType }>();
@@ -23,7 +24,7 @@ export default function NewDocumentScreen() {
       const doc = await createDraftDocument(docType, profile, null, null);
       router.replace({ pathname: '/documents/[id]', params: { id: doc.id, isNew: '1' } });
     } catch (err) {
-      Alert.alert('Couldn’t Create Document', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Create Document'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsCreating(false);
     }
@@ -45,7 +46,7 @@ export default function NewDocumentScreen() {
   if (isCreating || !profile || type) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator size="large" accessibilityLabel="Creating Document" />
+        <ActivityIndicator size="large" accessibilityLabel={t('Creating Document')} />
       </View>
     );
   }
@@ -57,19 +58,19 @@ export default function NewDocumentScreen() {
       contentContainerStyle={{ padding: 16, paddingTop: 24 }}
     >
       <Text className="text-title2 font-bold text-label text-center mb-6" accessibilityRole="header">
-        What Would You Like to Create?
+        {t('What Would You Like to Create?')}
       </Text>
       <ListSection>
         <ListRow
           icon="doc.plaintext.fill"
-          title="Estimate"
-          subtitle="A quote you can convert to an invoice later"
+          title={t('Estimate')}
+          subtitle={t('A quote you can convert to an invoice later')}
           onPress={() => handleChoose('estimate')}
         />
         <ListRow
           icon="doc.text.fill"
-          title="Invoice"
-          subtitle="A bill your client can pay"
+          title={t('Invoice')}
+          subtitle={t('A bill your client can pay')}
           onPress={() => handleChoose('invoice')}
         />
       </ListSection>

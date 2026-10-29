@@ -8,6 +8,7 @@ import { useSaveHeader } from '../../../../src/lib/useSaveHeader';
 import { useUnsavedChangesGuard } from '../../../../src/lib/useUnsavedChangesGuard';
 import { useClientsStore } from '../../../../src/stores/useClientsStore';
 import type { Client } from '../../../../src/types/models';
+import { t } from '../../../../src/lib/i18n';
 
 export default function EditClientScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,7 +30,7 @@ export default function EditClientScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Save Client', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Client'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -38,7 +39,7 @@ export default function EditClientScreen() {
   if (!client) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator accessibilityLabel="Loading" />
+        <ActivityIndicator accessibilityLabel={t('Loading')} />
       </View>
     );
   }

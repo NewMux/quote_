@@ -1,15 +1,16 @@
 import * as MailComposer from 'expo-mail-composer';
 import * as Sharing from 'expo-sharing';
 import { logActivity } from '../db/repositories/activityLog.repo';
+import { t } from './i18n';
 
 export async function sharePdf(documentId: string, pdfUri: string): Promise<void> {
   const available = await Sharing.isAvailableAsync();
   if (!available) {
-    throw new Error('Sharing is not available on this device.');
+    throw new Error(t('Sharing is not available on this device.'));
   }
   await Sharing.shareAsync(pdfUri, {
     mimeType: 'application/pdf',
-    dialogTitle: 'Share document',
+    dialogTitle: t('Share document'),
   });
   await logActivity(documentId, 'shared');
 }

@@ -1,4 +1,5 @@
 import { useAuthStore } from '../stores/useAuthStore';
+import { t } from '../lib/i18n';
 
 /** Every repo function that reads/writes user-owned data needs the signed-in user's id to scope
  * the query — RLS enforces isolation server-side regardless, but explicit owner_id filters let
@@ -7,6 +8,6 @@ import { useAuthStore } from '../stores/useAuthStore';
  * straight from the Zustand store's state rather than a hook. */
 export function requireOwnerId(): string {
   const userId = useAuthStore.getState().session?.user.id;
-  if (!userId) throw new Error('Not signed in.');
+  if (!userId) throw new Error(t('Not signed in.'));
   return userId;
 }

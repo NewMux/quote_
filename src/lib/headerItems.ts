@@ -5,6 +5,7 @@ import { createDraftDocument } from '../db/repositories/documents.repo';
 import { useBusinessProfileStore } from '../stores/useBusinessProfileStore';
 import type { DocType } from '../types/models';
 import { IS_IOS_26 } from './platform';
+import { t } from './i18n';
 
 /** Native iOS navigation bar items (SF Symbols, UIMenu). Screens pass these through
  * `unstable_headerRightItems`, with a React `headerRight` as the Android fallback. */
@@ -23,7 +24,7 @@ export async function startNewDocument(type: DocType) {
     router.navigate('/(tabs)/documents');
     router.push({ pathname: '/documents/[id]', params: { id: doc.id, isNew: '1' } });
   } catch (err) {
-    Alert.alert('Couldn’t Create Document', err instanceof Error ? err.message : 'Something went wrong.');
+    Alert.alert(t('Couldn’t Create Document'), err instanceof Error ? err.message : t('Something went wrong.'));
   } finally {
     isCreatingDocument = false;
   }
@@ -31,29 +32,29 @@ export async function startNewDocument(type: DocType) {
 
 /** Android fallback for the "+" menu: the same two choices as a system dialog. */
 export function showNewDocumentChooser() {
-  Alert.alert('New Document', undefined, [
-    { text: 'New Invoice', onPress: () => startNewDocument('invoice') },
-    { text: 'New Estimate', onPress: () => startNewDocument('estimate') },
-    { text: 'Cancel', style: 'cancel' },
+  Alert.alert(t('New Document'), undefined, [
+    { text: t('New Invoice'), onPress: () => startNewDocument('invoice') },
+    { text: t('New Estimate'), onPress: () => startNewDocument('estimate') },
+    { text: t('Cancel'), style: 'cancel' },
   ]);
 }
 
 export function newDocumentMenuItem(): NativeStackHeaderItem {
   return {
     type: 'menu',
-    label: 'New Document',
+    label: t('New Document'),
     icon: { type: 'sfSymbol', name: 'plus' },
     menu: {
       items: [
         {
           type: 'action',
-          label: 'New Invoice',
+          label: t('New Invoice'),
           icon: { type: 'sfSymbol', name: 'doc.text' },
           onPress: () => startNewDocument('invoice'),
         },
         {
           type: 'action',
-          label: 'New Estimate',
+          label: t('New Estimate'),
           icon: { type: 'sfSymbol', name: 'doc.plaintext' },
           onPress: () => startNewDocument('estimate'),
         },
@@ -69,7 +70,7 @@ export function addButtonItem(label: string, onPress: () => void): NativeStackHe
 export function filterButtonItem(isActive: boolean, onPress: () => void): NativeStackHeaderItem {
   return {
     type: 'button',
-    label: isActive ? 'Filters On' : 'Filter',
+    label: isActive ? t('Filters On') : t('Filter'),
     icon: {
       type: 'sfSymbol',
       name: isActive ? 'line.3.horizontal.decrease.circle.fill' : 'line.3.horizontal.decrease.circle',

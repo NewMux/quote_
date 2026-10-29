@@ -1,3 +1,5 @@
+import { t, tp } from './i18n';
+
 /** Pure subscription helpers — no RevenueCat import, so they stay unit-testable and the paywall's
  * wording/maths can be verified without a native build. */
 
@@ -37,18 +39,31 @@ interface IntroPriceLike {
   periodNumberOfUnits: number;
 }
 
-const UNIT_WORDS: Record<string, string> = { DAY: 'day', WEEK: 'week', MONTH: 'month', YEAR: 'year' };
+const UNITS = new Set(['DAY', 'WEEK', 'MONTH', 'YEAR']);
+
+function periodLabel(unit: string, count: number): string {
+  switch (unit) {
+    case 'DAY':
+      return tp(count, '{count} day', '{count} days');
+    case 'WEEK':
+      return tp(count, '{count} week', '{count} weeks');
+    case 'MONTH':
+      return tp(count, '{count} month', '{count} months');
+    default:
+      return tp(count, '{count} year', '{count} years');
+  }
+}
 
 /** "$0.99 for 1 month" for a paid introductory offer; null when there's no intro offer or it's a
  * free trial (the app doesn't offer free trials). Whole weeks given in days are shown as weeks. */
 export function introOfferLabel(intro: IntroPriceLike | null | undefined): string | null {
   if (!intro || intro.price <= 0) return null;
-  let unit = UNIT_WORDS[intro.periodUnit.toUpperCase()];
+  let unit = intro.periodUnit.toUpperCase();
   let count = intro.periodNumberOfUnits;
-  if (!unit || count <= 0) return null;
-  if (unit === 'day' && count % 7 === 0) {
-    unit = 'week';
+  if (!UNITS.has(unit) || count <= 0) return null;
+  if (unit === 'DAY' && count % 7 === 0) {
+    unit = 'WEEK';
     count /= 7;
   }
-  return `${intro.priceString} for ${count} ${unit}${count === 1 ? '' : 's'}`;
+  return t('{price} for {period}', { price: intro.priceString, period: periodLabel(unit, count) });
 }

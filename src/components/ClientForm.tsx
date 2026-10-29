@@ -13,6 +13,7 @@ import { pickContactAsClient } from '../lib/importContact';
 import { newId } from '../lib/id';
 import type { ClientInput } from '../db/repositories/clients.repo';
 import type { Client } from '../types/models';
+import { t } from '../lib/i18n';
 
 interface ClientFormProps {
   initial?: Client;
@@ -66,7 +67,7 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
       if (picked.address) setAddress(picked.address);
       if (picked.photo_uri) setPhotoUri(picked.photo_uri);
     } catch (err) {
-      Alert.alert('Couldn’t Open Contacts', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Open Contacts'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsImporting(false);
     }
@@ -75,7 +76,7 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
   async function pickPhoto() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to add a client photo.');
+      Alert.alert(t('Photo Access Needed'), t('Allow photo access in the Settings app to add a client photo.'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
@@ -85,7 +86,7 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
       const persistedUri = await persistPickedFile(result.assets[0].uri, 'client-photos', `${newId()}.jpg`);
       setPhotoUri(persistedUri);
     } catch (err) {
-      Alert.alert('Couldn’t Add Photo', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Photo'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsUploading(false);
     }
@@ -94,17 +95,17 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
   return (
     <FormScrollView>
       <View className="items-center gap-1 pb-4">
-        <Avatar name={displayName || 'New Client'} photoUri={photoUri} size={96} />
-        <Button label={photoUri ? 'Edit Photo' : 'Add Photo'} variant="plain" size="small" loading={isUploading} onPress={pickPhoto} />
+        <Avatar name={displayName || t('New Client')} photoUri={photoUri} size={96} />
+        <Button label={photoUri ? t('Edit Photo') : t('Add Photo')} variant="plain" size="small" loading={isUploading} onPress={pickPhoto} />
       </View>
 
       {initial ? null : (
-        <ListSection footer="Fills in the name, email, phone and address from someone in your contacts.">
+        <ListSection footer={t('Fills in the name, email, phone and address from someone in your contacts.')}>
           <ListRow
             icon="person.badge.plus"
-            title="Fill from Contacts"
+            title={t('Fill from Contacts')}
             onPress={isImporting ? undefined : importFromContacts}
-            trailing={isImporting ? <ActivityIndicator accessibilityLabel="Opening Contacts" /> : undefined}
+            trailing={isImporting ? <ActivityIndicator accessibilityLabel={t('Opening Contacts')} /> : undefined}
             accessory="none"
           />
         </ListSection>
@@ -112,10 +113,10 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
 
       <ListSection>
         <FormRow
-          label="Name"
+          label={t('Name')}
           value={displayName}
           onChangeText={setDisplayName}
-          placeholder="Business or person"
+          placeholder={t('Business or person')}
           maxLength={100}
           textContentType="organizationName"
           autoCapitalize="words"
@@ -125,10 +126,10 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
         />
         <FormRow
           ref={contactRef}
-          label="Contact"
+          label={t('Contact')}
           value={contactName}
           onChangeText={setContactName}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           maxLength={100}
           textContentType="name"
           autoComplete="name"
@@ -142,10 +143,10 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
       <ListSection>
         <FormRow
           ref={emailRef}
-          label="Email"
+          label={t('Email')}
           value={email}
           onChangeText={setEmail}
-          placeholder="name@example.com"
+          placeholder={t('name@example.com')}
           keyboardType="email-address"
           textContentType="emailAddress"
           autoComplete="email"
@@ -158,20 +159,20 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
         />
         <FormRow
           ref={phoneRef}
-          label="Phone"
+          label={t('Phone')}
           value={phone}
           onChangeText={setPhone}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
           autoComplete="tel"
           maxLength={30}
         />
         <FormRow
-          label="Address"
+          label={t('Address')}
           value={address}
           onChangeText={setAddress}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           multiline
           textContentType="fullStreetAddress"
           autoComplete="street-address"
@@ -179,17 +180,17 @@ export function ClientForm({ initial, onStateChange, footer }: ClientFormProps) 
         />
       </ListSection>
 
-      <ListSection footer="Notes are only for you; they never appear on documents.">
+      <ListSection footer={t('Notes are only for you; they never appear on documents.')}>
         <FormRow
-          label="Tax / VAT No."
+          label={t('Tax / VAT No.')}
           value={taxRegNumber}
           onChangeText={setTaxRegNumber}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={50}
         />
-        <FormRow label="Notes" value={notes} onChangeText={setNotes} placeholder="Optional" multiline maxLength={500} />
+        <FormRow label={t('Notes')} value={notes} onChangeText={setNotes} placeholder={t('Optional')} multiline maxLength={500} />
       </ListSection>
       {footer}
     </FormScrollView>

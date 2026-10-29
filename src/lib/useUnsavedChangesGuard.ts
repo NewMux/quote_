@@ -4,13 +4,14 @@ import { useNavigation } from 'expo-router';
 // Not re-exported from expo-router's entry point; this is the same navigation core the router
 // uses, so it also blocks the native swipe-back and sheet swipe-down gestures.
 import { usePreventRemove } from 'expo-router/build/react-navigation/core';
+import { t } from './i18n';
 
 function confirmDiscard(onDiscard: () => void) {
   if (Platform.OS === 'ios') {
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        title: "You haven't saved your changes.",
-        options: ['Discard Changes', 'Keep Editing'],
+        title: t("You haven't saved your changes."),
+        options: [t('Discard Changes'), t('Keep Editing')],
         destructiveButtonIndex: 0,
         cancelButtonIndex: 1,
       },
@@ -20,9 +21,9 @@ function confirmDiscard(onDiscard: () => void) {
     );
     return;
   }
-  Alert.alert('Discard Changes?', "You haven't saved your changes.", [
-    { text: 'Keep Editing', style: 'cancel' },
-    { text: 'Discard Changes', style: 'destructive', onPress: onDiscard },
+  Alert.alert(t('Discard Changes?'), t("You haven't saved your changes."), [
+    { text: t('Keep Editing'), style: 'cancel' },
+    { text: t('Discard Changes'), style: 'destructive', onPress: onDiscard },
   ]);
 }
 

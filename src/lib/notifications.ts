@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as SecureStore from 'expo-secure-store';
 import { supabase } from './supabase';
 import { requireOwnerId } from '../db/ownerId';
+import { t } from './i18n';
 
 const PREFERENCE_KEY = 'overdue_reminders_enabled';
 
@@ -63,7 +64,10 @@ export async function scheduleOverdueReminder(document: {
 
   await Notifications.scheduleNotificationAsync({
     identifier: document.id,
-    content: { title: 'Invoice overdue', body: `${document.doc_number} is now overdue.` },
+    content: {
+      title: t('Invoice overdue'),
+      body: t('{number} is now overdue.', { number: document.doc_number }),
+    },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
       date,

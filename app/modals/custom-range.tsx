@@ -8,6 +8,7 @@ import { SheetHeader } from '../../src/components/SheetHeader';
 import { SheetScreen } from '../../src/components/SheetScreen';
 import { toStoredDate } from '../../src/lib/format';
 import { useReportsStore } from '../../src/stores/useReportsStore';
+import { t } from '../../src/lib/i18n';
 
 function firstOfThisMonth(): string {
   const now = new Date();
@@ -35,16 +36,16 @@ export default function CustomRangeModal() {
 
   return (
     <SheetScreen
-      header={<SheetHeader title="Custom Range" actionLabel="Apply" onAction={apply} actionDisabled={!canApply} />}
+      header={<SheetHeader title={t('Custom Range')} actionLabel={t('Apply')} onAction={apply} actionDisabled={!canApply} />}
     >
       <FormScrollView>
-        <ListSection footer={isBackwards ? undefined : 'The summary covers every day from the start date through the end date.'}>
-          <DateField label="Start Date" value={startDate} onChange={setStartDate} />
-          <DateField label="End Date" value={endDate} onChange={setEndDate} />
+        <ListSection footer={isBackwards ? undefined : t('The summary covers every day from the start date through the end date.')}>
+          <DateField label={t('Start Date')} value={startDate} onChange={setStartDate} />
+          <DateField label={t('End Date')} value={endDate} onChange={setEndDate} />
         </ListSection>
         {isBackwards ? (
           <Text className="text-footnote text-destructive px-4 -mt-6">
-            The start date needs to be on or before the end date.
+            {t('The start date needs to be on or before the end date.')}
           </Text>
         ) : null}
       </FormScrollView>

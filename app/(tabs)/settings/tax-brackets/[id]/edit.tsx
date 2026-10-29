@@ -10,6 +10,7 @@ import { useSaveHeader } from '../../../../../src/lib/useSaveHeader';
 import { useUnsavedChangesGuard } from '../../../../../src/lib/useUnsavedChangesGuard';
 import { useTaxBracketsStore } from '../../../../../src/stores/useTaxBracketsStore';
 import type { TaxBracket } from '../../../../../src/types/models';
+import { t } from '../../../../../src/lib/i18n';
 
 export default function EditTaxBracketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,17 +40,17 @@ export default function EditTaxBracketScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Save Tax Rate', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Tax Rate'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   useSaveHeader({ onSave: handleSave, disabled: !name.trim() || !isDirty || isSaving });
 
   function confirmArchive() {
-    Alert.alert(`Archive ${bracket?.name ?? 'Tax Rate'}?`, "It won't be offered when you add new line items.", [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('Archive {name}?', { name: bracket?.name ?? t('Tax Rate') }), t('It won’t be offered when you add new line items.'), [
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: 'Archive',
+        text: t('Archive'),
         style: 'destructive',
         onPress: async () => {
           await archive(id, true);
@@ -62,7 +63,7 @@ export default function EditTaxBracketScreen() {
   if (!bracket) {
     return (
       <View className="flex-1 items-center justify-center bg-grouped">
-        <ActivityIndicator accessibilityLabel="Loading" />
+        <ActivityIndicator accessibilityLabel={t('Loading')} />
       </View>
     );
   }
@@ -70,12 +71,12 @@ export default function EditTaxBracketScreen() {
   return (
     <FormScrollView>
       <ListSection>
-        <FormRow label="Name" value={name} onChangeText={setName} autoCapitalize="words" maxLength={50} />
-        <FormRow label="Rate (%)" keyboardType="decimal-pad" value={rate} onChangeText={setRate} />
+        <FormRow label={t('Name')} value={name} onChangeText={setName} autoCapitalize="words" maxLength={50} />
+        <FormRow label={t('Rate (%)')} keyboardType="decimal-pad" value={rate} onChangeText={setRate} />
       </ListSection>
-      <ListSection footer="The default rate is applied to new taxable line items.">
+      <ListSection footer={t('The default rate is applied to new taxable line items.')}>
         <ListRow
-          title="Default Rate"
+          title={t('Default Rate')}
           switchValue={bracket.is_default === 1}
           switchDisabled={bracket.is_default === 1}
           onSwitchChange={(value) => {
@@ -84,7 +85,7 @@ export default function EditTaxBracketScreen() {
         />
       </ListSection>
       <ListSection>
-        <ListRow title="Archive Tax Rate" onPress={confirmArchive} destructive centered />
+        <ListRow title={t('Archive Tax Rate')} onPress={confirmArchive} destructive centered />
       </ListSection>
     </FormScrollView>
   );

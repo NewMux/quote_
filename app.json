@@ -31,6 +31,16 @@
     "plugins": [
       "expo-router",
       [
+        "expo-localization",
+        {
+          "supportedLocales": [
+            "en",
+            "ar"
+          ],
+          "supportsRTL": true
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
@@ -65,6 +75,9 @@
         "projectId": "ce6041f6-7490-4768-a46f-208f7cfe337a"
       }
     },
-    "owner": "m74ahmed"
+    "owner": "m74ahmed",
+    "locales": {
+      "ar": "./locales/ar.json"
+    }
   }
 }

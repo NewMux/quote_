@@ -1,6 +1,7 @@
 import { forwardRef, useId } from 'react';
 import { InputAccessoryView, Keyboard, Platform, Pressable, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { useThemeColors } from '../../lib/theme';
+import { t } from '../../lib/i18n';
 
 export interface FormFieldProps extends TextInputProps {
   label: string;
@@ -56,7 +57,7 @@ export const FormField = forwardRef<TextInput, FormFieldProps>(function FormFiel
               accessibilityRole="button"
               className="min-h-[44px] justify-center px-2"
             >
-              <Text className="text-body font-semibold text-tint">Done</Text>
+              <Text className="text-body font-semibold text-tint">{t('Done')}</Text>
             </Pressable>
           </View>
         </InputAccessoryView>

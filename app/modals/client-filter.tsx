@@ -5,10 +5,11 @@ import { ListSection } from '../../src/components/list/ListSection';
 import { SheetHeader } from '../../src/components/SheetHeader';
 import { SheetScreen } from '../../src/components/SheetScreen';
 import { useClientsStore } from '../../src/stores/useClientsStore';
+import { t } from '../../src/lib/i18n';
 
 const SORT_OPTIONS: { label: string; value: 'name' | 'recent' }[] = [
-  { label: 'Name', value: 'name' },
-  { label: 'Recently Added', value: 'recent' },
+  { label: t('Name'), value: 'name' },
+  { label: t('Recently Added'), value: 'recent' },
 ];
 
 /** Every control applies immediately to the Clients list, so the sheet offers Reset and Done
@@ -25,16 +26,16 @@ export default function ClientFilterModal() {
     <SheetScreen
       header={
         <SheetHeader
-          title="Filter Clients"
-          closeLabel="Reset"
+          title={t('Filter Clients')}
+          closeLabel={t('Reset')}
           onClose={reset}
-          actionLabel="Done"
+          actionLabel={t('Done')}
           onAction={() => router.back()}
         />
       }
     >
       <ScrollView contentInsetAdjustmentBehavior="never" contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
-        <ListSection header="Sort By">
+        <ListSection header={t('Sort By')}>
           {SORT_OPTIONS.map((option) => (
             <ListRow
               key={option.value}
@@ -44,8 +45,8 @@ export default function ClientFilterModal() {
             />
           ))}
         </ListSection>
-        <ListSection footer="Only show clients who owe you money on an issued invoice.">
-          <ListRow title="Outstanding Balance Only" switchValue={hasBalanceOnly} onSwitchChange={setHasBalanceOnly} />
+        <ListSection footer={t('Only show clients who owe you money on an issued invoice.')}>
+          <ListRow title={t('Outstanding Balance Only')} switchValue={hasBalanceOnly} onSwitchChange={setHasBalanceOnly} />
         </ListSection>
       </ScrollView>
     </SheetScreen>

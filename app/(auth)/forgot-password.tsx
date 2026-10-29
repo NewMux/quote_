@@ -6,6 +6,7 @@ import { AuthScreen, TextLink } from '../../src/components/auth/AuthScreen';
 import { Button } from '../../src/components/Button';
 import { FormField } from '../../src/components/form/FormField';
 import { supabase } from '../../src/lib/supabase';
+import { t } from '../../src/lib/i18n';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
@@ -21,12 +22,12 @@ export default function ForgotPasswordScreen() {
       });
       if (error) throw error;
       Alert.alert(
-        'Check Your Email',
-        'If an account exists for that email, we sent a link to reset your password.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        t('Check Your Email'),
+        t('If an account exists for that email, we sent a link to reset your password.'),
+        [{ text: t('OK'), onPress: () => router.back() }]
       );
     } catch (err) {
-      Alert.alert('Couldn’t Send Reset Link', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Send Reset Link'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -34,20 +35,20 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthScreen
-      title="Reset Your Password"
-      subtitle="Enter your email and we'll send you a link to set a new password."
+      title={t('Reset Your Password')}
+      subtitle={t("Enter your email and we'll send you a link to set a new password.")}
       actions={
         <>
-          <Button label="Send Reset Link" size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSubmit} />
-          <TextLink label="Back to Sign In" onPress={() => router.back()} />
+          <Button label={t('Send Reset Link')} size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSubmit} />
+          <TextLink label={t('Back to Sign In')} onPress={() => router.back()} />
         </>
       }
     >
       <FormField
-        label="Email"
+        label={t('Email')}
         value={email}
         onChangeText={setEmail}
-        placeholder="you@example.com"
+        placeholder={t('you@example.com')}
         keyboardType="email-address"
         textContentType="username"
         autoComplete="email"

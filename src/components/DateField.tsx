@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { parseISO } from 'date-fns';
 import { formatDisplayDate, toStoredDate } from '../lib/format';
 import { useThemeColors } from '../lib/theme';
+import { t } from '../lib/i18n';
 
 interface DateFieldProps {
   label: string;
@@ -19,7 +20,7 @@ interface DateFieldProps {
 /** A date row for a grouped form (put it in a ListSection). iOS uses the system compact date picker (a date button that opens the
  * calendar popover); Android opens the system date dialog. Dates are saved as the local calendar
  * day, so the day picked is the day stored in every timezone. */
-export function DateField({ label, value, onChange, emptyLabel = 'Add Date', showSeparator }: DateFieldProps) {
+export function DateField({ label, value, onChange, emptyLabel = t('Add Date'), showSeparator }: DateFieldProps) {
   const colors = useThemeColors();
   const [showAndroidDialog, setShowAndroidDialog] = useState(false);
 

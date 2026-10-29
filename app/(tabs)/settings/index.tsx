@@ -11,6 +11,7 @@ import { disableReminders, enableReminders, isRemindersEnabled } from '../../../
 import { useThemeColors } from '../../../src/lib/theme';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+import { t } from '../../../src/lib/i18n';
 
 /** iOS Settings-style icon backgrounds (white glyphs on system colors). */
 const ICON_COLORS = {
@@ -29,7 +30,7 @@ export default function SettingsScreen() {
   const signOut = useAuthStore((s) => s.signOut);
   const email = useAuthStore((s) => s.session?.user.email);
   const colors = useThemeColors();
-  const businessName = profile?.business_name?.trim() || 'Your Business';
+  const businessName = profile?.business_name?.trim() || t('Your Business');
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [isTogglingReminders, setIsTogglingReminders] = useState(false);
 
@@ -45,9 +46,9 @@ export default function SettingsScreen() {
         setRemindersEnabled(granted);
         if (!granted) {
           Alert.alert(
-            'Notifications Are Off',
-            'Turn on notifications for Invoice Them in the Settings app, then try again.',
-            [{ text: 'Not Now', style: 'cancel' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }]
+            t('Notifications Are Off'),
+            t('Turn on notifications for Invoice Them in the Settings app, then try again.'),
+            [{ text: t('Not Now'), style: 'cancel' }, { text: t('Open Settings'), onPress: () => Linking.openSettings() }]
           );
         }
       } else {
@@ -55,7 +56,7 @@ export default function SettingsScreen() {
         setRemindersEnabled(false);
       }
     } catch (err) {
-      Alert.alert('Couldn’t Update Reminders', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Update Reminders'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsTogglingReminders(false);
     }
@@ -65,22 +66,22 @@ export default function SettingsScreen() {
     try {
       await exportBackup(profile?.business_name ?? null);
     } catch (err) {
-      Alert.alert('Couldn’t Export Data', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Export Data'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
   function handleSignOut() {
-    Alert.alert('Sign Out?', 'You can sign back in anytime with your email and password.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('Sign Out?'), t('You can sign back in anytime with your email and password.'), [
+      { text: t('Cancel'), style: 'cancel' },
       {
-        text: 'Sign Out',
+        text: t('Sign Out'),
         style: 'destructive',
         onPress: async () => {
           try {
             await signOut();
             router.replace('/(auth)/sign-in');
           } catch (err) {
-            Alert.alert('Couldn’t Sign Out', err instanceof Error ? err.message : 'Something went wrong.');
+            Alert.alert(t('Couldn’t Sign Out'), err instanceof Error ? err.message : t('Something went wrong.'));
           }
         },
       },
@@ -98,8 +99,8 @@ export default function SettingsScreen() {
         <Pressable
           onPress={() => router.push('/settings/business-profile')}
           accessibilityRole="button"
-          accessibilityLabel={`${businessName}, ${email ?? 'Business Profile'}`}
-          accessibilityHint="Edit your business profile"
+          accessibilityLabel={`${businessName}, ${email ?? t('Business Profile')}`}
+          accessibilityHint={t('Edit your business profile')}
         >
           {({ pressed }) => (
             <View
@@ -112,7 +113,7 @@ export default function SettingsScreen() {
                   {businessName}
                 </Text>
                 <Text className="text-subhead text-secondary" numberOfLines={1}>
-                  {email ? `${email} · Business Profile` : 'Business Profile'}
+                  {email ? `${email} · ${t('Business Profile')}` : t('Business Profile')}
                 </Text>
               </View>
               <Icon name="chevron.right" size={14} weight="semibold" color={colors.chevron} />
@@ -125,46 +126,46 @@ export default function SettingsScreen() {
         <ListRow
           icon="crown.fill"
           iconBackground={ICON_COLORS.subscription}
-          title="Invoice Them Pro"
+          title={t('Invoice Them Pro')}
           onPress={() => router.push('/settings/subscription')}
         />
       </ListSection>
 
-      <ListSection header="Business">
+      <ListSection header={t('Business')}>
         <ListRow
           icon="tag.fill"
           iconBackground={ICON_COLORS.catalog}
-          title="Item Catalog"
+          title={t('Item Catalog')}
           onPress={() => router.push('/settings/items')}
         />
         <ListRow
           icon="percent"
           iconBackground={ICON_COLORS.tax}
-          title="Tax Rates"
+          title={t('Tax Rates')}
           onPress={() => router.push('/settings/tax-brackets')}
         />
         <ListRow
           icon="number"
           iconBackground={ICON_COLORS.numbers}
-          title="Invoice & Estimate Numbers"
+          title={t('Invoice & Estimate Numbers')}
           onPress={() => router.push('/settings/numbering')}
         />
         <ListRow
           icon="repeat"
           iconBackground={ICON_COLORS.recurring}
-          title="Recurring Invoices"
+          title={t('Recurring Invoices')}
           onPress={() => router.push('/settings/recurring')}
         />
       </ListSection>
 
       <ListSection
-        header="Notifications"
-        footer="Get a notification on this device when an invoice becomes overdue."
+        header={t('Notifications')}
+        footer={t('Get a notification on this device when an invoice becomes overdue.')}
       >
         <ListRow
           icon="bell.fill"
           iconBackground={ICON_COLORS.reminders}
-          title="Overdue Reminders"
+          title={t('Overdue Reminders')}
           switchValue={remindersEnabled}
           onSwitchChange={handleToggleReminders}
           switchDisabled={isTogglingReminders}
@@ -172,34 +173,34 @@ export default function SettingsScreen() {
       </ListSection>
 
       <ListSection
-        header="Data"
-        footer="Save a copy of your clients, invoices, and estimates to Files, email, or cloud storage."
+        header={t('Data')}
+        footer={t('Save a copy of your clients, invoices, and estimates to Files, email, or cloud storage.')}
       >
         <ListRow
           icon="square.and.arrow.up"
           iconBackground={ICON_COLORS.export}
-          title="Export Data"
+          title={t('Export Data')}
           onPress={handleExport}
           accessory="none"
         />
       </ListSection>
 
-      <ListSection header="About">
+      <ListSection header={t('About')}>
         <ListRow
           icon="hand.raised.fill"
           iconBackground={ICON_COLORS.privacy}
-          title="Privacy Policy"
+          title={t('Privacy Policy')}
           onPress={() => router.push('/settings/privacy-policy')}
         />
       </ListSection>
 
       <ListSection>
-        <ListRow title="Sign Out" onPress={handleSignOut} centered destructive />
+        <ListRow title={t('Sign Out')} onPress={handleSignOut} centered destructive />
       </ListSection>
 
-      <ListSection footer="Deleting can't be undone.">
-        <ListRow title="Delete All Data" onPress={() => router.push('/settings/delete-data')} destructive />
-        <ListRow title="Delete Account" onPress={() => router.push('/settings/delete-account')} destructive />
+      <ListSection footer={t("Deleting can't be undone.")}>
+        <ListRow title={t('Delete All Data')} onPress={() => router.push('/settings/delete-data')} destructive />
+        <ListRow title={t('Delete Account')} onPress={() => router.push('/settings/delete-account')} destructive />
       </ListSection>
     </ScrollView>
   );

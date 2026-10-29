@@ -18,6 +18,7 @@ import { useSignedUrl } from '../../../src/lib/useSignedUrl';
 import { useUnsavedChangesGuard } from '../../../src/lib/useUnsavedChangesGuard';
 import { getCurrencyName } from '../../../src/lib/currencies';
 import { useThemeColors } from '../../../src/lib/theme';
+import { t } from '../../../src/lib/i18n';
 
 /** Accent colors for the PDF header. They're printed on white paper, so they don't change with the
  * app's appearance. */
@@ -93,7 +94,7 @@ export default function BusinessProfileScreen() {
   async function pickLogo() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Photo Access Needed', 'Allow photo access in the Settings app to add your logo.');
+      Alert.alert(t('Photo Access Needed'), t('Allow photo access in the Settings app to add your logo.'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
@@ -108,9 +109,9 @@ export default function BusinessProfileScreen() {
   }
 
   function removeLogo() {
-    Alert.alert('Remove Logo?', 'Your documents will no longer show a logo.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove Logo', style: 'destructive', onPress: () => changeLogo(() => update({ logo_uri: null })) },
+    Alert.alert(t('Remove Logo?'), t('Your documents will no longer show a logo.'), [
+      { text: t('Cancel'), style: 'cancel' },
+      { text: t('Remove Logo'), style: 'destructive', onPress: () => changeLogo(() => update({ logo_uri: null })) },
     ]);
   }
 
@@ -119,7 +120,7 @@ export default function BusinessProfileScreen() {
     try {
       await task();
     } catch (err) {
-      Alert.alert('Couldn’t Update Logo', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Update Logo'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsUpdatingLogo(false);
     }
@@ -132,7 +133,7 @@ export default function BusinessProfileScreen() {
     }
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
-        { options: ['Choose Photo', 'Remove Logo', 'Cancel'], destructiveButtonIndex: 1, cancelButtonIndex: 2 },
+        { options: [t('Choose Photo'), t('Remove Logo'), t('Cancel')], destructiveButtonIndex: 1, cancelButtonIndex: 2 },
         (index) => {
           if (index === 0) pickLogo();
           if (index === 1) removeLogo();
@@ -141,9 +142,9 @@ export default function BusinessProfileScreen() {
       return;
     }
     Alert.alert('Logo', undefined, [
-      { text: 'Choose Photo', onPress: pickLogo },
-      { text: 'Remove Logo', style: 'destructive', onPress: removeLogo },
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('Choose Photo'), onPress: pickLogo },
+      { text: t('Remove Logo'), style: 'destructive', onPress: removeLogo },
+      { text: t('Cancel'), style: 'cancel' },
     ]);
   }
 
@@ -165,7 +166,7 @@ export default function BusinessProfileScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Save Profile', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Profile'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -182,19 +183,19 @@ export default function BusinessProfileScreen() {
               source={{ uri: signedLogoUrl }}
               className="w-24 h-24"
               resizeMode="contain"
-              accessibilityLabel="Business logo"
+              accessibilityLabel={t('Business logo')}
             />
           ) : (
             <Icon name="photo" size={34} color={colors.secondary} />
           )}
           {isUpdatingLogo ? (
             <View className="absolute inset-0 items-center justify-center bg-card/70">
-              <ActivityIndicator accessibilityLabel="Updating Logo" />
+              <ActivityIndicator accessibilityLabel={t('Updating Logo')} />
             </View>
           ) : null}
         </View>
         <Button
-          label={logoUri ? 'Edit Logo' : 'Add Logo'}
+          label={logoUri ? t('Edit Logo') : t('Add Logo')}
           variant="plain"
           size="small"
           disabled={isUpdatingLogo}
@@ -202,25 +203,25 @@ export default function BusinessProfileScreen() {
         />
       </View>
 
-      <ListSection footer="Your business name appears on every document.">
+      <ListSection footer={t('Your business name appears on every document.')}>
         <FormRow
-          label="Name"
+          label={t('Name')}
           value={businessName}
           onChangeText={setBusinessName}
-          placeholder="Required"
+          placeholder={t('Required')}
           textContentType="organizationName"
           autoCapitalize="words"
           maxLength={100}
-          error={businessName.trim() ? null : 'Enter your business name.'}
+          error={businessName.trim() ? null : t('Enter your business name.')}
         />
       </ListSection>
 
-      <ListSection header="Contact">
+      <ListSection header={t('Contact')}>
         <FormRow
-          label="Email"
+          label={t('Email')}
           value={email}
           onChangeText={setEmail}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           keyboardType="email-address"
           textContentType="emailAddress"
           autoComplete="email"
@@ -229,20 +230,20 @@ export default function BusinessProfileScreen() {
           maxLength={150}
         />
         <FormRow
-          label="Phone"
+          label={t('Phone')}
           value={phone}
           onChangeText={setPhone}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
           autoComplete="tel"
           maxLength={30}
         />
         <FormRow
-          label="Address"
+          label={t('Address')}
           value={address}
           onChangeText={setAddress}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           multiline
           textContentType="fullStreetAddress"
           autoComplete="street-address"
@@ -250,64 +251,64 @@ export default function BusinessProfileScreen() {
         />
       </ListSection>
 
-      <ListSection footer="The currency for new documents.">
+      <ListSection footer={t('The currency for new documents.')}>
         <ListRow
-          title="Currency"
+          title={t('Currency')}
           value={`${getCurrencyName(currencyCode)} (${currencyCode})`}
           onPress={() => router.push('/modals/currency-picker')}
         />
       </ListSection>
 
       <ListSection
-        header="Get Paid Online"
-        footer="Paste a payment link from Stripe, PayPal, your bank or any pay page. Invoices show it as a QR code and a Pay button. Add {amount} or {number} to fill in each invoice's balance or number, e.g. paypal.me/yourname/{amount}."
+        header={t('Get Paid Online')}
+        footer={t("Paste a payment link from Stripe, PayPal, your bank or any pay page. Invoices show it as a QR code and a Pay button. Add {amount} or {number} to fill in each invoice's balance or number, e.g. paypal.me/yourname/{amount}.")}
       >
         <FormRow
-          label="Payment Link"
+          label={t('Payment Link')}
           value={paymentLink}
           onChangeText={setPaymentLink}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           keyboardType="url"
           textContentType="URL"
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={500}
-          error={paymentLinkInvalid ? 'Enter a web link, like paypal.me/yourname.' : null}
+          error={paymentLinkInvalid ? t('Enter a web link, like paypal.me/yourname.') : null}
         />
       </ListSection>
 
       <ListSection
-        header="On Your Documents"
-        footer="Payment instructions (such as bank details) print on invoices. Default terms print at the bottom of every document unless you change them on a document."
+        header={t('On Your Documents')}
+        footer={t('Payment instructions (such as bank details) print on invoices. Default terms print at the bottom of every document unless you change them on a document.')}
       >
         <FormRow
-          label="Tax / VAT No."
+          label={t('Tax / VAT No.')}
           value={taxRegNumber}
           onChangeText={setTaxRegNumber}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={50}
         />
         <FormRow
-          label="Payment Instructions"
+          label={t('Payment Instructions')}
           value={paymentInstructions}
           onChangeText={setPaymentInstructions}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           multiline
           maxLength={1000}
         />
         <FormRow
-          label="Default Terms"
+          label={t('Default Terms')}
           value={footerTerms}
           onChangeText={setFooterTerms}
-          placeholder="Optional"
+          placeholder={t('Optional')}
           multiline
           maxLength={2000}
         />
       </ListSection>
 
-      <GroupedCard header="PDF Accent Color" footer="Used for headings on your PDFs.">
+      <GroupedCard header={t('PDF Accent Color')} footer={t('Used for headings on your PDFs.')}>
         <View className="flex-row flex-wrap justify-between" accessibilityRole="radiogroup">
           {ACCENT_COLORS.map((color) => {
             const selected = accentColor === color.hex;

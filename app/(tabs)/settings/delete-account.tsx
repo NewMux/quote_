@@ -11,6 +11,7 @@ import { ListSection } from '../../../src/components/list/ListSection';
 import { deleteAccount } from '../../../src/db/repositories/account.repo';
 import { APPLE_MANAGE_SUBSCRIPTIONS_URL } from '../../../src/lib/subscription';
 import { useAuthStore } from '../../../src/stores/useAuthStore';
+import { t } from '../../../src/lib/i18n';
 
 const CONFIRM_WORD = 'DELETE';
 
@@ -30,7 +31,7 @@ export default function DeleteAccountScreen() {
       router.replace('/(auth)/sign-in');
     } catch (err) {
       setIsDeleting(false);
-      Alert.alert('Couldn’t Delete Account', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Delete Account'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -39,28 +40,26 @@ export default function DeleteAccountScreen() {
       <View className="items-center gap-2 pt-2">
         <Icon name="exclamationmark.triangle.fill" size={48} color={colors.destructive} />
         <Text className="text-title2 font-semibold text-label text-center" accessibilityRole="header">
-          This Can’t Be Undone
+          {t('This Can’t Be Undone')}
         </Text>
         <Text className="text-body text-secondary text-center">
-          This permanently deletes your account and everything in it — every client, invoice,
-          estimate, item, tax rate, signature, photo, and payment record — and signs you out. To
-          clear your data but keep your account, use Delete All Data instead.
+          {t('This permanently deletes your account and everything in it — every client, invoice, estimate, item, tax rate, signature, photo, and payment record — and signs you out. To clear your data but keep your account, use Delete All Data instead.')}
         </Text>
       </View>
 
       <View>
-        <ListSection footer="Deleting your account doesn't cancel an Invoice Them Pro subscription — Apple bills it separately. Cancel it first so you aren't charged again.">
+        <ListSection footer={t("Deleting your account doesn't cancel an Invoice Them Pro subscription — Apple bills it separately. Cancel it first so you aren't charged again.")}>
           <ListRow
-            title="Manage Subscription"
+            title={t('Manage Subscription')}
             onPress={() => Linking.openURL(APPLE_MANAGE_SUBSCRIPTIONS_URL)}
             accessory="none"
-            accessibilityHint="Opens your App Store subscriptions"
+            accessibilityHint={t('Opens your App Store subscriptions')}
           />
         </ListSection>
       </View>
 
       <FormField
-        label={`Type ${CONFIRM_WORD} to Confirm`}
+        label={t('Type {word} to Confirm', { word: CONFIRM_WORD })}
         value={confirmText}
         onChangeText={setConfirmText}
         autoCapitalize="characters"
@@ -70,7 +69,7 @@ export default function DeleteAccountScreen() {
       />
 
       <Button
-        label="Delete Account"
+        label={t('Delete Account')}
         variant="destructive"
         size="large"
         disabled={!canDelete}

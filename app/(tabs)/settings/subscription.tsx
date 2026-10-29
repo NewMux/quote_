@@ -6,11 +6,12 @@ import { ListSection } from '../../../src/components/list/ListSection';
 import { formatDisplayDate } from '../../../src/lib/format';
 import { APPLE_MANAGE_SUBSCRIPTIONS_URL, ENTITLEMENT_ID } from '../../../src/lib/subscription';
 import { useSubscriptionStore } from '../../../src/stores/useSubscriptionStore';
+import { t } from '../../../src/lib/i18n';
 
 function planName(productId: string): string {
   if (/annual|year/i.test(productId)) return 'Yearly';
   if (/month/i.test(productId)) return 'Monthly';
-  return 'Invoice Them Pro';
+  return t('Invoice Them Pro');
 }
 
 export default function SubscriptionScreen() {
@@ -38,13 +39,12 @@ export default function SubscriptionScreen() {
     try {
       const restored = await restore();
       Alert.alert(
-        restored ? 'Purchases Restored' : 'Nothing to Restore',
+        restored ? t('Purchases Restored') : t('Nothing to Restore'),
         restored
-          ? 'Your subscription is active on this account.'
-          : 'No active subscription was found for the Apple Account signed in on this device.'
+          ? t('Your subscription is active on this account.') : t('No active subscription was found for the Apple Account signed in on this device.')
       );
     } catch (err) {
-      Alert.alert('Couldn’t Restore Purchases', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Restore Purchases'), err instanceof Error ? err.message : t('Something went wrong.'));
     } finally {
       setIsRestoring(false);
     }
@@ -57,31 +57,31 @@ export default function SubscriptionScreen() {
       contentContainerStyle={{ padding: 16 }}
     >
       {!isAvailable ? (
-        <ListSection footer="Subscriptions aren't set up in this build, so every feature is unlocked.">
-          <ListRow title="Plan" value="All Features" />
+        <ListSection footer={t("Subscriptions aren't set up in this build, so every feature is unlocked.")}>
+          <ListRow title={t('Plan')} value={t('All Features')} />
         </ListSection>
       ) : entitlement ? (
-        <ListSection header="Invoice Them Pro">
-          <ListRow title="Plan" value={planName(entitlement.productIdentifier)} />
-          <ListRow title="Status" value={entitlement.periodType === 'INTRO' ? 'Intro Offer' : 'Active'} />
+        <ListSection header={t('Invoice Them Pro')}>
+          <ListRow title={t('Plan')} value={planName(entitlement.productIdentifier)} />
+          <ListRow title={t('Status')} value={entitlement.periodType === 'INTRO' ? t('Intro Offer') : t('Active')} />
           {entitlement.expirationDate ? (
             <ListRow
-              title={entitlement.willRenew ? 'Renews On' : 'Ends On'}
+              title={entitlement.willRenew ? t('Renews On') : t('Ends On')}
               value={formatDisplayDate(entitlement.expirationDate)}
             />
           ) : null}
         </ListSection>
       ) : (
         <ListSection>
-          <ListRow title="Status" value="Not Subscribed" />
+          <ListRow title={t('Status')} value={t('Not Subscribed')} />
         </ListSection>
       )}
 
-      <ListSection footer="Your subscription is billed through your Apple Account. To change plans or cancel, use Manage Subscription — if you cancel, Invoice Them Pro stays active until the end of the current period.">
-        <ListRow title="Manage Subscription" onPress={handleManage} accessory="none" />
+      <ListSection footer={t('Your subscription is billed through your Apple Account. To change plans or cancel, use Manage Subscription — if you cancel, Invoice Them Pro stays active until the end of the current period.')}>
+        <ListRow title={t('Manage Subscription')} onPress={handleManage} accessory="none" />
         {isAvailable ? (
           <ListRow
-            title={isRestoring ? 'Restoring…' : 'Restore Purchases'}
+            title={isRestoring ? t('Restoring…') : t('Restore Purchases')}
             onPress={isRestoring ? undefined : handleRestore}
             accessory="none"
           />

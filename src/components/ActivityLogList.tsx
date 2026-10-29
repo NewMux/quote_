@@ -1,19 +1,21 @@
 import { Text, View } from 'react-native';
 import { format, parseISO } from 'date-fns';
 import type { ActivityLogEntry } from '../types/models';
+import { t } from '../lib/i18n';
+import { dateLocale, datePattern } from '../lib/i18n/dates';
 
 const LABELS: Record<ActivityLogEntry['event_type'], string> = {
   created: 'Created',
   edited: 'Edited',
   issued: 'Issued',
-  viewed_marked: 'Marked as viewed',
+  viewed_marked: t('Marked as viewed'),
   shared: 'Shared',
   emailed: 'Emailed',
-  signed_merchant: 'You signed',
-  signed_client: 'Client signed',
-  settlement_logged: 'Payment logged',
-  status_changed: 'Status changed',
-  converted_to_invoice: 'Converted to invoice',
+  signed_merchant: t('You signed'),
+  signed_client: t('Client signed'),
+  settlement_logged: t('Payment logged'),
+  status_changed: t('Status changed'),
+  converted_to_invoice: t('Converted to invoice'),
   voided: 'Canceled',
 };
 
@@ -24,7 +26,7 @@ interface ActivityLogListProps {
 /** A document's history as a simple timeline: a dot and line joining each event, newest first. */
 export function ActivityLogList({ entries }: ActivityLogListProps) {
   if (entries.length === 0) {
-    return <Text className="text-subhead text-secondary">No activity yet.</Text>;
+    return <Text className="text-subhead text-secondary">{t('No activity yet.')}</Text>;
   }
   return (
     <View>
@@ -40,7 +42,7 @@ export function ActivityLogList({ entries }: ActivityLogListProps) {
               {entry.event_detail ? ` — ${entry.event_detail}` : ''}
             </Text>
             <Text className="text-footnote text-secondary">
-              {format(parseISO(entry.created_at), 'MMM d, yyyy · h:mm a')}
+              {format(parseISO(entry.created_at), `${datePattern('MMM d, yyyy')} · h:mm a`, { locale: dateLocale() })}
             </Text>
           </View>
         </View>

@@ -9,6 +9,7 @@ import { formatDocNumber } from '../../../src/lib/docNumber';
 import { useSaveHeader } from '../../../src/lib/useSaveHeader';
 import { useUnsavedChangesGuard } from '../../../src/lib/useUnsavedChangesGuard';
 import { useBusinessProfileStore } from '../../../src/stores/useBusinessProfileStore';
+import { t } from '../../../src/lib/i18n';
 
 export default function NumberingScreen() {
   const { profile, load, update } = useBusinessProfileStore();
@@ -47,7 +48,7 @@ export default function NumberingScreen() {
     // Estimates and invoices are numbered separately, so identical prefixes would hand both the
     // same numbers (EST-001 and EST-001).
     if (estimatePrefix.trim() === invoicePrefix.trim()) {
-      Alert.alert('Use Different Prefixes', 'Estimates and invoices need different prefixes so their numbers never clash.');
+      Alert.alert(t('Use Different Prefixes'), t('Estimates and invoices need different prefixes so their numbers never clash.'));
       return;
     }
     setIsSaving(true);
@@ -62,7 +63,7 @@ export default function NumberingScreen() {
       leave(() => router.back());
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Save Settings', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Save Settings'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -74,14 +75,14 @@ export default function NumberingScreen() {
 
   return (
     <FormScrollView>
-      <ListSection header="Preview" footer="How the next new numbers will look.">
-        <ListRow title="Next Estimate" value={estimatePreview} />
-        <ListRow title="Next Invoice" value={invoicePreview} />
+      <ListSection header={t('Preview')} footer={t('How the next new numbers will look.')}>
+        <ListRow title={t('Next Estimate')} value={estimatePreview} />
+        <ListRow title={t('Next Invoice')} value={invoicePreview} />
       </ListSection>
 
-      <ListSection header="Format" footer="Minimum digits pads numbers with zeros: 3 gives 001.">
+      <ListSection header={t('Format')} footer={t('Minimum digits pads numbers with zeros: 3 gives 001.')}>
         <FormRow
-          label="Estimate Prefix"
+          label={t('Estimate Prefix')}
           value={estimatePrefix}
           onChangeText={setEstimatePrefix}
           autoCapitalize="characters"
@@ -89,7 +90,7 @@ export default function NumberingScreen() {
           maxLength={10}
         />
         <FormRow
-          label="Invoice Prefix"
+          label={t('Invoice Prefix')}
           value={invoicePrefix}
           onChangeText={setInvoicePrefix}
           autoCapitalize="characters"
@@ -97,7 +98,7 @@ export default function NumberingScreen() {
           maxLength={10}
         />
         <FormRow
-          label="Minimum Digits"
+          label={t('Minimum Digits')}
           value={padding}
           onChangeText={setPadding}
           keyboardType="number-pad"
@@ -105,13 +106,13 @@ export default function NumberingScreen() {
         />
       </ListSection>
 
-      <ListSection footer="Numbering restarts at 1 every January, and the year is added, like INV-2026-001.">
-        <ListRow title="Start Over Each Year" switchValue={resetYearly} onSwitchChange={setResetYearly} />
+      <ListSection footer={t('Numbering restarts at 1 every January, and the year is added, like INV-2026-001.')}>
+        <ListRow title={t('Start Over Each Year')} switchValue={resetYearly} onSwitchChange={setResetYearly} />
       </ListSection>
 
-      <ListSection footer="Sets the due date on new invoices.">
+      <ListSection footer={t('Sets the due date on new invoices.')}>
         <FormRow
-          label="Due After (Days)"
+          label={t('Due After (Days)')}
           value={paymentTermsDays}
           onChangeText={setPaymentTermsDays}
           keyboardType="number-pad"

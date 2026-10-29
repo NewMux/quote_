@@ -2,6 +2,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
 import { requireOwnerId } from '../db/ownerId';
+import { t } from './i18n';
 
 function sanitizeFileNamePart(value: string): string {
   return value.trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'InvoiceThem';
@@ -43,7 +44,7 @@ async function fetchAllRows(table: (typeof OWNER_SCOPED_TABLES)[number], ownerId
 export async function exportBackup(businessName: string | null): Promise<void> {
   const available = await Sharing.isAvailableAsync();
   if (!available) {
-    throw new Error('Sharing is not available on this device.');
+    throw new Error(t('Sharing is not available on this device.'));
   }
 
   const ownerId = requireOwnerId();
@@ -69,7 +70,7 @@ export async function exportBackup(businessName: string | null): Promise<void> {
   try {
     await Sharing.shareAsync(dest.uri, {
       mimeType: 'application/json',
-      dialogTitle: 'Save backup',
+      dialogTitle: t('Save backup'),
     });
   } finally {
     // The file holds every client's details; don't leave a copy in the app's cache.

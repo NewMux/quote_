@@ -10,6 +10,7 @@ import { SheetScreen } from '../../src/components/SheetScreen';
 import { CURRENCIES } from '../../src/lib/currencies';
 import { getCurrencySymbol } from '../../src/lib/money';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
+import { t } from '../../src/lib/i18n';
 
 export default function CurrencyPickerModal() {
   const currentCode = useBusinessProfileStore((s) => s.profile?.default_currency_code);
@@ -28,7 +29,7 @@ export default function CurrencyPickerModal() {
   }
 
   return (
-    <SheetScreen header={<SheetHeader title="Currency" />}>
+    <SheetScreen header={<SheetHeader title={t('Currency')} />}>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
@@ -38,10 +39,10 @@ export default function CurrencyPickerModal() {
         keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View className="mb-4">
-            <SearchField value={query} onChangeText={setQuery} placeholder="Search Currencies" />
+            <SearchField value={query} onChangeText={setQuery} placeholder={t('Search Currencies')} />
           </View>
         }
-        ListEmptyComponent={<EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a currency name or code." />}
+        ListEmptyComponent={<EmptyState icon="magnifyingglass" title={t('No Results')} subtitle={t('Try a currency name or code.')} />}
         renderItem={({ item, index }) => (
           <GroupedRow index={index} count={filtered.length}>
             <ListRow

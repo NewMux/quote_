@@ -1,4 +1,4 @@
-import { Platform, type ColorValue, type StyleProp, type ViewStyle } from 'react-native';
+import { I18nManager, Platform, type ColorValue, type StyleProp, type ViewStyle } from 'react-native';
 import { SymbolView, type SymbolWeight } from 'expo-symbols';
 import { Ionicons } from '@expo/vector-icons';
 import type { SFSymbol } from 'sf-symbols-typescript';
@@ -26,13 +26,15 @@ interface IconProps {
 export function Icon({ name, size = 22, color, weight = 'regular', accessibilityLabel, style }: IconProps) {
   const colors = useThemeColors();
   const tint = color ?? colors.tint;
+  // "right" chevrons point toward the trailing edge; mirror them when the layout runs right to left.
+  const iconStyle = I18nManager.isRTL && name === 'chevron.right' ? [style, { transform: [{ scaleX: -1 }] }] : style;
   const a11y = accessibilityLabel
     ? { accessible: true, accessibilityLabel, accessibilityRole: 'image' as const }
     : { accessibilityElementsHidden: true, importantForAccessibility: 'no-hide-descendants' as const };
 
   if (Platform.OS !== 'ios') {
     return (
-      <Ionicons name={fallbackIcon(name)} size={size} color={tint as string} style={style as never} {...a11y} />
+      <Ionicons name={fallbackIcon(name)} size={size} color={tint as string} style={iconStyle as never} {...a11y} />
     );
   }
 
@@ -42,7 +44,7 @@ export function Icon({ name, size = 22, color, weight = 'regular', accessibility
       size={size}
       tintColor={tint}
       weight={weight}
-      style={[{ width: size, height: size }, style]}
+      style={[{ width: size, height: size }, iconStyle]}
       {...a11y}
     />
   );

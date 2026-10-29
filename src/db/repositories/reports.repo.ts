@@ -1,4 +1,6 @@
+import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { dateLocale } from '../../lib/i18n/dates';
 import { toStoredDate } from '../../lib/format';
 import { getDisplayStatus } from '../../lib/statusMachine';
 import { requireOwnerId } from '../ownerId';
@@ -91,7 +93,7 @@ export async function getRevenueByMonth(monthsBack = 6): Promise<ChartPoint[]> {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const ymonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     points.push({
-      label: d.toLocaleDateString('en-US', { month: 'short' }),
+      label: format(d, 'MMM', { locale: dateLocale() }),
       value: totalsByMonth.get(ymonth) ?? 0,
     });
   }
@@ -120,7 +122,7 @@ export async function getPaidTotalsByPeriod(
     if (granularity === 'day') {
       start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
       end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
-      label = start.toLocaleDateString('en-US', { weekday: 'short' });
+      label = format(start, 'EEE', { locale: dateLocale() });
     } else if (granularity === 'week') {
       const weekStartOffset = now.getDate() - now.getDay() - i * 7;
       start = new Date(now.getFullYear(), now.getMonth(), weekStartOffset);
@@ -133,7 +135,7 @@ export async function getPaidTotalsByPeriod(
     } else {
       start = new Date(now.getFullYear(), now.getMonth() - i, 1);
       end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-      label = start.toLocaleDateString('en-US', { month: 'short' });
+      label = format(start, 'MMM', { locale: dateLocale() });
     }
     buckets.push({ label, start, end });
   }

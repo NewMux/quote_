@@ -7,6 +7,7 @@ import type { SymbolName } from '../lib/symbols';
 import { BRAND, useThemeColors } from '../lib/theme';
 import { HeaderTextButton } from './HeaderTextButton';
 import { Icon } from './Icon';
+import { t } from '../lib/i18n';
 
 const HAS_GLASS = isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
@@ -71,7 +72,7 @@ function RoundButton({
  * earlier iOS and Android use text buttons. */
 export function SheetHeader({
   title,
-  closeLabel = 'Cancel',
+  closeLabel = t('Cancel'),
   onClose,
   actionLabel,
   onAction,
@@ -79,7 +80,7 @@ export function SheetHeader({
 }: SheetHeaderProps) {
   const close = onClose ?? (() => router.back());
   // A custom leading action (like "Reset") has no standard symbol, so it stays a text button.
-  const useRoundClose = IS_IOS_26 && closeLabel === 'Cancel';
+  const useRoundClose = IS_IOS_26 && closeLabel === t('Cancel');
   return (
     // Not collapsable, so a formSheet sees exactly header + ScrollView (react-native-screens needs
     // that to size the sheet's scroll content).

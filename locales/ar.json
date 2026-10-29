@@ -1,0 +1,5 @@
+{
+  "CFBundleDisplayName": "Invoice Them",
+  "NSContactsUsageDescription": "اسمح لتطبيق Invoice Them بالوصول إلى جهات اتصالك حتى تتمكن من إضافة عميل منها.",
+  "NSPhotoLibraryUsageDescription": "اسمح لتطبيق Invoice Them بالوصول إلى صورك لإرفاق إيصال أو تعيين شعار عملك."
+}

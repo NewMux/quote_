@@ -12,6 +12,7 @@ import { addButtonItem, filterButtonItem } from '../../../src/lib/headerItems';
 import { SWIPE_COLORS } from '../../../src/lib/theme';
 import { useClientsStore } from '../../../src/stores/useClientsStore';
 import type { Client } from '../../../src/types/models';
+import { t } from '../../../src/lib/i18n';
 
 function openFilters() {
   router.push('/modals/client-filter');
@@ -29,7 +30,7 @@ export default function ClientsScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      unstable_headerRightItems: () => [addButtonItem('Add Client', addClient), filterButtonItem(hasActiveFilter, openFilters)],
+      unstable_headerRightItems: () => [addButtonItem(t('Add Client'), addClient), filterButtonItem(hasActiveFilter, openFilters)],
       headerRight:
         Platform.OS === 'ios'
           ? undefined
@@ -37,15 +38,15 @@ export default function ClientsScreen() {
               <View className="flex-row">
                 <HeaderButton
                   icon={hasActiveFilter ? 'line.3.horizontal.decrease.circle.fill' : 'line.3.horizontal.decrease.circle'}
-                  label="Filter"
+                  label={t('Filter')}
                   selected={hasActiveFilter}
                   onPress={openFilters}
                 />
-                <HeaderButton icon="plus" label="Add Client" onPress={addClient} />
+                <HeaderButton icon="plus" label={t('Add Client')} onPress={addClient} />
               </View>
             ),
       headerSearchBarOptions: {
-        placeholder: 'Search Clients',
+        placeholder: t('Search Clients'),
         autoCapitalize: 'none',
         onChangeText: (event: { nativeEvent: { text: string } }) => setSearch(event.nativeEvent.text),
       },
@@ -80,11 +81,11 @@ export default function ClientsScreen() {
   function handleArchive(item: Client, swipeable?: SwipeableMethods) {
     swipeable?.close();
     Alert.alert(
-      `Archive ${item.display_name}?`,
-      "They'll no longer appear when you create new documents. Their existing documents aren't changed.",
+      t('Archive {name}?', { name: item.display_name }),
+      t("They'll no longer appear when you create new documents. Their existing documents aren't changed."),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Archive', onPress: () => archive(item.id, true) },
+        { text: t('Cancel'), style: 'cancel' },
+        { text: t('Archive'), onPress: () => archive(item.id, true) },
       ]
     );
   }
@@ -92,11 +93,11 @@ export default function ClientsScreen() {
   function handleDelete(item: Client, swipeable?: SwipeableMethods) {
     swipeable?.close();
     Alert.alert(
-      `Delete ${item.display_name}?`,
-      "Their past documents are kept but no longer linked to them. This can't be undone.",
+      t('Delete {name}?', { name: item.display_name }),
+      t("Their past documents are kept but no longer linked to them. This can't be undone."),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteClient(item.id) },
+        { text: t('Cancel'), style: 'cancel' },
+        { text: t('Delete'), style: 'destructive', onPress: () => deleteClient(item.id) },
       ]
     );
   }
@@ -129,22 +130,22 @@ export default function ClientsScreen() {
       }
       ListEmptyComponent={
         isNarrowed ? (
-          <EmptyState icon="magnifyingglass" title="No Results" subtitle="Try a different search or filter." />
+          <EmptyState icon="magnifyingglass" title={t('No Results')} subtitle={t('Try a different search or filter.')} />
         ) : (
           <EmptyState
             icon="person.2"
-            title="No Clients"
-            subtitle="Add the people and businesses you bill."
-            actionLabel="Add Client"
+            title={t('No Clients')}
+            subtitle={t('Add the people and businesses you bill.')}
+            actionLabel={t('Add Client')}
             onAction={addClient}
           />
         )
       }
       renderItem={({ item, index, section }) => {
         const actions = [
-          { name: 'edit', label: 'Edit', run: () => handleEdit(item) },
-          { name: 'archive', label: 'Archive', run: () => handleArchive(item) },
-          { name: 'delete', label: 'Delete', run: () => handleDelete(item) },
+          { name: 'edit', label: t('Edit'), run: () => handleEdit(item) },
+          { name: 'archive', label: t('Archive'), run: () => handleArchive(item) },
+          { name: 'delete', label: t('Delete'), run: () => handleDelete(item) },
         ];
         const detail = item.email ?? item.phone ?? item.contact_name;
         return (
@@ -153,19 +154,19 @@ export default function ClientsScreen() {
               renderRightActions={(_progress, _translation, swipeable) => (
                 <View className="flex-row">
                   <SwipeAction
-                    label="Edit"
+                    label={t('Edit')}
                     icon="pencil"
                     color={SWIPE_COLORS.edit}
                     onPress={() => handleEdit(item, swipeable)}
                   />
                   <SwipeAction
-                    label="Archive"
+                    label={t('Archive')}
                     icon="archivebox"
                     color={SWIPE_COLORS.archive}
                     onPress={() => handleArchive(item, swipeable)}
                   />
                   <SwipeAction
-                    label="Delete"
+                    label={t('Delete')}
                     icon="trash"
                     color={SWIPE_COLORS.delete}
                     onPress={() => handleDelete(item, swipeable)}

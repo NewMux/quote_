@@ -15,6 +15,7 @@ import type {
   LineItemEditable,
   TaxBracket,
 } from '../types/models';
+import { t } from '../lib/i18n';
 
 interface DocumentEditorState {
   documentId: string | null;
@@ -87,7 +88,7 @@ const initialState = {
 };
 
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : 'Something went wrong.';
+  return err instanceof Error ? err.message : t('Something went wrong.');
 }
 
 /** The save currently in flight. Saves run one at a time, in order, so an older save can never
@@ -104,11 +105,11 @@ export const useDocumentEditorStore = create<DocumentEditorState>((set, get) => 
     try {
       doc = await getDocument(id);
       if (!doc) {
-        set({ isLoading: false, loadError: 'This document no longer exists.' });
+        set({ isLoading: false, loadError: t('This document no longer exists.') });
         return;
       }
       if (doc.status !== 'draft') {
-        set({ isLoading: false, loadError: 'Only drafts can be edited. This document has already been issued.' });
+        set({ isLoading: false, loadError: t('Only drafts can be edited. This document has already been issued.') });
         return;
       }
       rows = await listLineItems(id);

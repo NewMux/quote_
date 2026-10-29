@@ -20,6 +20,7 @@ import { StatusBadge } from '../src/components/StatusBadge';
 import { markIntroSeen } from '../src/lib/introSeen';
 import { qrSvg } from '../src/lib/pdf/qrSvg';
 import { useSystemColors, useThemeColors } from '../src/lib/theme';
+import { isRTL, t } from '../src/lib/i18n';
 
 /** Content stays readable on iPad and wide displays instead of stretching edge to edge. */
 const MAX_WIDTH = 480;
@@ -51,13 +52,13 @@ function Placeholder({ width }: { width: `${number}%` }) {
 function SummaryArt() {
   const system = useSystemColors();
   const tiles = [
-    { title: 'Outstanding', value: '$4,280', color: system.orange, icon: 'clock.fill' as const },
-    { title: 'Paid This Month', value: '$9,615', color: system.green, icon: 'checkmark.circle.fill' as const },
-    { title: 'Overdue', value: '$740', color: system.red, icon: 'exclamationmark.circle.fill' as const },
+    { title: t('Outstanding'), value: '$4,280', color: system.orange, icon: 'clock.fill' as const },
+    { title: t('Paid This Month'), value: '$9,615', color: system.green, icon: 'checkmark.circle.fill' as const },
+    { title: t('Overdue'), value: '$740', color: system.red, icon: 'exclamationmark.circle.fill' as const },
   ];
   return (
-    <MockCard label="A summary showing what's outstanding, paid this month, and overdue.">
-      <Text className="text-footnote font-semibold text-secondary mb-1">Summary</Text>
+    <MockCard label={t("A summary showing what's outstanding, paid this month, and overdue.")}>
+      <Text className="text-footnote font-semibold text-secondary mb-1">{t('Summary')}</Text>
       {tiles.map((tile, i) => (
         <View
           key={tile.title}
@@ -77,13 +78,13 @@ function SummaryArt() {
 function EstimateArt() {
   const system = useSystemColors();
   return (
-    <MockCard label="An estimate signed by the client on screen, ready to convert into an invoice.">
+    <MockCard label={t('An estimate signed by the client on screen, ready to convert into an invoice.')}>
       <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-headline font-semibold text-label">Estimate EST-0042</Text>
+        <Text className="text-headline font-semibold text-label">{t('Estimate EST-0042')}</Text>
         <View className="flex-row items-center gap-1">
           <Icon name="checkmark.circle.fill" size={15} color={system.green} />
           <Text className="text-footnote font-semibold" style={{ color: system.green }}>
-            Signed
+            {t('Signed')}
           </Text>
         </View>
       </View>
@@ -91,12 +92,12 @@ function EstimateArt() {
       <Placeholder width="65%" />
       <Placeholder width="75%" />
       <View className="mt-2 rounded-2xl border border-dashed border-field p-3">
-        <Text className="text-title2 italic font-light text-label">J. Carter</Text>
+        <Text className="text-title2 italic font-light text-label">{t('J. Carter')}</Text>
         <View className="h-px bg-separator my-1" />
-        <Text className="text-caption text-secondary">Client signature</Text>
+        <Text className="text-caption text-secondary">{t('Client signature')}</Text>
       </View>
       <View className="mt-4 rounded-full bg-brand py-2.5 items-center">
-        <Text className="text-subhead font-semibold text-white">Convert to Invoice</Text>
+        <Text className="text-subhead font-semibold text-white">{t('Convert to Invoice')}</Text>
       </View>
     </MockCard>
   );
@@ -106,25 +107,25 @@ const SAMPLE_QR = qrSvg('https://example.com/pay/INV-0108', 64);
 
 function PdfArt() {
   return (
-    <MockCard label="An invoice PDF with your logo, the total due, a Pay Now button, and a QR code.">
+    <MockCard label={t('An invoice PDF with your logo, the total due, a Pay Now button, and a QR code.')}>
       <View className="flex-row items-center gap-3 mb-4">
         <View className="w-10 h-10 rounded-xl bg-brand items-center justify-center" style={{ borderCurve: 'continuous' }}>
-          <Text className="text-subhead font-bold text-white">SP</Text>
+          <Text className="text-subhead font-bold text-white">{t('SP')}</Text>
         </View>
         <View className="flex-1">
           <Text className="text-subhead font-semibold text-label">Sam&apos;s Plumbing</Text>
-          <Text className="text-caption text-secondary">Invoice INV-0108</Text>
+          <Text className="text-caption text-secondary">{t('Invoice INV-0108')}</Text>
         </View>
       </View>
       <Placeholder width="70%" />
       <Placeholder width="55%" />
       <View className="flex-row justify-between items-center border-t border-separator pt-3 mt-2 mb-4">
-        <Text className="text-subhead text-secondary">Total Due</Text>
+        <Text className="text-subhead text-secondary">{t('Total Due')}</Text>
         <Text className="text-title3 font-bold text-label">$1,250.00</Text>
       </View>
       <View className="flex-row items-center gap-3">
         <View className="flex-1 rounded-full bg-brand py-2.5 items-center">
-          <Text className="text-subhead font-semibold text-white">Pay Now</Text>
+          <Text className="text-subhead font-semibold text-white">{t('Pay Now')}</Text>
         </View>
         <View className="rounded-lg overflow-hidden">
           <SvgXml xml={SAMPLE_QR} width={64} height={64} />
@@ -136,14 +137,14 @@ function PdfArt() {
 
 // Sample documents for the badges. Overdue comes from a due date in the past, exactly as in the app.
 const SAMPLE_DOCS = [
-  { client: 'Harbor Café', amount: '$860.00', doc: { status: 'paid', due_date: null, total_minor: 86000, amount_paid_minor: 86000 } },
-  { client: 'Nadia Home Reno', amount: '$2,400.00', doc: { status: 'partially_paid', due_date: '2999-12-31', total_minor: 240000, amount_paid_minor: 100000 } },
-  { client: 'Westside Dental', amount: '$740.00', doc: { status: 'issued', due_date: '2000-01-01', total_minor: 74000, amount_paid_minor: 0 } },
+  { client: t('Harbor Café'), amount: '$860.00', doc: { status: 'paid', due_date: null, total_minor: 86000, amount_paid_minor: 86000 } },
+  { client: t('Nadia Home Reno'), amount: '$2,400.00', doc: { status: 'partially_paid', due_date: '2999-12-31', total_minor: 240000, amount_paid_minor: 100000 } },
+  { client: t('Westside Dental'), amount: '$740.00', doc: { status: 'issued', due_date: '2000-01-01', total_minor: 74000, amount_paid_minor: 0 } },
 ] as const;
 
 function StatusArt() {
   return (
-    <MockCard label="Invoices marked paid, partly paid, and overdue, with a reminder ready for the overdue one.">
+    <MockCard label={t('Invoices marked paid, partly paid, and overdue, with a reminder ready for the overdue one.')}>
       {SAMPLE_DOCS.map((row, i) => (
         <View
           key={row.client}
@@ -158,7 +159,7 @@ function StatusArt() {
       ))}
       <View className="mt-2 rounded-2xl bg-grouped px-3 py-2.5 flex-row items-center gap-2">
         <Icon name="bell.badge.fill" size={16} />
-        <Text className="flex-1 text-footnote text-label">Reminder ready for Westside Dental</Text>
+        <Text className="flex-1 text-footnote text-label">{t('Reminder ready for Westside Dental')}</Text>
       </View>
     </MockCard>
   );
@@ -167,26 +168,26 @@ function StatusArt() {
 const PAGES = [
   {
     key: 'summary',
-    title: 'Get Paid for Your Work, Faster',
-    body: 'Estimates, invoices and payments for your business, all from your iPhone.',
+    title: t('Get Paid for Your Work, Faster'),
+    body: t('Estimates, invoices and payments for your business, all from your iPhone.'),
     Art: SummaryArt,
   },
   {
     key: 'estimate',
-    title: 'Quote on the Spot',
-    body: 'Write an estimate on site, get it signed on your screen, and turn it into an invoice in one tap.',
+    title: t('Quote on the Spot'),
+    body: t('Write an estimate on site, get it signed on your screen, and turn it into an invoice in one tap.'),
     Art: EstimateArt,
   },
   {
     key: 'pdf',
-    title: 'Look Professional, Get Paid in Seconds',
-    body: 'Every PDF carries your logo and terms, plus a Pay button and QR code for your payment link.',
+    title: t('Look Professional, Get Paid in Seconds'),
+    body: t('Every PDF carries your logo and terms, plus a Pay button and QR code for your payment link.'),
     Art: PdfArt,
   },
   {
     key: 'status',
-    title: 'Always Know Who Has Paid',
-    body: 'Paid, partly paid and overdue update on their own, and reminders help you chase late payments.',
+    title: t('Always Know Who Has Paid'),
+    body: t('Paid, partly paid and overdue update on their own, and reminders help you chase late payments.'),
     Art: StatusArt,
   },
 ] as const;
@@ -219,16 +220,19 @@ export default function WelcomeScreen() {
           <Pressable
             onPress={() => goTo(PAGES.length - 1)}
             accessibilityRole="button"
-            accessibilityLabel="Skip Tour"
+            accessibilityLabel={t('Skip Tour')}
             className="min-h-[44px] min-w-[44px] items-end justify-center"
           >
-            <Text className="text-body text-tint">Skip</Text>
+            <Text className="text-body text-tint">{t('Skip')}</Text>
           </Pressable>
         ) : null}
       </View>
 
+      {/* The pager itself stays left to right so its scroll offsets map to pages the same way in every
+          language; each page flows in the language's own direction. */}
       <FlatList
         ref={listRef}
+        style={{ direction: 'ltr' }}
         data={PAGES}
         keyExtractor={(page) => page.key}
         horizontal
@@ -238,7 +242,7 @@ export default function WelcomeScreen() {
         onMomentumScrollEnd={onScrollEnd}
         getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
         renderItem={({ item: { Art, title, body } }) => (
-          <View style={{ width }} className="flex-1 px-6">
+          <View style={{ width, direction: isRTL() ? 'rtl' : 'ltr' }} className="flex-1 px-6">
             <View className="flex-1 w-full self-center items-center" style={{ maxWidth: MAX_WIDTH }}>
               <View className="flex-1 w-full items-center justify-center py-4">
                 <Art />
@@ -255,8 +259,9 @@ export default function WelcomeScreen() {
       <View className="px-6 pt-6 pb-2 w-full self-center gap-2" style={{ maxWidth: MAX_WIDTH }}>
         <View
           className="flex-row justify-center gap-1.5 mb-3"
+          style={{ direction: 'ltr' }}
           accessible
-          accessibilityLabel={`Page ${index + 1} of ${PAGES.length}`}
+          accessibilityLabel={t('Page {current} of {total}', { current: index + 1, total: PAGES.length })}
         >
           {PAGES.map((page, i) => (
             <View
@@ -267,11 +272,11 @@ export default function WelcomeScreen() {
           ))}
         </View>
         <Button
-          label={isLast ? 'Get Started' : 'Continue'}
+          label={isLast ? t('Get Started') : t('Continue')}
           size="large"
           onPress={() => (isLast ? leave('/(auth)/sign-up') : goTo(index + 1))}
         />
-        <Button label="I Already Have an Account" variant="plain" onPress={() => leave('/(auth)/sign-in')} />
+        <Button label={t('I Already Have an Account')} variant="plain" onPress={() => leave('/(auth)/sign-in')} />
       </View>
     </SafeAreaView>
   );

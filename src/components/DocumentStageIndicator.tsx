@@ -2,9 +2,10 @@ import { Text, View } from 'react-native';
 import { Icon } from './Icon';
 import { useThemeColors } from '../lib/theme';
 import type { DocumentRecord } from '../types/models';
+import { t } from '../lib/i18n';
 
-const INVOICE_STAGES = ['Draft', 'Issued', 'Paid'];
-const ESTIMATE_STAGES = ['Draft', 'Issued', 'Converted'];
+const INVOICE_STAGES = [t('Draft'), t('Issued'), t('Paid')];
+const ESTIMATE_STAGES = [t('Draft'), t('Issued'), t('Converted')];
 
 function currentStageIndex(document: DocumentRecord): number {
   if (document.doc_type === 'estimate') {
@@ -29,7 +30,7 @@ export function DocumentStageIndicator({ document }: { document: DocumentRecord 
     <View
       className="flex-row items-center"
       accessible
-      accessibilityLabel={`Stage ${current + 1} of ${stages.length}: ${stages[current]}`}
+      accessibilityLabel={t('Stage {current} of {total}: {name}', { current: current + 1, total: stages.length, name: stages[current] })}
     >
       {stages.map((stage, index) => (
         <View key={stage} className="flex-row items-center">

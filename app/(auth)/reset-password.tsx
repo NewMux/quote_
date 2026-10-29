@@ -7,6 +7,7 @@ import { FormField } from '../../src/components/form/FormField';
 import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/useAuthStore';
 import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStore';
+import { t, tp } from '../../src/lib/i18n';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -29,7 +30,7 @@ export default function ResetPasswordScreen() {
       router.replace(profile?.business_name?.trim() ? '/(tabs)/home' : '/onboarding');
     } catch (err) {
       setIsSubmitting(false);
-      Alert.alert('Couldn’t Update Password', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Update Password'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -44,39 +45,39 @@ export default function ResetPasswordScreen() {
 
   return (
     <AuthScreen
-      title="Set a New Password"
-      subtitle="Choose a new password for your account."
+      title={t('Set a New Password')}
+      subtitle={t('Choose a new password for your account.')}
       actions={
         <>
-          <Button label="Update Password" size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSubmit} />
-          <TextLink label="Cancel" onPress={handleCancel} />
+          <Button label={t('Update Password')} size="large" disabled={!canSubmit} loading={isSubmitting} onPress={handleSubmit} />
+          <TextLink label={t('Cancel')} onPress={handleCancel} />
         </>
       }
     >
       <FormField
-        label="New Password"
+        label={t('New Password')}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         textContentType="newPassword"
         autoComplete="new-password"
         autoCapitalize="none"
-        hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}
-        error={password.length > 0 && password.length < MIN_PASSWORD_LENGTH ? `Use at least ${MIN_PASSWORD_LENGTH} characters.` : null}
+        hint={tp(MIN_PASSWORD_LENGTH, 'At least {count} character.', 'At least {count} characters.')}
+        error={password.length > 0 && password.length < MIN_PASSWORD_LENGTH ? tp(MIN_PASSWORD_LENGTH, 'Use at least {count} character.', 'Use at least {count} characters.') : null}
         returnKeyType="next"
         onSubmitEditing={() => confirmRef.current?.focus()}
         submitBehavior="submit"
       />
       <FormField
         ref={confirmRef}
-        label="Confirm New Password"
+        label={t('Confirm New Password')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
         textContentType="newPassword"
         autoComplete="new-password"
         autoCapitalize="none"
-        error={mismatch ? "The passwords don't match." : null}
+        error={mismatch ? t("The passwords don't match.") : null}
         returnKeyType="go"
         onSubmitEditing={handleSubmit}
       />

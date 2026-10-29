@@ -1,4 +1,5 @@
 import type { DocumentRecord, DocumentListItem } from '../types/models';
+import { t } from './i18n';
 
 export type DisplayStatus = 'draft' | 'issued' | 'partially_paid' | 'paid' | 'overdue' | 'void';
 
@@ -62,16 +63,16 @@ export function canMarkViewed(doc: Pick<DocumentRecord, 'status' | 'viewed_at'>)
 export function statusLabel(status: DisplayStatus): string {
   switch (status) {
     case 'draft':
-      return 'Draft';
+      return t('Draft');
     case 'issued':
-      return 'Issued';
+      return t('Issued');
     case 'partially_paid':
-      return 'Partially Paid';
+      return t('Partially Paid');
     case 'paid':
-      return 'Paid';
+      return t('Paid');
     case 'overdue':
-      return 'Overdue';
+      return t('Overdue');
     case 'void':
-      return 'Canceled';
+      return t('Canceled');
   }
 }

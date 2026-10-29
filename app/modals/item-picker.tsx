@@ -13,6 +13,7 @@ import { useBusinessProfileStore } from '../../src/stores/useBusinessProfileStor
 import { useDocumentEditorStore } from '../../src/stores/useDocumentEditorStore';
 import { useItemCatalogStore } from '../../src/stores/useItemCatalogStore';
 import { useTaxBracketsStore } from '../../src/stores/useTaxBracketsStore';
+import { t } from '../../src/lib/i18n';
 
 export default function ItemPickerModal() {
   const { items, load } = useItemCatalogStore();
@@ -36,7 +37,7 @@ export default function ItemPickerModal() {
   }, [items, query]);
 
   return (
-    <SheetScreen header={<SheetHeader title="Add Item" />}>
+    <SheetScreen header={<SheetHeader title={t('Add Item')} />}>
       <FlatList
         style={{ flex: 1 }}
         data={filtered}
@@ -47,13 +48,13 @@ export default function ItemPickerModal() {
         ListHeaderComponent={
           <View>
             <View className="mb-4">
-              <SearchField value={query} onChangeText={setQuery} placeholder="Search Items" />
+              <SearchField value={query} onChangeText={setQuery} placeholder={t('Search Items')} />
             </View>
             <ListSection>
               <ListRow
                 icon="pencil"
-                title="Custom Item"
-                subtitle="Type a one-time item on this document"
+                title={t('Custom Item')}
+                subtitle={t('Type a one-time item on this document')}
                 onPress={() => {
                   addBlankLineItem();
                   router.back();
@@ -62,15 +63,15 @@ export default function ItemPickerModal() {
               />
               <ListRow
                 icon="plus.circle.fill"
-                title="New Catalog Item"
-                subtitle="Save an item to reuse on future documents"
+                title={t('New Catalog Item')}
+                subtitle={t('Save an item to reuse on future documents')}
                 onPress={() => router.push('/items/new')}
                 accessory="none"
               />
             </ListSection>
             {filtered.length > 0 ? (
               <Text className="text-footnote text-secondary px-4 mb-2" accessibilityRole="header">
-                Item Catalog
+                {t('Item Catalog')}
               </Text>
             ) : null}
           </View>
@@ -78,8 +79,8 @@ export default function ItemPickerModal() {
         ListEmptyComponent={
           <EmptyState
             icon="tag"
-            title={query.trim() ? 'No Results' : 'No Saved Items'}
-            subtitle={query.trim() ? undefined : 'Items you save to your catalog appear here.'}
+            title={query.trim() ? t('No Results') : t('No Saved Items')}
+            subtitle={query.trim() ? undefined : t('Items you save to your catalog appear here.')}
           />
         }
         renderItem={({ item, index }) => (

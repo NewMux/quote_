@@ -8,6 +8,7 @@ import { SheetScreen } from '../../src/components/SheetScreen';
 import { useUnsavedChangesGuard } from '../../src/lib/useUnsavedChangesGuard';
 import { useClientsStore } from '../../src/stores/useClientsStore';
 import type { ClientInput } from '../../src/db/repositories/clients.repo';
+import { t } from '../../src/lib/i18n';
 
 export default function NewClientScreen() {
   const create = useClientsStore((s) => s.create);
@@ -23,7 +24,7 @@ export default function NewClientScreen() {
       leave(() => router.replace(`/clients/${client.id}`));
     } catch (err) {
       setIsSaving(false);
-      Alert.alert('Couldn’t Add Client', err instanceof Error ? err.message : 'Something went wrong.');
+      Alert.alert(t('Couldn’t Add Client'), err instanceof Error ? err.message : t('Something went wrong.'));
     }
   }
 
@@ -31,8 +32,8 @@ export default function NewClientScreen() {
     <SheetScreen
       header={
         <SheetHeader
-          title="New Client"
-          actionLabel="Add"
+          title={t('New Client')}
+          actionLabel={t('Add')}
           onAction={handleAdd}
           actionDisabled={!form?.canSubmit || isSaving}
         />
