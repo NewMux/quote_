@@ -182,6 +182,18 @@ If the form offers "Made for Kids", leave it off.
 
 ---
 
+## What's New in 1.0.4 (paste into "What's New in This Version")
+
+```
+• Invoice Them now speaks Arabic, with a full right-to-left layout. It follows your iPhone's language, or you can set it for this app alone in Settings → Invoice Them → Language.
+• Estimate and invoice PDFs come out in Arabic too when the app is in Arabic.
+• Statuses, dates, reminders and messages are all translated.
+```
+
+The Arabic version of this text is under "Arabic Listing" below.
+
+---
+
 ## App Review Information
 
 **Sign-in required:** Yes. Enter the demo account's email and password in the Sign-in Information fields. The password is stored in App Store Connect → App Review Information (ask Mohammed).
