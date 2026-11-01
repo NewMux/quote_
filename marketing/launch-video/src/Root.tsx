@@ -9,8 +9,8 @@ import { ProsVideo } from './pros/ProsVideo';
 import { FPS as FPS_PROS, TOTAL as TOTAL_PROS } from './pros/timing';
 import { AppProof } from './store/proof';
 import { STORE_H, STORE_W } from './store/design';
-import { SHOTS } from './store/shots';
-import { STRIP_H, STRIP_W, StoreStrip } from './store/strip';
+import { SHOTS, SHOTS_AR } from './store/shots';
+import { STRIP_H, STRIP_W, StoreStrip, StoreStripAr } from './store/strip';
 import { LaunchVideoV2 } from './v2/LaunchVideoV2';
 import { BentoV2 } from './v2/scenes/BentoV2';
 import { ContactsV2 } from './v2/scenes/ContactsV2';
@@ -56,6 +56,10 @@ export const RemotionRoot: React.FC = () => (
       {SHOTS.map(({ id, Component }) => (
         <Composition key={id} id={id} component={Component} width={STORE_W} height={STORE_H} fps={30} durationInFrames={1} />
       ))}
+      {SHOTS_AR.map(({ id, Component }) => (
+        <Composition key={id} id={id} component={Component} width={STORE_W} height={STORE_H} fps={30} durationInFrames={1} />
+      ))}
+      <Composition id="StoreStripAr" component={StoreStripAr} width={STRIP_W} height={STRIP_H} fps={30} durationInFrames={1} />
       <Composition id="AppProof" component={AppProof} width={3440} height={1420} fps={30} durationInFrames={1} />
       <Composition id="StoreStrip" component={StoreStrip} width={STRIP_W} height={STRIP_H} fps={30} durationInFrames={1} />
     </Folder>

@@ -10,4 +10,9 @@ export const fontsReady = Promise.all([
   ...[400, 600, 700, 800].map((weight) =>
     loadFont({ family: 'Bricolage Grotesque', url: staticFile(`fonts/Bricolage-${weight}.woff2`), weight: String(weight) })
   ),
+  // IBM Plex Sans Arabic (SIL Open Font License), for the Arabic screenshots. Latin letters and
+  // digits fall back to Inter.
+  ...[500, 600, 700].map((weight) =>
+    loadFont({ family: 'IBM Plex Sans Arabic', url: staticFile(`fonts/PlexArabic-${weight}.woff2`), weight: String(weight) })
+  ),
 ]);

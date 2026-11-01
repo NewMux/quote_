@@ -1,7 +1,7 @@
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
 import { STORE_H, STORE_W } from './design';
-import { SHOTS } from './shots';
+import { SHOTS, SHOTS_AR } from './shots';
 
 const SCALE = 0.26;
 const GAP = 40;
@@ -10,16 +10,15 @@ const PAD = 70;
 export const STRIP_W = Math.round(PAD * 2 + SHOTS.length * STORE_W * SCALE + (SHOTS.length - 1) * GAP);
 export const STRIP_H = Math.round(PAD * 2 + STORE_H * SCALE);
 
-/** All six screenshots side by side on a plain backdrop: the preview image for sharing, not an
- * App Store upload. */
-export const StoreStrip: React.FC = () => (
+const Strip: React.FC<{ shots: typeof SHOTS | typeof SHOTS_AR; rtl?: boolean }> = ({ shots, rtl }) => (
   <AbsoluteFill style={{ background: '#E8E2D9' }}>
-    {SHOTS.map(({ id, Component }, i) => (
+    {shots.map(({ id, Component }, i) => (
       <div
         key={id}
         style={{
           position: 'absolute',
-          left: PAD + i * (STORE_W * SCALE + GAP),
+          // The Arabic strip reads right to left: the first shot sits at the right edge.
+          left: PAD + (rtl ? shots.length - 1 - i : i) * (STORE_W * SCALE + GAP),
           top: PAD,
           width: STORE_W,
           height: STORE_H,
@@ -34,3 +33,8 @@ export const StoreStrip: React.FC = () => (
     ))}
   </AbsoluteFill>
 );
+
+/** All the screenshots side by side on a plain backdrop: the preview image for sharing, not an
+ * App Store upload. */
+export const StoreStrip: React.FC = () => <Strip shots={SHOTS} />;
+export const StoreStripAr: React.FC = () => <Strip shots={SHOTS_AR} rtl />;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from '../../components/Icon';
 import { Signature } from '../../screens/Screens';
-import { FONT } from '../../theme';
+import { fontFor, useLocal } from '../lang';
 import {
   AppButton,
   AVATAR_COLORS,
@@ -57,11 +57,12 @@ const SearchField: React.FC<{ placeholder: string }> = ({ placeholder }) => (
 );
 
 const InlineStatus: React.FC<{ status: StatusKey }> = ({ status }) => {
+  const { t } = useLocal();
   const s = STATUS[status];
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: s.fg, fontSize: 13, fontWeight: 600 }}>
       <Icon name={s.icon} size={13} weight={2.4} color={s.fg} />
-      {s.label}
+      {t(s.label)}
     </div>
   );
 };
@@ -76,7 +77,7 @@ const Tile: React.FC<{ kind: 'check' | 'clock' | 'exclaim' | 'pencil'; color: st
       {label}
     </div>
     <div>
-      <div style={{ fontSize: 22, lineHeight: '28px', fontWeight: 700 }}>{amount}</div>
+      <div style={{ fontSize: amount.startsWith('AED') ? 19 : 22, lineHeight: '28px', fontWeight: 700, whiteSpace: 'nowrap', direction: 'ltr', textAlign: amount.startsWith('AED') ? 'right' : 'left' }}>{amount}</div>
       <div style={{ fontSize: 13, lineHeight: '18px', color: LIGHT.secondary }}>{detail}</div>
     </div>
   </div>
@@ -110,7 +111,7 @@ const LineChart: React.FC<{ data: { label: string; value: number }[]; height?: n
   const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
   const area = `${line} L ${pts[pts.length - 1].x} ${py + ch} L ${pts[0].x} ${py + ch} Z`;
   return (
-    <div>
+    <div style={{ direction: 'ltr' }}>
       <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
         <defs>
           <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
@@ -133,27 +134,32 @@ const LineChart: React.FC<{ data: { label: string; value: number }[]; height?: n
   );
 };
 
-export const SummaryScreen: React.FC = () => (
+export const SummaryScreen: React.FC = () => {
+  const { t, lang, money, date, month, name, plural } = useLocal();
+  const invoices = (n: number) => plural(n, ['invoice', 'invoices'], { one: 'فاتورة واحدة', two: 'فاتورتان', few: 'فواتير', many: 'فاتورة' });
+  return (
   <Screen>
-    <LargeTitleBar title="Summary" buttons={['plus']} />
-    <div style={{ position: 'absolute', top: 158, left: 16, right: 16 }}>
-      <Segmented values={['Month', '90 Days', 'Year', 'Custom']} selected={0} />
+    <LargeTitleBar title={t('Summary')} buttons={['plus']} />
+    <div style={{ position: 'absolute', top: 158, insetInlineStart: 16, insetInlineEnd: 16 }}>
+      <Segmented values={[t('Month'), t('90 Days'), t('Year'), t('Custom')]} selected={0} />
       <div style={{ padding: '24px 4px 20px' }}>
-        <div style={{ fontSize: 15, lineHeight: '20px', fontWeight: 600, color: LIGHT.secondary }}>Outstanding</div>
-        <div style={{ fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em' }}>$8,940.00</div>
-        <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>6 invoices awaiting payment · October 2026</div>
+        <div style={{ fontSize: 15, lineHeight: '20px', fontWeight: 600, color: LIGHT.secondary }}>{t('Outstanding')}</div>
+        <div style={{ fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em' }}>{money('$8,940.00')}</div>
+        <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>
+          {lang === 'ar' ? `${invoices(6)} بانتظار الدفع · أكتوبر 2026` : '6 invoices awaiting payment · October 2026'}
+        </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
         <div style={{ display: 'flex', gap: 12 }}>
-          <Tile kind="check" color={LIGHT.green} label="Paid" amount="$12,840.00" detail="7 invoices" />
-          <Tile kind="clock" color={LIGHT.orange} label="Unpaid" amount="$5,790.00" detail="3 invoices" />
+          <Tile kind="check" color={LIGHT.green} label={t('Paid')} amount={money('$12,840.00')} detail={invoices(7)} />
+          <Tile kind="clock" color={LIGHT.orange} label={t('Unpaid')} amount={money('$5,790.00')} detail={invoices(3)} />
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <Tile kind="exclaim" color={LIGHT.red} label="Overdue" amount="$3,150.00" detail="3 invoices" />
-          <Tile kind="pencil" color={LIGHT.gray} label="Drafts" amount="$1,780.00" detail="2 documents" />
+          <Tile kind="exclaim" color={LIGHT.red} label={t('Overdue')} amount={money('$3,150.00')} detail={invoices(3)} />
+          <Tile kind="pencil" color={LIGHT.gray} label={t('Drafts')} amount={money('$1,780.00')} detail={lang === 'ar' ? 'مستندان' : '2 documents'} />
         </div>
       </div>
-      <Section header="Needs Attention" footer="Overdue invoices, oldest due date first.">
+      <Section header={t('Needs Attention')} footer={t('Overdue invoices, oldest due date first.')}>
         {OVERDUE.map((o, i) => (
           <div key={o.number}>
             {i > 0 ? <Hairline inset={58} /> : null}
@@ -162,33 +168,34 @@ export const SummaryScreen: React.FC = () => (
                 <SymbolFill kind="exclaim" color={LIGHT.red} size={21} />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 17, lineHeight: '22px' }}>{o.client}</div>
+                <div style={{ fontSize: 17, lineHeight: '22px' }}>{name(o.client)}</div>
                 <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary, marginTop: 2 }}>
-                  {o.number} · Due {o.due}
+                  {lang === 'ar' ? <><bdi dir="ltr">{o.number}</bdi> · الاستحقاق <bdi>{date(o.due)}</bdi></> : `${o.number} · Due ${o.due}`}
                 </div>
               </div>
-              <div style={{ fontSize: 17, fontWeight: 600, color: LIGHT.destructive }}>{o.amount}</div>
+              <div style={{ fontSize: 17, fontWeight: 600, color: LIGHT.destructive }}>{money(o.amount)}</div>
               <Chevron />
             </div>
           </div>
         ))}
       </Section>
-      <Section header="Payments">
+      <Section header={t('Payments')}>
         <div style={{ padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
             <div>
-              <div style={{ fontSize: 15, color: LIGHT.secondary }}>Paid This Month</div>
-              <div style={{ fontSize: 28, lineHeight: '34px', fontWeight: 700 }}>$12,840.00</div>
+              <div style={{ fontSize: 15, color: LIGHT.secondary }}>{t('Paid This Month')}</div>
+              <div style={{ fontSize: 28, lineHeight: '34px', fontWeight: 700 }}>{money('$12,840.00')}</div>
             </div>
-            <div style={{ fontSize: 13, color: LIGHT.secondary, marginBottom: 4 }}>Last 6 Months</div>
+            <div style={{ fontSize: 13, color: LIGHT.secondary, marginBottom: 4 }}>{t('Last 6 Months')}</div>
           </div>
-          <LineChart data={PAID_BY_MONTH} />
+          <LineChart data={PAID_BY_MONTH.map((p) => ({ ...p, label: month(p.label) }))} />
         </div>
       </Section>
     </div>
     <TabBar active={0} />
   </Screen>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------------------------
 // Documents
@@ -206,10 +213,12 @@ export const DOCS: Doc[] = [
   { client: 'Atlas Print Co.', number: 'INV-0035', date: 'Sep 11', total: '$2,880.00', status: 'paid' },
 ];
 
-export const DocumentsScreen: React.FC = () => (
+export const DocumentsScreen: React.FC = () => {
+  const { t, money, date, name } = useLocal();
+  return (
   <Screen>
-    <LargeTitleBar title="Documents" buttons={[]} />
-    <div style={{ position: 'absolute', top: 58, right: 16, display: 'flex', gap: 10, zIndex: 5 }}>
+    <LargeTitleBar title={t('Documents')} buttons={[]} />
+    <div style={{ position: 'absolute', top: 58, insetInlineEnd: 16, display: 'flex', gap: 10, zIndex: 5 }}>
       <GlassSlot>
         <Icon name="plus" size={19} weight={2.3} color={LIGHT.label} />
       </GlassSlot>
@@ -217,10 +226,10 @@ export const DocumentsScreen: React.FC = () => (
         <FilterGlyph />
       </GlassSlot>
     </div>
-    <div style={{ position: 'absolute', top: 157, left: 16, right: 16 }}>
-      <SearchField placeholder="Search Documents" />
+    <div style={{ position: 'absolute', top: 157, insetInlineStart: 16, insetInlineEnd: 16 }}>
+      <SearchField placeholder={t('Search Documents')} />
       <div style={{ height: 12 }} />
-      <Segmented values={['All', 'Estimates', 'Invoices']} selected={0} />
+      <Segmented values={[t('All'), t('Estimates'), t('Invoices')]} selected={0} />
       <div style={{ height: 16 }} />
       <div style={{ background: LIGHT.card, borderRadius: 26, overflow: 'hidden' }}>
         {DOCS.map((d, i) => (
@@ -232,12 +241,12 @@ export const DocumentsScreen: React.FC = () => (
               </div>
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <div style={{ flex: 1, fontSize: 17, lineHeight: '22px', fontWeight: 600, whiteSpace: 'nowrap' }}>{d.client}</div>
-                  <div style={{ fontSize: 17, lineHeight: '22px' }}>{d.total}</div>
+                  <div style={{ flex: 1, fontSize: 17, lineHeight: '22px', fontWeight: 600, whiteSpace: 'nowrap' }}>{name(d.client)}</div>
+                  <div style={{ fontSize: 17, lineHeight: '22px' }}>{money(d.total)}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ flex: 1, fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>
-                    {d.number} · {d.date}
+                    <bdi dir="ltr">{d.number}</bdi> · <bdi>{date(d.date)}</bdi>
                   </div>
                   <InlineStatus status={d.status} />
                 </div>
@@ -249,24 +258,26 @@ export const DocumentsScreen: React.FC = () => (
     </div>
     <TabBar active={1} />
   </Screen>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------------------------
 // Document detail (an issued invoice)
 
 export const DetailScreen: React.FC = () => {
+  const { t, lang, money, date, name } = useLocal();
   const s = STATUS.issued;
-  const stages = ['Draft', 'Issued', 'Paid'];
+  const stages = [t('Draft'), t('Issued'), t('Paid')];
   return (
     <Screen>
-      <div style={{ position: 'absolute', top: 58, left: 16, zIndex: 5 }}>
+      <div style={{ position: 'absolute', top: 58, insetInlineStart: 16, zIndex: 5 }}>
         <GlassSlot>
-          <div style={{ rotate: '180deg', display: 'flex' }}>
+          <div style={{ rotate: lang === 'ar' ? '0deg' : '180deg', display: 'flex' }}>
             <Icon name="chevron" size={18} weight={2.6} color={LIGHT.label} />
           </div>
         </GlassSlot>
       </div>
-      <div style={{ position: 'absolute', top: 58, right: 16, display: 'flex', gap: 10, zIndex: 5 }}>
+      <div style={{ position: 'absolute', top: 58, insetInlineEnd: 16, display: 'flex', gap: 10, zIndex: 5 }}>
         <GlassSlot>
           <Icon name="pencil" size={18} weight={2.3} color={LIGHT.label} />
         </GlassSlot>
@@ -275,21 +286,21 @@ export const DetailScreen: React.FC = () => {
         </GlassSlot>
       </div>
       <div style={{ position: 'absolute', top: 110, left: 16, right: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Avatar name="Harbor Coffee Co." color={AVATAR_COLORS[1]} size={64} />
-        <div style={{ fontSize: 20, lineHeight: '25px', fontWeight: 600, marginTop: 8 }}>Harbor Coffee Co.</div>
-        <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>Invoice INV-0042</div>
-        <div style={{ fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em', marginTop: 12 }}>$4,290.00</div>
-        <div style={{ fontSize: 13, color: LIGHT.secondary }}>Balance Due</div>
+        <Avatar name={name('Harbor Coffee Co.')} color={AVATAR_COLORS[1]} size={64} />
+        <div style={{ fontSize: 20, lineHeight: '25px', fontWeight: 600, marginTop: 8 }}>{name('Harbor Coffee Co.')}</div>
+        <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>{lang === 'ar' ? 'فاتورة INV-0042' : 'Invoice INV-0042'}</div>
+        <div style={{ fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em', marginTop: 12 }}>{money('$4,290.00')}</div>
+        <div style={{ fontSize: 13, color: LIGHT.secondary }}>{t('Balance Due')}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, padding: '6px 12px', borderRadius: 999, background: s.bg, color: s.fg, fontSize: 15, fontWeight: 600 }}>
           <Icon name={s.icon} size={14} weight={2.4} color={s.fg} />
-          {s.label}
+          {t(s.label)}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: 12, fontSize: 15 }}>
           {stages.map((st, i) => (
             <div key={st} style={{ display: 'flex', alignItems: 'center' }}>
               <span style={{ color: i <= 1 ? LIGHT.tint : LIGHT.secondary, fontWeight: i <= 1 ? 600 : 400 }}>{st}</span>
               {i < stages.length - 1 ? (
-                <span style={{ margin: '0 4px', display: 'flex' }}>
+                <span style={{ margin: '0 4px', display: 'flex', transform: lang === 'ar' ? 'scaleX(-1)' : undefined }}>
                   <Icon name="chevron" size={11} weight={2.8} color={i < 1 ? LIGHT.tint : LIGHT.chevron} />
                 </span>
               ) : null}
@@ -297,18 +308,18 @@ export const DetailScreen: React.FC = () => {
           ))}
         </div>
         <div style={{ alignSelf: 'stretch', marginTop: 20 }}>
-          <AppButton label="Log Payment" variant="filled" large />
-          <div style={{ fontSize: 13, lineHeight: '18px', color: LIGHT.secondary, textAlign: 'center', marginTop: 8 }}>Record a payment you received for this invoice.</div>
+          <AppButton label={t('Log Payment')} variant="filled" large />
+          <div style={{ fontSize: 13, lineHeight: '18px', color: LIGHT.secondary, textAlign: 'center', marginTop: 8 }}>{t('Record a payment you received for this invoice.')}</div>
         </div>
         <div style={{ alignSelf: 'stretch', marginTop: 12 }}>
-          <AppButton label="Share PDF" variant="tinted" icon="share" />
+          <AppButton label={t('Share PDF')} variant="tinted" icon="share" />
         </div>
         <div style={{ alignSelf: 'stretch', marginTop: 28 }}>
           <Section>
             {[
-              ['Client', 'Harbor Coffee Co.', true],
-              ['Issued', 'Oct 14, 2026', false],
-              ['Payment Due', 'Oct 28, 2026', false],
+              [t('Client'), name('Harbor Coffee Co.'), true],
+              [t('Issued'), date('Oct 14, 2026'), false],
+              [t('Payment Due'), date('Oct 28, 2026'), false],
             ].map(([k, v, chev], i) => (
               <div key={k as string}>
                 {i > 0 ? <Hairline inset={16} /> : null}
@@ -331,30 +342,33 @@ export const DetailScreen: React.FC = () => {
 // Signature sheet (app/modals/sign.tsx)
 
 /** The sheet alone, 393 × 790 pt, for crops that don't need the screen behind it. */
-export const SignSheet: React.FC = () => (
-  <div style={{ position: 'relative', width: 393, height: 790, background: LIGHT.grouped, borderRadius: '38px 38px 0 0', fontFamily: FONT, color: LIGHT.label, overflow: 'hidden' }}>
+export const SignSheet: React.FC = () => {
+  const { t, lang } = useLocal();
+  return (
+  <div style={{ position: 'relative', width: 393, height: 790, background: LIGHT.grouped, borderRadius: '38px 38px 0 0', fontFamily: fontFor(lang), direction: lang === 'ar' ? 'rtl' : 'ltr', color: LIGHT.label, overflow: 'hidden' }}>
     <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px 6px', minHeight: 64 }}>
       <div style={{ flex: 1, display: 'flex' }}>
         <GlassButton icon="xmark" />
       </div>
-      <div style={{ fontSize: 17, fontWeight: 600 }}>Your Signature</div>
+      <div style={{ fontSize: 17, fontWeight: 600 }}>{t('Your Signature')}</div>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
         <GlassButton icon="check" prominent />
       </div>
     </div>
     <div style={{ position: 'absolute', left: 16, right: 16, top: 84, bottom: 40, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ flex: 1, background: '#fff', border: `1px solid ${LIGHT.field}`, borderRadius: 26, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', left: 14, top: 140 }}>
+        <div style={{ position: 'absolute', left: 14, top: 140, direction: 'ltr' }}>
           <Signature progress={1} width={340} strokeWidth={3.6} />
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}>
-        <div style={{ fontSize: 15, color: LIGHT.secondary }}>Sign above with your finger.</div>
-        <div style={{ fontSize: 15, fontWeight: 500, color: LIGHT.tint, padding: '10px 16px' }}>Clear</div>
+        <div style={{ fontSize: 15, color: LIGHT.secondary }}>{t('Sign above with your finger.')}</div>
+        <div style={{ fontSize: 15, fontWeight: 500, color: LIGHT.tint, padding: '10px 16px' }}>{t('Clear')}</div>
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export const SignScreen: React.FC = () => (
   <Screen bg="#6B6B70">
@@ -388,10 +402,23 @@ const CLIENTS: { letter: string; people: { name: string; detail: string }[] }[] 
 
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0);
 
-export const ClientsScreen: React.FC = () => (
+const CLIENTS_AR: typeof CLIENTS = [
+  { letter: 'ا', people: [{ name: 'استوديو مارلو', detail: 'accounts@marlowstudio.com' }, { name: 'استوديو المد', detail: 'hello@tidewater.studio' }] },
+  { letter: 'ب', people: [{ name: 'بستان الصنوبر', detail: 'info@orchardpine.com' }] },
+  { letter: 'خ', people: [{ name: 'خزائن الأرز', detail: '+971 4 013 2218' }] },
+  { letter: 'ز', people: [{ name: 'زعفران وملح', detail: 'orders@saffronsalt.com' }] },
+  { letter: 'ع', people: [{ name: 'عيادة الابتسامة', detail: 'office@brightsidedental.com' }] },
+  { letter: 'ل', people: [{ name: 'لومن للياقة', detail: 'team@lumenfit.com' }] },
+  { letter: 'م', people: [{ name: 'مخبز الريحان', detail: 'hello@juniperbakery.com' }, { name: 'مطبعة أطلس', detail: 'billing@atlasprint.co' }, { name: 'مقهى الميناء', detail: 'lina@harborcoffee.co' }] },
+];
+
+export const ClientsScreen: React.FC = () => {
+  const { t, lang } = useLocal();
+  const clients = lang === 'ar' ? CLIENTS_AR : CLIENTS;
+  return (
   <Screen>
-    <LargeTitleBar title="Clients" buttons={[]} />
-    <div style={{ position: 'absolute', top: 58, right: 16, display: 'flex', gap: 10, zIndex: 5 }}>
+    <LargeTitleBar title={t('Clients')} buttons={[]} />
+    <div style={{ position: 'absolute', top: 58, insetInlineEnd: 16, display: 'flex', gap: 10, zIndex: 5 }}>
       <GlassSlot>
         <Icon name="plus" size={19} weight={2.3} color={LIGHT.label} />
       </GlassSlot>
@@ -399,9 +426,9 @@ export const ClientsScreen: React.FC = () => (
         <FilterGlyph />
       </GlassSlot>
     </div>
-    <div style={{ position: 'absolute', top: 157, left: 16, right: 16 }}>
-      <SearchField placeholder="Search Clients" />
-      {CLIENTS.map((section) => (
+    <div style={{ position: 'absolute', top: 157, insetInlineStart: 16, insetInlineEnd: 16 }}>
+      <SearchField placeholder={t('Search Clients')} />
+      {clients.map((section) => (
         <div key={section.letter}>
           <div style={{ fontSize: 13, lineHeight: '18px', fontWeight: 600, color: LIGHT.secondary, padding: '16px 16px 8px' }}>{section.letter}</div>
           <div style={{ background: LIGHT.card, borderRadius: 26, overflow: 'hidden' }}>
@@ -412,7 +439,7 @@ export const ClientsScreen: React.FC = () => (
                   <Avatar name={p.name} color={AVATAR_COLORS[hash(p.name) % AVATAR_COLORS.length]} size={36} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 17, lineHeight: '22px' }}>{p.name}</div>
-                    <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary }}>{p.detail}</div>
+                    <div style={{ fontSize: 15, lineHeight: '20px', color: LIGHT.secondary, direction: 'ltr', textAlign: lang === 'ar' ? 'right' : 'left' }}>{p.detail}</div>
                   </div>
                 </div>
               </div>
@@ -423,4 +450,5 @@ export const ClientsScreen: React.FC = () => (
     </div>
     <TabBar active={2} />
   </Screen>
-);
+  );
+};

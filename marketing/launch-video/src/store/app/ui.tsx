@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon, type IconName } from '../../components/Icon';
 import { SCREEN_H, SCREEN_W } from '../../components/Phone';
-import { FONT } from '../../theme';
+import { dirFor, fontFor, tracking, useLang, useT } from '../lang';
 
 // Building blocks for the screens in screens.tsx, rebuilt from the app's own source (the tokens in
 // src/lib/theme.ts, the Tailwind text styles, and the list / card / button components) in iOS
@@ -38,11 +38,14 @@ export type StatusKey = keyof typeof STATUS;
 /** The app's avatar palette (src/lib/theme.ts). */
 export const AVATAR_COLORS = ['#157A63', '#A14B08', '#1D5FC4', '#6D3FD1', '#B3261E', '#0B6E8A', '#7A5A06', '#4B5563'];
 
-export const Screen: React.FC<{ children: React.ReactNode; bg?: string }> = ({ children, bg = LIGHT.grouped }) => (
-  <div style={{ position: 'absolute', inset: 0, width: SCREEN_W, height: SCREEN_H, background: bg, fontFamily: FONT, color: LIGHT.label, overflow: 'hidden' }}>
-    {children}
-  </div>
-);
+export const Screen: React.FC<{ children: React.ReactNode; bg?: string }> = ({ children, bg = LIGHT.grouped }) => {
+  const lang = useLang();
+  return (
+    <div style={{ position: 'absolute', inset: 0, width: SCREEN_W, height: SCREEN_H, background: bg, fontFamily: fontFor(lang), direction: dirFor(lang), color: LIGHT.label, overflow: 'hidden' }}>
+      {children}
+    </div>
+  );
+};
 
 /** The Liquid Glass material: a translucent, blurred, lightly lit capsule. */
 export const glass = (extra?: React.CSSProperties): React.CSSProperties => ({
@@ -70,16 +73,19 @@ export const GlassButton: React.FC<{ icon: IconName; prominent?: boolean; size?:
 );
 
 /** A tab root's navigation bar: glass buttons on the right, the large title below. */
-export const LargeTitleBar: React.FC<{ title: string; buttons: IconName[] }> = ({ title, buttons }) => (
-  <div style={{ position: 'absolute', left: 0, right: 0, top: 0, zIndex: 4 }}>
-    <div style={{ position: 'absolute', top: 58, right: 16, display: 'flex', gap: 10 }}>
-      {buttons.map((b) => (
-        <GlassButton key={b} icon={b} />
-      ))}
+export const LargeTitleBar: React.FC<{ title: string; buttons: IconName[] }> = ({ title, buttons }) => {
+  const lang = useLang();
+  return (
+    <div style={{ position: 'absolute', left: 0, right: 0, top: 0, zIndex: 4 }}>
+      <div style={{ position: 'absolute', top: 58, insetInlineEnd: 16, display: 'flex', gap: 10 }}>
+        {buttons.map((b) => (
+          <GlassButton key={b} icon={b} />
+        ))}
+      </div>
+      <div style={{ position: 'absolute', top: 108, insetInlineStart: 20, fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: tracking(lang, '-0.02em') }}>{title}</div>
     </div>
-    <div style={{ position: 'absolute', top: 108, left: 20, fontSize: 34, lineHeight: '41px', fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
-  </div>
-);
+  );
+};
 
 const TABS: { name: IconName; label: string }[] = [
   { name: 'house', label: 'Summary' },
@@ -89,13 +95,15 @@ const TABS: { name: IconName; label: string }[] = [
 ];
 
 /** The iOS 26 system tab bar: a floating glass capsule, the selected tab in a darker pill. */
-export const TabBar: React.FC<{ active: number }> = ({ active }) => (
+export const TabBar: React.FC<{ active: number }> = ({ active }) => {
+  const t = useT();
+  return (
   <>
     <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 150, background: 'linear-gradient(to bottom, rgba(242,242,247,0) 0%, rgba(242,242,247,0.92) 62%)', zIndex: 5 }} />
     <div style={{ position: 'absolute', left: 21, right: 21, bottom: 27, height: 64, borderRadius: 32, padding: 4, display: 'flex', zIndex: 6, ...glass({ background: 'rgba(250,250,252,0.78)' }) }}>
-      {TABS.map((t, i) => (
+      {TABS.map((tab, i) => (
         <div
-          key={t.label}
+          key={tab.label}
           style={{
             flex: 1,
             borderRadius: 28,
@@ -108,14 +116,15 @@ export const TabBar: React.FC<{ active: number }> = ({ active }) => (
             color: i === active ? LIGHT.tint : '#5F6368',
           }}
         >
-          <Icon name={t.name} size={23} weight={i === active ? 2.2 : 1.9} color={i === active ? LIGHT.tint : '#5F6368'} />
-          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.01em' }}>{t.label}</div>
+          <Icon name={tab.name} size={23} weight={i === active ? 2.2 : 1.9} color={i === active ? LIGHT.tint : '#5F6368'} />
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.01em' }}>{t(tab.label)}</div>
         </div>
       ))}
     </div>
     <div style={{ position: 'absolute', bottom: 8, left: (SCREEN_W - 134) / 2, width: 134, height: 5, borderRadius: 3, background: '#111', zIndex: 7 }} />
   </>
-);
+  );
+};
 
 export const Segmented: React.FC<{ values: string[]; selected: number }> = ({ values, selected }) => (
   <div style={{ position: 'relative', height: 36, borderRadius: 18, background: 'rgba(118,118,128,0.12)', display: 'flex', padding: 2 }}>
@@ -149,9 +158,17 @@ export const Section: React.FC<{ header?: string; footer?: string; children: Rea
   </div>
 );
 
-export const Hairline: React.FC<{ inset: number }> = ({ inset }) => <div style={{ marginLeft: inset, height: 0.5, background: LIGHT.separator }} />;
+export const Hairline: React.FC<{ inset: number }> = ({ inset }) => <div style={{ marginInlineStart: inset, height: 0.5, background: LIGHT.separator }} />;
 
-export const Chevron: React.FC = () => <Icon name="chevron" size={14} weight={2.6} color={LIGHT.chevron} />;
+/** Points to the trailing edge: right in English, left in Arabic. */
+export const Chevron: React.FC = () => {
+  const lang = useLang();
+  return (
+    <span style={{ display: 'flex', transform: lang === 'ar' ? 'scaleX(-1)' : undefined }}>
+      <Icon name="chevron" size={14} weight={2.6} color={LIGHT.chevron} />
+    </span>
+  );
+};
 
 /** A circle in a system color with a white glyph: the filled SF Symbols (checkmark.circle.fill…). */
 export const SymbolFill: React.FC<{ kind: 'check' | 'clock' | 'exclaim' | 'pencil' | 'plane'; color: string; size?: number }> = ({ kind, color, size = 17 }) => (

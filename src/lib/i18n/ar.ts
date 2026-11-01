@@ -269,7 +269,7 @@ export const ar: Dictionary = {
   "Issue Estimate": "إصدار عرض السعر",
   "Issue Invoice": "إصدار الفاتورة",
   "Issued": "صادر",
-  "Issued: {date}": "تاريخ الإصدار: {date}",
+  "Issued: {date}": "الإصدار: {date}",
   "It stays on record but can't be edited, sent, or paid anymore. Add a reason if you like.": "يبقى في السجل لكن لا يمكن تعديله أو إرساله أو دفعه بعد الآن. يمكنك إضافة سبب إن أردت.",
   "It takes less than a minute.": "يستغرق أقل من دقيقة.",
   "It won’t appear in your item catalog anymore.": "لن يظهر في كتالوج أصنافك بعد الآن.",

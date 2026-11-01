@@ -2,7 +2,7 @@ import React from 'react';
 import { AbsoluteFill } from 'remotion';
 import { BRAND, BRAND_FONT } from '../brand';
 import { Phone } from '../components/Phone';
-import { FONT } from '../theme';
+import { BRAND_FONT_AR, dirFor, fontFor, tracking, useLang, useT } from './lang';
 
 // App Store screenshots: iPhone 6.9" (1320×2868), the size App Store Connect asks for first. It
 // scales down to every smaller iPhone size, and the app is iPhone-only (supportsTablet: false).
@@ -19,9 +19,10 @@ export const PAL = {
   white: '#FFFFFF',
 } as const;
 
-export const Canvas: React.FC<{ bg: string; children: React.ReactNode }> = ({ bg, children }) => (
-  <AbsoluteFill style={{ background: bg, overflow: 'hidden', fontFamily: FONT }}>{children}</AbsoluteFill>
-);
+export const Canvas: React.FC<{ bg: string; children: React.ReactNode }> = ({ bg, children }) => {
+  const lang = useLang();
+  return <AbsoluteFill style={{ background: bg, overflow: 'hidden', fontFamily: fontFor(lang) }}>{children}</AbsoluteFill>;
+};
 
 /** Headline + sub-line, pinned to the top or the bottom of the canvas. `*word*` gets a lime marker stripe under it. */
 export const TextBlock: React.FC<{
@@ -32,12 +33,16 @@ export const TextBlock: React.FC<{
   top?: number;
   bottom?: number;
   size?: number;
-}> = ({ lines, sub, color, subColor, top, bottom, size = 160 }) => (
-  <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, top, bottom, color }}>
-    <div style={{ fontFamily: BRAND_FONT, fontSize: size, fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 0.98, whiteSpace: 'nowrap' }}>
+}> = ({ lines, sub, color, subColor, top, bottom, size = 160 }) => {
+  const lang = useLang();
+  const t = useT();
+  const ar = lang === 'ar';
+  return (
+  <div style={{ position: 'absolute', left: MARGIN, right: MARGIN, top, bottom, color, direction: dirFor(lang) }}>
+    <div style={{ fontFamily: ar ? BRAND_FONT_AR : BRAND_FONT, fontSize: ar ? size * 0.92 : size, fontWeight: ar ? 700 : 800, letterSpacing: tracking(lang, '-0.045em'), lineHeight: ar ? 1.2 : 0.98, whiteSpace: 'nowrap' }}>
       {lines.map((line) => (
         <div key={line}>
-          {line
+          {t(line)
             .split(/(\*[^*]+\*)/g)
             .filter(Boolean)
             .map((part, i) =>
@@ -52,9 +57,10 @@ export const TextBlock: React.FC<{
         </div>
       ))}
     </div>
-    <div style={{ marginTop: 40, maxWidth: 1010, fontSize: 48, lineHeight: 1.26, fontWeight: 500, letterSpacing: '-0.012em', color: subColor ?? color, opacity: subColor ? 1 : 0.74 }}>{sub}</div>
+    <div style={{ marginTop: 40, maxWidth: 1010, fontSize: 48, lineHeight: ar ? 1.45 : 1.26, fontWeight: 500, letterSpacing: tracking(lang, '-0.012em'), color: subColor ?? color, opacity: subColor ? 1 : 0.74 }}>{t(sub)}</div>
   </div>
-);
+  );
+};
 
 /** An iPhone, with a shadow that suits the field it sits on. */
 export const Device: React.FC<{ left: number; top: number; width: number; shadow?: string; children: React.ReactNode }> = ({
