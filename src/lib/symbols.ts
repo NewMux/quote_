@@ -39,6 +39,7 @@ export const SYMBOL_FALLBACKS = {
 
   // Accessories
   'chevron.right': 'chevron-forward',
+  'chevron.left': 'chevron-back',
   checkmark: 'checkmark',
   'checkmark.circle.fill': 'checkmark-circle',
   circle: 'ellipse-outline',

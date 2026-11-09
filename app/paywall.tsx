@@ -124,12 +124,30 @@ export default function PaywallScreen() {
       } ${t('Payment is charged to your Apple ID. The subscription renews automatically unless you turn it off at least 24 hours before the end of the current period. Manage or cancel anytime in your App Store account settings.')}`
     : null;
 
+  /** Back to the setup screens (or wherever the paywall was opened from) to change the business
+   * details before subscribing. */
+  function goBack() {
+    if (router.canGoBack()) router.back();
+    else router.replace('/onboarding');
+  }
+
   return (
     <View className="flex-1 bg-grouped">
+      <Pressable
+        onPress={goBack}
+        accessibilityRole="button"
+        accessibilityLabel={t('Back')}
+        hitSlop={8}
+        className="absolute z-10 flex-row items-center gap-1 min-h-[44px] px-3"
+        style={{ top: insets.top + 4, left: 8 }}
+      >
+        <Icon name="chevron.left" size={16} weight="semibold" />
+        <Text className="text-body text-tint">{t('Back')}</Text>
+      </Pressable>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: insets.top + 24,
+          paddingTop: insets.top + 56,
           paddingBottom: insets.bottom + 180,
           maxWidth: 560,
           width: '100%',

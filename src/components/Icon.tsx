@@ -26,8 +26,9 @@ interface IconProps {
 export function Icon({ name, size = 22, color, weight = 'regular', accessibilityLabel, style }: IconProps) {
   const colors = useThemeColors();
   const tint = color ?? colors.tint;
-  // "right" chevrons point toward the trailing edge; mirror them when the layout runs right to left.
-  const iconStyle = I18nManager.isRTL && name === 'chevron.right' ? [style, { transform: [{ scaleX: -1 }] }] : style;
+  // "right" chevrons point toward the trailing edge and "left" ones toward the leading edge, so
+  // both mirror when the layout runs right to left.
+  const iconStyle = I18nManager.isRTL && (name === 'chevron.right' || name === 'chevron.left') ? [style, { transform: [{ scaleX: -1 }] }] : style;
   const a11y = accessibilityLabel
     ? { accessible: true, accessibilityLabel, accessibilityRole: 'image' as const }
     : { accessibilityElementsHidden: true, importantForAccessibility: 'no-hide-descendants' as const };

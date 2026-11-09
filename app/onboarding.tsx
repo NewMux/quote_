@@ -27,15 +27,19 @@ export default function OnboardingScreen() {
   const profile = useBusinessProfileStore((s) => s.profile);
   const updateProfile = useBusinessProfileStore((s) => s.update);
   const createTaxRate = useTaxBracketsStore((s) => s.create);
+  const updateTaxRate = useTaxBracketsStore((s) => s.update);
   const setDefaultTaxRate = useTaxBracketsStore((s) => s.setDefault);
   const system = useSystemColors();
 
   const [step, setStep] = useState(1);
-  const [businessName, setBusinessName] = useState('');
+  // Prefilled, so coming back to this screen (from the paywall's Back) shows what was already saved.
+  const [businessName, setBusinessName] = useState(profile?.business_name ?? '');
   const [chargesTax, setChargesTax] = useState(false);
   const [taxName, setTaxName] = useState('');
   const [taxRate, setTaxRate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  // Set once the tax rate is saved, so going Back and Continue again updates it instead of adding a second one.
+  const [taxRateId, setTaxRateId] = useState<string | null>(null);
   const accountEmail = useAuthStore((s) => s.session?.user.email ?? '');
   const [email, setEmail] = useState(profile?.email ?? accountEmail);
   const [phone, setPhone] = useState(profile?.phone ?? '');
@@ -96,8 +100,14 @@ export default function OnboardingScreen() {
     if (chargesTax && taxName.trim()) {
       setIsSaving(true);
       try {
-        const bracket = await createTaxRate({ name: taxName.trim(), rate_bp: parseRateBp(taxRate) });
-        await setDefaultTaxRate(bracket.id);
+        const input = { name: taxName.trim(), rate_bp: parseRateBp(taxRate) };
+        if (taxRateId) {
+          await updateTaxRate(taxRateId, input);
+        } else {
+          const bracket = await createTaxRate(input);
+          setTaxRateId(bracket.id);
+          await setDefaultTaxRate(bracket.id);
+        }
       } catch (err) {
         setIsSaving(false);
         Alert.alert(t('Couldn’t Save'), err instanceof Error ? err.message : t('Check your connection and try again.'));
@@ -303,6 +313,7 @@ export default function OnboardingScreen() {
               <>
                 <Button label={t('Create Your First Invoice')} size="large" onPress={() => finish('invoice')} />
                 <Button label={t('Explore the App')} variant="plain" onPress={() => finish('home')} />
+                <Button label={t('Back')} variant="plain" onPress={() => setStep(3)} />
               </>
             ) : null}
           </View>
