@@ -97,6 +97,18 @@ describe('t', () => {
 });
 
 describe('tp', () => {
+  it('does not need Intl.PluralRules, which Hermes lacks', () => {
+    const intl = Intl as unknown as { PluralRules?: unknown };
+    const original = intl.PluralRules;
+    intl.PluralRules = undefined;
+    try {
+      setLocaleForTests('ar');
+      expect(tp(5, '{count} invoice', '{count} invoices')).toBe('5 فواتير');
+    } finally {
+      intl.PluralRules = original;
+    }
+  });
+
   it('uses the English singular and plural', () => {
     expect(tp(1, '{count} invoice', '{count} invoices')).toBe('1 invoice');
     expect(tp(3, '{count} invoice', '{count} invoices')).toBe('3 invoices');
@@ -111,6 +123,10 @@ describe('tp', () => {
     expect(invoices(3)).toBe('3 فواتير');
     expect(invoices(11)).toBe('11 فاتورة');
     expect(invoices(100)).toBe('100 فاتورة');
+    expect(invoices(102)).toBe('102 فاتورة');
+    expect(invoices(103)).toBe('103 فواتير');
+    expect(invoices(111)).toBe('111 فاتورة');
+    expect(invoices(1.5)).toBe('1.5 فاتورة');
   });
 });
 

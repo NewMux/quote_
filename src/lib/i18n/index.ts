@@ -54,15 +54,20 @@ export function t(en: string, params?: Record<string, string | number>): string 
   return fill(typeof entry === 'string' ? entry : en, params);
 }
 
-const pluralRules = new Map<Locale, Intl.PluralRules>();
-
+/** The CLDR plural category for `count`. Written out rather than taken from Intl.PluralRules,
+ * which Hermes (the engine the app runs on) doesn't provide: calling it threw as soon as an Arabic
+ * screen with a counted noun rendered. */
 function categoryFor(count: number): keyof Plural {
-  let rules = pluralRules.get(current);
-  if (!rules) {
-    rules = new Intl.PluralRules(current);
-    pluralRules.set(current, rules);
-  }
-  return rules.select(count) as keyof Plural;
+  if (current !== 'ar') return count === 1 ? 'one' : 'other';
+  if (!Number.isInteger(count)) return 'other';
+  const n = Math.abs(count);
+  if (n === 0) return 'zero';
+  if (n === 1) return 'one';
+  if (n === 2) return 'two';
+  const lastTwo = n % 100;
+  if (lastTwo >= 3 && lastTwo <= 10) return 'few';
+  if (lastTwo >= 11) return 'many';
+  return 'other';
 }
 
 /** Picks the right form for `count` and fills `{count}` plus any `params`. `one` and `other` are
