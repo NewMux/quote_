@@ -182,6 +182,16 @@ If the form offers "Made for Kids", leave it off.
 
 ---
 
+## What's New in 1.0.5 (paste into "What's New in This Version")
+
+```
+• Fixed a crash on launch when the app is set to Arabic.
+• A Back button on the last setup step and on the subscription screen, so you can change your business details before subscribing.
+• Safer handling of very large amounts and quantities, and of long text in notes and terms.
+```
+
+---
+
 ## What's New in 1.0.4 (paste into "What's New in This Version")
 
 ```
