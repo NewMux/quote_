@@ -59,6 +59,7 @@ export default function ResetPasswordScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        maxLength={128}
         textContentType="newPassword"
         autoComplete="new-password"
         autoCapitalize="none"
@@ -74,6 +75,7 @@ export default function ResetPasswordScreen() {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
+        maxLength={128}
         textContentType="newPassword"
         autoComplete="new-password"
         autoCapitalize="none"

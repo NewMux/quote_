@@ -594,7 +594,7 @@ export default function DocumentDetailScreen() {
             <Text className="text-body text-secondary">
               It stays on record but can&apos;t be edited, sent, or paid anymore.
             </Text>
-            <FormField label={t('Reason')} hint={t('Optional')} value={voidReason} onChangeText={setVoidReason} autoFocus />
+            <FormField label={t('Reason')} hint={t('Optional')} value={voidReason} onChangeText={setVoidReason} maxLength={300} autoFocus />
             <View className="flex-row gap-2 justify-end mt-1">
               <Button label={t("Don't Cancel")} variant="plain" onPress={() => setVoidPromptVisible(false)} />
               <Button label={document.doc_type === 'estimate' ? t('Cancel Estimate') : t('Cancel Invoice')} variant="destructive" onPress={confirmVoid} />

@@ -242,13 +242,14 @@ export default function OnboardingScreen() {
                 </ListSection>
                 {chargesTax ? (
                   <ListSection>
-                    <FormRow label={t('Name')} placeholder={t('e.g. Sales Tax')} value={taxName} onChangeText={setTaxName} />
+                    <FormRow label={t('Name')} placeholder={t('e.g. Sales Tax')} value={taxName} onChangeText={setTaxName} maxLength={50} />
                     <FormRow
                       label={t('Rate (%)')}
                       placeholder="8.25"
                       keyboardType="decimal-pad"
                       value={taxRate}
                       onChangeText={setTaxRate}
+                      maxLength={7}
                     />
                   </ListSection>
                 ) : null}

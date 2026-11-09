@@ -74,6 +74,7 @@ export default function SignInScreen() {
         onChangeText={setEmail}
         placeholder={t('you@example.com')}
         keyboardType="email-address"
+        maxLength={254}
         textContentType="username"
         autoComplete="email"
         autoCapitalize="none"
@@ -88,6 +89,7 @@ export default function SignInScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        maxLength={128}
         textContentType="password"
         autoComplete="current-password"
         autoCapitalize="none"

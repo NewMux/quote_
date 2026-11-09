@@ -73,10 +73,20 @@ function parseScaled(input: string, digits: number): number {
   return padded[digits] >= '5' ? scaled + 1 : scaled;
 }
 
+/** The largest amount a person can type: 10 million in the currency's main unit. Larger numbers
+ * lose precision once they're multiplied by a quantity and added up (JavaScript numbers are exact
+ * only up to 2^53, about 9 quadrillion minor units). */
+export const MAX_AMOUNT = 10_000_000;
+/** The largest quantity on a line. With MAX_AMOUNT, a single line stays under 10^15 minor units. */
+export const MAX_QUANTITY = 100_000;
+/** The largest percentage (a tax rate or a discount), in basis points. */
+export const MAX_RATE_BP = 10000;
+
 /** Parses a user-typed amount string (e.g. "12.5" or "12,5") into integer minor units, scaled
- * for the given currency's decimal precision. Returns 0 for invalid input. */
+ * for the given currency's decimal precision, capped at MAX_AMOUNT. Returns 0 for invalid input. */
 export function parseToMinor(input: string, currencyCode: string): number {
-  return parseScaled(input, getCurrencyDecimals(currencyCode));
+  const digits = getCurrencyDecimals(currencyCode);
+  return Math.min(parseScaled(input, digits), MAX_AMOUNT * 10 ** digits);
 }
 
 export function minorToDecimalString(minor: number, currencyCode: string): string {
@@ -111,5 +121,11 @@ export function formatRateBp(rateBp: number): string {
 
 /** Parses a typed percentage ("7.5" or "7,5") into basis points (750). */
 export function parseRateBp(input: string): number {
-  return parseScaled(input, 2);
+  return Math.min(parseScaled(input, 2), MAX_RATE_BP);
+}
+
+/** Parses a typed quantity: 0 when it isn't a number, never negative, capped at MAX_QUANTITY. */
+export function parseQuantity(input: string): number {
+  const qty = parseDecimalInput(input);
+  return Number.isNaN(qty) ? 0 : Math.min(Math.max(qty, 0), MAX_QUANTITY);
 }

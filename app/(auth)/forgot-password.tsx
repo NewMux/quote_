@@ -50,6 +50,7 @@ export default function ForgotPasswordScreen() {
         onChangeText={setEmail}
         placeholder={t('you@example.com')}
         keyboardType="email-address"
+        maxLength={254}
         textContentType="username"
         autoComplete="email"
         autoCapitalize="none"

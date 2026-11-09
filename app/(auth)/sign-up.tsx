@@ -72,6 +72,7 @@ export default function SignUpScreen() {
         onChangeText={setEmail}
         placeholder={t('you@example.com')}
         keyboardType="email-address"
+        maxLength={254}
         textContentType="username"
         autoComplete="email"
         autoCapitalize="none"
@@ -86,6 +87,7 @@ export default function SignUpScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        maxLength={128}
         textContentType="newPassword"
         autoComplete="new-password"
         autoCapitalize="none"
@@ -101,6 +103,7 @@ export default function SignUpScreen() {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
+        maxLength={128}
         textContentType="newPassword"
         autoComplete="new-password"
         autoCapitalize="none"

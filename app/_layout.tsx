@@ -1,8 +1,8 @@
 import '../global.css';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Text, View, useColorScheme } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, router, useRootNavigationState, useSegments, type ErrorBoundaryProps } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { THEME_COLORS, THEME_VARS } from '../src/lib/theme';
@@ -15,6 +15,7 @@ import { Button } from '../src/components/Button';
 import { resetUserState } from '../src/stores/resetUserState';
 import { generateDueRecurringInvoices } from '../src/db/repositories/recurring.repo';
 import { t } from '../src/lib/i18n';
+import { accessRedirect } from '../src/lib/accessGuard';
 
 // Keep the branded launch screen up until auth and the business profile have loaded, so launch
 // goes straight from the logo to the first screen instead of flashing a spinner in between.
@@ -52,6 +53,41 @@ function ThemeRoot({ children }: { children: ReactNode }) {
       </ThemeProvider>
     </View>
   );
+}
+
+/** Anything that throws while a screen renders lands here instead of closing the app. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  if (__DEV__) console.error(error);
+  const dark = useColorScheme() === 'dark';
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12, backgroundColor: dark ? '#000000' : '#F2F2F7' }}>
+      <Text style={{ fontSize: 20, fontWeight: '600', textAlign: 'center', color: dark ? '#FFFFFF' : '#111827' }}>{t('Something Went Wrong')}</Text>
+      <Text style={{ fontSize: 17, textAlign: 'center', color: dark ? '#AEAEB2' : '#5F6368' }}>
+        {t('Your data is safe. Try again, and if it keeps happening, close and reopen the app.')}
+      </Text>
+      <Pressable
+        onPress={retry}
+        accessibilityRole="button"
+        style={{ minHeight: 48, paddingHorizontal: 28, borderRadius: 999, backgroundColor: '#157A63', alignItems: 'center', justifyContent: 'center', marginTop: 8 }}
+      >
+        <Text style={{ fontSize: 17, fontWeight: '600', color: '#FFFFFF' }}>{t('Try Again')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+/** Keeps every route to its own gate: signed in, and subscribed where that's required. */
+function AccessGuard() {
+  const segments = useSegments();
+  const navigationReady = Boolean(useRootNavigationState()?.key);
+  const signedIn = useAuthStore((s) => Boolean(s.session));
+  const subscriptionReady = useSubscriptionStore((s) => s.isReady);
+  const isPro = useSubscriptionStore((s) => s.isPro);
+  const target = accessRedirect({ signedIn, subscriptionReady, isPro, firstSegment: segments[0] });
+  useEffect(() => {
+    if (navigationReady && target) router.replace(target);
+  }, [navigationReady, target]);
+  return null;
 }
 
 export default function RootLayout() {
@@ -163,6 +199,7 @@ export default function RootLayout() {
   return (
     <ThemeRoot>
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <AccessGuard />
       <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

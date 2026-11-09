@@ -72,7 +72,7 @@ export default function EditTaxBracketScreen() {
     <FormScrollView>
       <ListSection>
         <FormRow label={t('Name')} value={name} onChangeText={setName} autoCapitalize="words" maxLength={50} />
-        <FormRow label={t('Rate (%)')} keyboardType="decimal-pad" value={rate} onChangeText={setRate} />
+        <FormRow label={t('Rate (%)')} keyboardType="decimal-pad" value={rate} onChangeText={setRate} maxLength={7} />
       </ListSection>
       <ListSection footer={t('The default rate is applied to new taxable line items.')}>
         <ListRow

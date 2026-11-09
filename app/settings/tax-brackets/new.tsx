@@ -54,6 +54,7 @@ export default function NewTaxBracketScreen() {
             label={t('Rate (%)')}
             placeholder={t('e.g. 8.25')}
             keyboardType="decimal-pad"
+            maxLength={7}
             value={rate}
             onChangeText={setRate}
           />

@@ -5,7 +5,9 @@ import {
   getCurrencyDecimals,
   getCurrencySymbol,
   minorToDecimalString,
+  MAX_QUANTITY,
   parseDecimalInput,
+  parseQuantity,
   parseRateBp,
   parseToMinor,
 } from './money';
@@ -200,5 +202,37 @@ describe('applyDiscount bounds', () => {
 
   it('never returns a negative discount', () => {
     expect(applyDiscount(10000, 'fixed', -500)).toBe(0);
+  });
+});
+
+describe('input limits', () => {
+  it('caps a typed amount at 10 million, however many digits are typed', () => {
+    expect(parseToMinor('10000000', 'USD')).toBe(1_000_000_000);
+    expect(parseToMinor('10000001', 'USD')).toBe(1_000_000_000);
+    expect(parseToMinor('9'.repeat(400), 'USD')).toBe(1_000_000_000);
+    expect(parseToMinor('99999999999999999999.99', 'KWD')).toBe(10_000_000_000);
+    expect(parseToMinor('1000.50', 'USD')).toBe(100050);
+  });
+
+  it('keeps the largest possible line total exact', () => {
+    const line = parseToMinor('9'.repeat(30), 'KWD') * MAX_QUANTITY;
+    expect(Number.isSafeInteger(line)).toBe(true);
+  });
+
+  it('caps a rate at 100%', () => {
+    expect(parseRateBp('100')).toBe(10000);
+    expect(parseRateBp('250')).toBe(10000);
+    expect(parseRateBp('99999999999')).toBe(10000);
+    expect(parseRateBp('8.25')).toBe(825);
+  });
+
+  it('parses a quantity into 0..100,000 and ignores junk', () => {
+    expect(parseQuantity('2.5')).toBe(2.5);
+    expect(parseQuantity('')).toBe(0);
+    expect(parseQuantity('abc')).toBe(0);
+    expect(parseQuantity('-5')).toBe(5);
+    expect(parseQuantity('1e9')).toBe(19); // letters are dropped, like every other typed number
+    expect(parseQuantity('9999999')).toBe(MAX_QUANTITY);
+    expect(parseQuantity('9'.repeat(400))).toBe(MAX_QUANTITY);
   });
 });

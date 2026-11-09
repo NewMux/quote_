@@ -148,13 +148,14 @@ export default function EditDocumentScreen() {
       </ListSection>
 
       <ListSection footer={t('Terms: leave blank to use the default terms from your Business Profile.')}>
-        <FormRow label={t('Notes')} value={editor.notes} onChangeText={editor.setNotes} placeholder={t('Shown on the document')} multiline />
+        <FormRow label={t('Notes')} value={editor.notes} onChangeText={editor.setNotes} placeholder={t('Shown on the document')} multiline maxLength={2000} />
         <FormRow
           label={t('Terms')}
           value={editor.termsOverride}
           onChangeText={editor.setTermsOverride}
           placeholder={t('Default terms')}
           multiline
+          maxLength={2000}
         />
       </ListSection>
 

@@ -579,6 +579,7 @@ export const ar: Dictionary = {
   "Your Signature": "توقيعك",
   "Your business name appears on every document.": "يظهر اسم عملك في كل مستند.",
   "Your business name appears on every document. The currency is used for new documents; you can change both later in Settings.": "يظهر اسم عملك في كل مستند. وتُستخدم العملة في المستندات الجديدة؛ ويمكنك تغيير كليهما لاحقًا من الإعدادات.",
+  "Your data is safe. Try again, and if it keeps happening, close and reopen the app.": "بياناتك بأمان. حاول مرة أخرى، وإن تكرر الأمر فأغلق التطبيق وأعد فتحه.",
   "Your documents will no longer show a logo.": "لن تعرض مستنداتك شعارًا بعد الآن.",
   "Your email is confirmed. Sign in with your email and password to continue.": "تم تأكيد بريدك الإلكتروني. سجّل الدخول ببريدك الإلكتروني وكلمة المرور للمتابعة.",
   "Your signature will be removed.": "سيُزال توقيعك.",

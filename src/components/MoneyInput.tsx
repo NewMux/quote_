@@ -24,6 +24,7 @@ export function MoneyInput({ valueMinor, onChangeMinor, currencyCode, label, err
       showSeparator={showSeparator}
       prefix={getCurrencySymbol(currencyCode)}
       keyboardType="decimal-pad"
+      maxLength={20}
       value={text}
       onChangeText={(next) => {
         setText(next);
